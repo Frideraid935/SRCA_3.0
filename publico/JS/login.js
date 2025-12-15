@@ -16,7 +16,7 @@ document.getElementById("login").addEventListener("submit", async function (e) {
     const data = await response.json();
 
     if (data.success) {
-      window.location.href = "/menu_inicio/menu_inicio_admin.html";
+      window.location.href = "../publico/menu_inicio/menu_inicio_admin.html";
     } else {
       alert("Credenciales incorrectas");
     }
