@@ -1,25 +1,29 @@
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const usuario = document.getElementById('usuario').value;
-  const password = document.getElementById('password').value;
+    const usuario = document.getElementById('usuario').value;
+    const password = document.getElementById('password').value;
 
-  const res = await fetch('/api/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ usuario, password })
-  });
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ usuario, password })
+        });
 
-  const data = await res.json();
+        const data = await res.json();
 
-  const mensaje = document.getElementById('mensaje');
-
-  if (data.success) {
-    mensaje.textContent = 'Login correcto';
-    // window.location.href = 'dashboard.html';
-  } else {
-    mensaje.textContent = data.message;
-  }
+        if (data.success) {
+            alert('Login correcto');
+            window.location.href = '../menu_inicio/menu_inicio_admin.html';
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error al conectar con el servidor');
+    }
 });
+

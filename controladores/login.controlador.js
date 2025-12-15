@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const db = require('../BD/db');
 
 const login = async (req, res) => {
   const { usuario, password } = req.body;
