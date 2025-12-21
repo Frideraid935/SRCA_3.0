@@ -5,7 +5,7 @@ document.getElementById("login").addEventListener("submit", async function (e) {
   const contraseña = document.getElementById("contraseña").value;
 
   try {
-    const response = await fetch("../APIS/login.api.js", {
+    const response = await fetch("/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -14,12 +14,14 @@ document.getElementById("login").addEventListener("submit", async function (e) {
     });
 
     const data = await response.json();
+    console.log("Respuesta backend:", data);
 
-    if (data.success) {
-      window.location.href = "../publico/menu_inicio/menu_inicio_admin.html";
+    if (data.success === true) {
+      window.location.href = "/menu_inicio/menu_inicio_admin.html";
     } else {
-      alert("Credenciales incorrectas");
+      alert(data.message || "Credenciales incorrectas");
     }
+
   } catch (error) {
     console.error("Error:", error);
     alert("Error al conectar con el servidor");
