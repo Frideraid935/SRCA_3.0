@@ -1,29 +1,48 @@
-document.getElementById("login").addEventListener("submit", async function (e) {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
 
-  const usuario = document.getElementById("usuario").value;
-  const contraseña = document.getElementById("contraseña").value;
+  const form = document.getElementById("loginForm");
 
-  try {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ usuario, contraseña })
-    });
+  if (!form) {
+    console.error("No se encontró el formulario con id loginForm");
+    return;
+  }
 
-    const data = await response.json();
-    console.log("Respuesta backend:", data);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    if (data.success === true) {
-      window.location.href = "/menu_inicio/menu_inicio_admin.html";
-    } else {
-      alert(data.message || "Credenciales incorrectas");
+    const usuario = document.getElementById("usuario").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!usuario || !password) {
+      alert("Completa todos los campos");
+      return;
     }
 
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error al conectar con el servidor");
-  }
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ usuario, password })
+      });
+
+      if (!response.ok) {
+        throw new Error("Error en el servidor");
+      }
+
+      const data = await response.json();
+
+      if (data.success === true) {
+        window.location.href = "/menu_inicio/menu_inicio_admin.html";
+      } else {
+        alert(data.message || "Credenciales incorrectas");
+      }
+
+    } catch (error) {
+      console.error("Error en login:", error);
+      alert("No se pudo conectar con el servidor");
+    }
+  });
+
 });
