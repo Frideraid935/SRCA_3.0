@@ -1,78 +1,77 @@
-// BD.js - Con la contraseña ACTUAL del nuevo screenshot
+// BD.js - Versión equivalente al PHP exitoso
 const mysql = require("mysql2/promise");
 
-// ¡CONTRASEÑA ACTUAL del screenshot NUEVO!
-const CURRENT_PASSWORD = "LDjVxOHEvKrtQqmyMGmmnvVbZeYXdABF";
-
-console.log("=== MYSQL CONFIGURACIÓN ===");
-console.log("Usando contraseña del screenshot más reciente");
-console.log("Contraseña (primeros 10 chars):", CURRENT_PASSWORD.substring(0, 10) + "...");
-
-// Configuración PRINCIPAL - Usa MYSQL_PUBLIC_URL del screenshot
+// Usa las MISMAS variables que usaba PHP
 const config = {
-  host: "shuttle.proxy.rlwy.net",    // De MYSQL_PUBLIC_URL
-  port: 51060,                        // De MYSQL_PUBLIC_URL  
-  user: "root",                       // De MYSQLUSER
-  password: CURRENT_PASSWORD,         // De MYSQL_PUBLIC_URL/MYSQLPASSWORD
-  database: "railway",                // De MYSQL_DATABASE
+  host: process.env.MYSQLHOST || "mysql.railway.internal",
+  port: process.env.MYSQLPORT || 3306,
+  user: process.env.MYSQLUSER || "root",
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQL_DATABASE || "railway",
+  
+  // Configuración equivalente a PDO en PHP
+  charset: 'utf8mb4',  // ¡IMPORTANTE! Igual que PHP
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  
+  // SSL - Railway requiere esto
   ssl: {
-    rejectUnauthorized: false  // CRÍTICO para Railway
+    rejectUnauthorized: false  // Permitir certificados self-signed
   }
 };
 
-console.log("\n📡 Configuración de conexión:");
-console.log("   Host:", config.host);
-console.log("   Puerto:", config.port);
-console.log("   Usuario:", config.user);
-console.log("   Base de datos:", config.database);
+console.log("=== CONFIGURACIÓN MYSQL (igual que PHP) ===");
+console.log("Host:", config.host);
+console.log("Puerto:", config.port);
+console.log("Usuario:", config.user);
+console.log("Base de datos:", config.database);
+console.log("Charset:", config.charset);
+console.log("SSL:", config.ssl ? "Activado" : "Desactivado");
 
-// Crear el pool
 const pool = mysql.createPool(config);
 
-// Función para probar conexión (sin bloquear el inicio)
+// Probar conexión EXACTAMENTE como lo haría PHP
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    console.log("\n✅ ¡CONEXIÓN A MYSQL EXITOSA!");
     
-    // Hacer una consulta simple
-    const [rows] = await connection.query('SELECT NOW() as hora_actual, DATABASE() as base_datos');
-    console.log("   Hora servidor:", rows[0].hora_actual);
-    console.log("   Base de datos:", rows[0].base_datos);
+    // Hacer una consulta de prueba como haría PHP
+    const [rows] = await connection.query('SELECT 1 as test, NOW() as hora, DATABASE() as db');
+    
+    console.log("\n✅ ¡CONEXIÓN EXITOSA! (igual que PHP)");
+    console.log("   Test:", rows[0].test);
+    console.log("   Hora servidor:", rows[0].hora);
+    console.log("   Base de datos:", rows[0].db);
+    
+    // Verificar tablas que buscaba PHP
+    const [tables] = await connection.query(
+      "SHOW TABLES LIKE 'administradores' OR SHOW TABLES LIKE 'alumnos' OR SHOW TABLES LIKE 'profesores'"
+    );
+    
+    console.log("   Tablas encontradas:", tables.length);
     
     connection.release();
     return true;
   } catch (error) {
     console.error("\n❌ ERROR DE CONEXIÓN:", error.code);
     console.log("   Mensaje:", error.message);
+    console.log("\n💡 DEBUG - Variables de entorno disponibles:");
     
-    // Dar consejos específicos
-    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-      console.log("\n💡 PROBLEMA DE AUTENTICACIÓN:");
-      console.log("   La contraseña actual es:", CURRENT_PASSWORD);
-      console.log("   Verifica en Railway MySQL → Variables que sea EXACTA");
-    } else if (error.code === 'ECONNREFUSED') {
-      console.log("\n💡 CONEXIÓN RECHAZADA:");
-      console.log("   El servicio MySQL puede no estar ejecutándose");
-      console.log("   Verifica en Railway que MySQL esté 'Online'");
+    // Mostrar TODAS las variables MYSQL
+    const mysqlVars = {};
+    for (const key in process.env) {
+      if (key.includes('MYSQL')) {
+        mysqlVars[key] = process.env[key] ? "DEFINIDA" : "NO DEFINIDA";
+      }
     }
+    console.log(mysqlVars);
     
     return false;
   }
 }
 
-// Probar conexión después de 2 segundos
-setTimeout(() => {
-  testConnection().then(success => {
-    if (!success) {
-      console.log("\n⚠️  La aplicación inició SIN conexión a MySQL");
-      console.log("   Las funciones de BD no estarán disponibles");
-    }
-  });
-}, 2000);
+// Probar conexión
+testConnection();
 
-// Exportar el pool CORRECTAMENTE
 module.exports = pool;
