@@ -1,6 +1,6 @@
 const mysql = require("mysql2/promise");
 
-const MYSQL_CONFIG = {
+const pool = mysql.createPool({
   host: process.env.MYSQLHOST,
   port: process.env.MYSQLPORT,
   user: process.env.MYSQLUSER,
@@ -11,9 +11,7 @@ const MYSQL_CONFIG = {
   connectionLimit: 10,
   queueLimit: 0,
   ssl: { rejectUnauthorized: false }
-};
-
-const pool = mysql.createPool(MYSQL_CONFIG);
+});
 
 async function testDatabaseConnection() {
   let connection;
