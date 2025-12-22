@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
 
   if (!form) {
-    console.error("No se encontró el formulario con id loginForm");
+    console.error("No se encontró el formulario loginForm");
     return;
   }
 
@@ -28,13 +28,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!response.ok) {
-        throw new Error("Error en el servidor");
+        throw new Error("Error de servidor");
       }
 
       const data = await response.json();
 
-      if (data.success === true) {
-        window.location.href = "/menu_inicio/menu_inicio_admin.html";
+      if (data.success) {
+        // Redirección según rol
+        if (data.rol === "admin") {
+          window.location.href = "/menu_inicio/menu_inicio_admin.html";
+        } else if (data.rol === "alumno") {
+          window.location.href = "/menu_inicio/menu_inicio_alumno.html";
+        } else if (data.rol === "profesor") {
+          window.location.href = "/menu_inicio/menu_inicio_profesor.html";
+        } else {
+          alert("Rol no reconocido");
+        }
       } else {
         alert(data.message || "Credenciales incorrectas");
       }
