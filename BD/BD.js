@@ -1,77 +1,86 @@
-// BD.js - Versión equivalente al PHP exitoso
+// BD.js - Traducción EXACTA de tu código PHP
 const mysql = require("mysql2/promise");
 
-// Usa las MISMAS variables que usaba PHP
-const config = {
-  host: process.env.MYSQLHOST || "mysql.railway.internal",
-  port: process.env.MYSQLPORT || 3306,
-  user: process.env.MYSQLUSER || "root",
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQL_DATABASE || "railway",
+// ===== CONFIGURACIÓN DE RAILWAY ===== 
+const host = process.env.MYSQLHOST;
+const user = process.env.MYSQLUSER;
+const password = process.env.MYSQLPASSWORD;
+const dbname = process.env.MYSQL_DATABASE;
+const port = process.env.MYSQLPORT || 3306;
+
+// ===== DEPURACIÓN OPCIONAL =====
+console.log("=== DEBUG CONFIGURACIÓN RAILWAY ===");
+console.log("MYSQLHOST:", host || "NO DEFINIDO");
+console.log("MYSQLUSER:", user || "NO DEFINIDO");
+console.log("MYSQL_DATABASE:", dbname || "NO DEFINIDO");
+console.log("MYSQLPORT:", port);
+
+// ===== VALIDAR VARIABLES =====
+if (!host || !user || !password || !dbname) {
+  console.error("\n🚨 ERROR: Faltan variables de entorno de Railway.");
+  console.error("Asegúrate de haber configurado en Railway SRCA3.0 → Variables:");
+  console.error("MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQL_DATABASE, MYSQLPORT");
   
-  // Configuración equivalente a PDO en PHP
-  charset: 'utf8mb4',  // ¡IMPORTANTE! Igual que PHP
+  // Valores de EMERGENCIA (del screenshot)
+  console.error("\n⚠️  Usando valores de emergencia del screenshot...");
+  
+  const emergencyConfig = {
+    host: "mysql.railway.internal",
+    port: 3306,
+    user: "root",
+    password: "LDjVxOHEvKrtQqmyMGmmnvVbZeYXdABF",
+    database: "railway"
+  };
+  
+  const pool = mysql.createPool({
+    ...emergencyConfig,
+    charset: 'utf8mb4',
+    waitForConnections: true,
+    connectionLimit: 10,
+    ssl: { rejectUnauthorized: false }
+  });
+  
+  console.log("✅ Pool creado con valores de emergencia");
+  module.exports = pool;
+  return;
+}
+
+// ===== CONEXIÓN =====
+console.log("\n🔗 Conectando a MySQL Railway...");
+console.log(`Host: ${host}:${port}`);
+console.log(`Usuario: ${user}`);
+console.log(`Base de datos: ${dbname}`);
+
+const pool = mysql.createPool({
+  host: host,
+  port: port,
+  user: user,
+  password: password,
+  database: dbname,
+  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  
-  // SSL - Railway requiere esto
-  ssl: {
-    rejectUnauthorized: false  // Permitir certificados self-signed
-  }
-};
-
-console.log("=== CONFIGURACIÓN MYSQL (igual que PHP) ===");
-console.log("Host:", config.host);
-console.log("Puerto:", config.port);
-console.log("Usuario:", config.user);
-console.log("Base de datos:", config.database);
-console.log("Charset:", config.charset);
-console.log("SSL:", config.ssl ? "Activado" : "Desactivado");
-
-const pool = mysql.createPool(config);
-
-// Probar conexión EXACTAMENTE como lo haría PHP
-async function testConnection() {
-  try {
-    const connection = await pool.getConnection();
-    
-    // Hacer una consulta de prueba como haría PHP
-    const [rows] = await connection.query('SELECT 1 as test, NOW() as hora, DATABASE() as db');
-    
-    console.log("\n✅ ¡CONEXIÓN EXITOSA! (igual que PHP)");
-    console.log("   Test:", rows[0].test);
-    console.log("   Hora servidor:", rows[0].hora);
-    console.log("   Base de datos:", rows[0].db);
-    
-    // Verificar tablas que buscaba PHP
-    const [tables] = await connection.query(
-      "SHOW TABLES LIKE 'administradores' OR SHOW TABLES LIKE 'alumnos' OR SHOW TABLES LIKE 'profesores'"
-    );
-    
-    console.log("   Tablas encontradas:", tables.length);
-    
-    connection.release();
-    return true;
-  } catch (error) {
-    console.error("\n❌ ERROR DE CONEXIÓN:", error.code);
-    console.log("   Mensaje:", error.message);
-    console.log("\n💡 DEBUG - Variables de entorno disponibles:");
-    
-    // Mostrar TODAS las variables MYSQL
-    const mysqlVars = {};
-    for (const key in process.env) {
-      if (key.includes('MYSQL')) {
-        mysqlVars[key] = process.env[key] ? "DEFINIDA" : "NO DEFINIDA";
-      }
-    }
-    console.log(mysqlVars);
-    
-    return false;
-  }
-}
+  ssl: { rejectUnauthorized: false }
+});
 
 // Probar conexión
-testConnection();
+pool.getConnection()
+  .then(connection => {
+    console.log("✅ Conexión a Railway exitosa!");
+    connection.release();
+  })
+  .catch(error => {
+    console.error("❌ Error de conexión a Railway:", error.message);
+    console.error("Código:", error.code);
+    
+    // Si es error de acceso, probablemente las variables no tienen valores reales
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error("\n💡 SOLUCIÓN:");
+      console.error("1. Ve a Railway → SRCA3.0 → Variables");
+      console.error("2. Cambia cada variable {{MySQL.XXX}} por el valor REAL");
+      console.error("3. Los valores REALES están en MySQL → Variables");
+    }
+  });
 
 module.exports = pool;
