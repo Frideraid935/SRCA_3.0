@@ -1,136 +1,78 @@
-// BD.js - Con la contraseña EXACTA
+// BD.js - Con la contraseña ACTUAL del nuevo screenshot
 const mysql = require("mysql2/promise");
 
-// ¡USA LA CONTRASEÑA CORRECTA! Del screenshot:
-// MYSQL_ROOT_PASSWORD: LDjVx0HEvkrtQqmyMGmmvvbZaYXdABF (con Z)
-// MYSQLPASSWORD: LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF (con e)
+// ¡CONTRASEÑA ACTUAL del screenshot NUEVO!
+const CURRENT_PASSWORD = "LDjVxOHEvKrtQqmyMGmmnvVbZeYXdABF";
 
-const PASSWORD = "LDjVx0HEvkrtQqmyMGmmvvbZaYXdABF"; // ← CON Z (de MYSQL_ROOT_PASSWORD)
+console.log("=== MYSQL CONFIGURACIÓN ===");
+console.log("Usando contraseña del screenshot más reciente");
+console.log("Contraseña (primeros 10 chars):", CURRENT_PASSWORD.substring(0, 10) + "...");
 
-console.log("🔑 Usando contraseña de MYSQL_ROOT_PASSWORD");
-
-const connectionOptions = [
-  // PRIMERO probar con MYSQL_ROOT_PASSWORD (más probable)
-  {
-    name: "CONEXIÓN ROOT PÚBLICA",
-    config: {
-      host: "shuttle.proxy.rlwy.net",
-      port: 51060,
-      user: "root",
-      password: PASSWORD, // ← CON Z
-      database: "railway",
-      waitForConnections: true,
-      connectionLimit: 10,
-      ssl: { rejectUnauthorized: false }
-    }
-  },
-  // LUEGO probar con MYSQLPASSWORD (alternativa)
-  {
-    name: "CONEXIÓN PÚBLICA ALTERNATIVA",
-    config: {
-      host: "shuttle.proxy.rlwy.net",
-      port: 51060,
-      user: "root",
-      password: "LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF", // ← CON e
-      database: "railway",
-      waitForConnections: true,
-      connectionLimit: 10,
-      ssl: { rejectUnauthorized: false }
-    }
-  },
-  // Conexión interna
-  {
-    name: "CONEXIÓN INTERNA ROOT",
-    config: {
-      host: "mysql.railway.internal",
-      port: 3306,
-      user: "root",
-      password: PASSWORD, // ← CON Z
-      database: "railway",
-      waitForConnections: true,
-      connectionLimit: 10,
-      ssl: { rejectUnauthorized: false }
-    }
+// Configuración PRINCIPAL - Usa MYSQL_PUBLIC_URL del screenshot
+const config = {
+  host: "shuttle.proxy.rlwy.net",    // De MYSQL_PUBLIC_URL
+  port: 51060,                        // De MYSQL_PUBLIC_URL  
+  user: "root",                       // De MYSQLUSER
+  password: CURRENT_PASSWORD,         // De MYSQL_PUBLIC_URL/MYSQLPASSWORD
+  database: "railway",                // De MYSQL_DATABASE
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: false  // CRÍTICO para Railway
   }
-];
+};
 
-async function createConnection() {
-  console.log("🔍 Probando diferentes combinaciones...");
-  
-  for (const option of connectionOptions) {
-    try {
-      console.log(`\n🔄 Probando: ${option.name}`);
-      console.log(`   Contraseña: ${option.config.password.substring(0, 10)}...`);
-      
-      const pool = mysql.createPool(option.config);
-      const conn = await pool.getConnection();
-      
-      console.log(`✅ ${option.name} - ¡ÉXITO!`);
-      
-      // Hacer una consulta simple para verificar
-      const [rows] = await conn.query('SELECT 1 + 1 AS result');
-      console.log(`   Test query: ${rows[0].result}`);
-      
-      conn.release();
-      return pool;
-    } catch (err) {
-      console.log(`❌ ${option.name} falló: ${err.code}`);
-      if (err.code === 'ER_ACCESS_DENIED_ERROR') {
-        console.log(`   Error: Usuario/contraseña incorrectos para ${option.config.user}`);
-      }
-    }
-  }
-  
-  // Si todo falla, intentar SIN contraseña (solo para testing)
-  console.log("\n⚠️  Probando sin contraseña...");
+console.log("\n📡 Configuración de conexión:");
+console.log("   Host:", config.host);
+console.log("   Puerto:", config.port);
+console.log("   Usuario:", config.user);
+console.log("   Base de datos:", config.database);
+
+// Crear el pool
+const pool = mysql.createPool(config);
+
+// Función para probar conexión (sin bloquear el inicio)
+async function testConnection() {
   try {
-    const testPool = mysql.createPool({
-      host: "shuttle.proxy.rlwy.net",
-      port: 51060,
-      user: "root",
-      password: "", // Sin contraseña
-      database: "railway",
-      waitForConnections: true,
-      connectionLimit: 10,
-      ssl: { rejectUnauthorized: false }
-    });
+    const connection = await pool.getConnection();
+    console.log("\n✅ ¡CONEXIÓN A MYSQL EXITOSA!");
     
-    const conn = await testPool.getConnection();
-    console.log("✅ ¡Conexión sin contraseña funciona!");
-    conn.release();
-    return testPool;
-  } catch (err) {
-    console.log("❌ También falló sin contraseña:", err.code);
+    // Hacer una consulta simple
+    const [rows] = await connection.query('SELECT NOW() as hora_actual, DATABASE() as base_datos');
+    console.log("   Hora servidor:", rows[0].hora_actual);
+    console.log("   Base de datos:", rows[0].base_datos);
+    
+    connection.release();
+    return true;
+  } catch (error) {
+    console.error("\n❌ ERROR DE CONEXIÓN:", error.code);
+    console.log("   Mensaje:", error.message);
+    
+    // Dar consejos específicos
+    if (error.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.log("\n💡 PROBLEMA DE AUTENTICACIÓN:");
+      console.log("   La contraseña actual es:", CURRENT_PASSWORD);
+      console.log("   Verifica en Railway MySQL → Variables que sea EXACTA");
+    } else if (error.code === 'ECONNREFUSED') {
+      console.log("\n💡 CONEXIÓN RECHAZADA:");
+      console.log("   El servicio MySQL puede no estar ejecutándose");
+      console.log("   Verifica en Railway que MySQL esté 'Online'");
+    }
+    
+    return false;
   }
-  
-  throw new Error("No se pudo conectar a MySQL");
 }
 
-// Crear conexión SIN bloquear el inicio del servidor
-let poolPromise = createConnection()
-  .then(pool => {
-    console.log("\n🎉 ¡CONEXIÓN A MYSQL ESTABLECIDA!");
-    return pool;
-  })
-  .catch(err => {
-    console.error("\n💥 ERROR:", err.message);
-    console.log("\n📋 DEBUG - Valores del screenshot:");
-    console.log("MYSQL_ROOT_PASSWORD: LDjVx0HEvkrtQqmyMGmmvvbZaYXdABF");
-    console.log("MYSQLPASSWORD: LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF");
-    console.log("\n💡 Intenta usar esta URL COMPLETA:");
-    console.log("mysql://root:LDjVx0HEvkrtQqmyMGmmvvbZaYXdABF@shuttle.proxy.rlwy.net:51060/railway");
-    
-    // Pool dummy para desarrollo
-    return mysql.createPool({
-      host: 'localhost',
-      port: 3306,
-      user: 'root',
-      password: '',
-      database: 'test',
-      waitForConnections: true,
-      connectionLimit: 5
-    });
+// Probar conexión después de 2 segundos
+setTimeout(() => {
+  testConnection().then(success => {
+    if (!success) {
+      console.log("\n⚠️  La aplicación inició SIN conexión a MySQL");
+      console.log("   Las funciones de BD no estarán disponibles");
+    }
   });
+}, 2000);
 
-// Exportar
-module.exports = poolPromise;
+// Exportar el pool CORRECTAMENTE
+module.exports = pool;
