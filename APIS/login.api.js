@@ -6,29 +6,43 @@ router.post("/login", async (req, res) => {
     const { usuario, password } = req.body;
 
     if (!usuario || !password) {
-        return res.status(400).json({ success: false, message: "Datos incompletos" });
+        return res.status(400).json({
+            success: false,
+            message: "Datos incompletos"
+        });
     }
 
     try {
         const [rows] = await pool.query(
-            `SELECT * FROM administradores WHERE usuario = ? AND password = ? 
+            `SELECT 'admin' AS rol, usuario, contraseña FROM administradores WHERE usuario = ? AND contraseña = ?
              UNION
-             SELECT * FROM profesores WHERE usuario = ? AND password = ? 
+             SELECT 'profesor' AS rol, usuario, contraseña FROM profesores WHERE usuario = ? AND contraseña = ?
              UNION
-             SELECT * FROM alumnos WHERE usuario = ? AND password = ?`,
+             SELECT 'alumno' AS rol, usuario, contraseña FROM alumnos WHERE usuario = ? AND contraseña = ?`,
             [usuario, password, usuario, password, usuario, password]
         );
 
         if (rows.length === 0) {
-            return res.status(401).json({ success: false, message: "Usuario o contraseña incorrectos" });
+            return res.status(401).json({
+                success: false,
+                message: "Usuario o contraseña incorrectos"
+            });
         }
 
-        const user = rows[0];
-        res.json({ success: true, user: { id: user.id, nombre: user.nombre, tipo: user.tipo || "Alumno" } });
+        const usuarioEncontrado = rows[0];
+
+        return res.json({
+            success: true,
+            rol: usuarioEncontrado.rol,
+            usuario: usuarioEncontrado.usuario
+        });
 
     } catch (error) {
         console.error("Error en login:", error.message);
-        res.status(500).json({ success: false, message: "Error interno del servidor" });
+        return res.status(500).json({
+            success: false,
+            message: "Error del servidor"
+        });
     }
 });
 
