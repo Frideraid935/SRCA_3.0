@@ -1,6 +1,6 @@
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 
-// Pool de conexiones (RECOMENDADO en Railway)
+// Pool de conexiones compatible con async/await
 const pool = mysql.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
@@ -13,3 +13,4 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool;
+

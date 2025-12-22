@@ -9,7 +9,7 @@ async function login(req, res) {
 
   try {
     const [rows] = await pool.execute(
-      "SELECT id, rol FROM usuarios WHERE usuario = ? AND password = ?",
+      "SELECT id, rol FROM usuarios WHERE usuario = ? AND password = ? LIMIT 1",
       [usuario, password]
     );
 
