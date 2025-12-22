@@ -1,69 +1,99 @@
+// BD.js - Versión inteligente que prueba ambas
 const mysql = require("mysql2/promise");
 
-// Usa ESTOS VALORES EXACTOS que copiaste
-const config = {
-  host: "mysql.railway.internal",  // De MYSQLHOST
-  port: 3306,                      // De MYSQLPORT
-  user: "root",                    // De MYSQLUSER
-  password: "LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF",  // De MYSQLPASSWORD
-  database: "railway",             // De MYSQL_DATABASE
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  ssl: {                           // ¡IMPORTANTE para Railway!
-    rejectUnauthorized: false
-  }
-};
-
-console.log("=== CONFIGURACIÓN MYSQL ===");
-console.log("Host:", config.host);
-console.log("Database:", config.database);
-console.log("User:", config.user);
-console.log("Port:", config.port);
-
-const pool = mysql.createPool(config);
-
-// Probar conexión inmediatamente
-pool.getConnection()
-  .then(connection => {
-    console.log("\n ¡CONEXIÓN EXITOSA A MYSQL EN RAILWAY!");
-    console.log(`Servidor: ${config.host}:${config.port}`);
-    console.log(`Base de datos: ${config.database}`);
-    connection.release();
-  })
-  .catch(err => {
-    console.error("\n ERROR DE CONEXIÓN:", err.message);
-    console.log("Código de error:", err.code);
-    
-    // Si falla la conexión interna, probar con la URL pública
-    if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
-      console.log("\n  Probando con URL pública...");
-      
-      const publicConfig = {
-        host: "shuttle.proxy.rlwy.net",  // De MYSQL_URL pública
-        port: 51060,                     // De MYSQL_URL pública
+async function createBestConnection() {
+  const connectionOptions = [
+    {
+      name: "CONEXIÓN PÚBLICA",
+      config: {
+        host: "shuttle.proxy.rlwy.net",
+        port: 51060,
         user: "root",
         password: "LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF",
         database: "railway",
         waitForConnections: true,
         connectionLimit: 10,
         ssl: { rejectUnauthorized: false }
-      };
-      
-      console.log("Probando con host público:", publicConfig.host);
-      
-      const publicPool = mysql.createPool(publicConfig);
-      publicPool.getConnection()
-        .then(conn => {
-          console.log("¡Conexión exitosa por URL pública!");
-          conn.release();
-          // Reemplazar el pool con la conexión pública
-          module.exports = publicPool;
-        })
-        .catch(publicErr => {
-          console.error(" También falló la URL pública:", publicErr.message);
-        });
+      }
+    },
+    {
+      name: "CONEXIÓN INTERNA",
+      config: {
+        host: "mysql.railway.internal",
+        port: 3306,
+        user: "root",
+        password: "LDjVx0HEvkrtQqmyMGmmvvbZeYXdABF",
+        database: "railway",
+        waitForConnections: true,
+        connectionLimit: 10,
+        ssl: { rejectUnauthorized: false }
+      }
     }
+  ];
+
+  // Probar cada opción
+  for (const option of connectionOptions) {
+    try {
+      console.log(`🔍 Probando ${option.name}...`);
+      console.log(`   Host: ${option.config.host}:${option.config.port}`);
+      
+      const testPool = mysql.createPool(option.config);
+      const connection = await testPool.getConnection();
+      
+      console.log(`✅ ${option.name} EXITOSA!`);
+      connection.release();
+      
+      return {
+        pool: testPool,
+        config: option.config,
+        type: option.name
+      };
+    } catch (err) {
+      console.log(`❌ ${option.name} falló: ${err.code || err.message}`);
+    }
+  }
+  
+  throw new Error("Todas las conexiones fallaron");
+}
+
+// Crear conexión
+const connectionPromise = createBestConnection();
+
+// Iniciar servidor después de conectar
+connectionPromise
+  .then(({ pool, config, type }) => {
+    console.log(`\n🎉 ${type} ESTABLECIDA`);
+    console.log(`📊 Servidor: ${config.host}:${config.port}`);
+    console.log(`🗄️  Base de datos: ${config.database}`);
+    
+    // Aquí puedes iniciar tu servidor Express
+    const PORT = process.env.PORT || 8080;
+    // app.listen(PORT, () => {
+    //   console.log(`Servidor activo en puerto ${PORT}`);
+    // });
+    
+    module.exports = pool;
+  })
+  .catch(err => {
+    console.error("\n💥 ERROR CRÍTICO:", err.message);
+    console.log("\n📋 Posibles soluciones:");
+    console.log("1. Verifica que la contraseña sea correcta");
+    console.log("2. Asegúrate de que el servicio MySQL esté 'Online'");
+    console.log("3. Espera 2-3 minutos después del deploy");
+    
+    // Pool dummy para que no falle el require
+    const dummyPool = mysql.createPool({
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: '',
+      database: 'test',
+      waitForConnections: true,
+      connectionLimit: 5
+    });
+    
+    module.exports = dummyPool;
   });
 
-module.exports = pool;
+// Exportar la promesa, no el pool directamente
+module.exports = connectionPromise.then(({ pool }) => pool);
