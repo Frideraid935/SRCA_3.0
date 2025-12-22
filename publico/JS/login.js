@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
+
   if (!form) {
     console.error("No se encontró el formulario loginForm");
     return;
@@ -12,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password").value.trim();
 
     if (!usuario || !password) {
-      alert("Completa todos los campos");
+      console.log("❌ Datos incompletos");
       return;
     }
 
@@ -35,15 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (data.rol === "profesor") {
           window.location.href = "/menu_inicio/menu_inicio_profesor.html";
         } else {
-          alert("Rol no reconocido");
+          console.log("Rol no reconocido");
         }
       } else {
-        alert(data.message || "Credenciales incorrectas");
+        console.log(data.message || "Credenciales incorrectas");
       }
 
     } catch (error) {
       console.error("Error en login:", error);
-      alert("No se pudo conectar con el servidor");
     }
   });
 });
