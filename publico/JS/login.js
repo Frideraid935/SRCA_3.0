@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const form = document.getElementById("loginForm");
-
   if (!form) {
     console.error("No se encontró el formulario loginForm");
     return;
@@ -21,20 +19,15 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, password })
       });
 
-      if (!response.ok) {
-        throw new Error("Error de servidor");
-      }
+      if (!response.ok) throw new Error("Error de servidor");
 
       const data = await response.json();
 
       if (data.success) {
-        // Redirección según rol
         if (data.rol === "admin") {
           window.location.href = "/menu_inicio/menu_inicio_admin.html";
         } else if (data.rol === "alumno") {
@@ -53,5 +46,4 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("No se pudo conectar con el servidor");
     }
   });
-
 });
