@@ -14,11 +14,11 @@ router.post("/login", async (req, res) => {
 
     try {
         const [rows] = await pool.query(
-            `SELECT 'admin' AS rol, usuario, contraseña FROM administradores WHERE usuario = ? AND contraseña = ?
+            `SELECT 'admin' AS rol, usuario, contrasena FROM administradores WHERE usuario = ? AND contrasena = ?
              UNION
-             SELECT 'profesor' AS rol, usuario, contraseña FROM profesores WHERE usuario = ? AND contraseña = ?
+             SELECT 'profesor' AS rol, usuario, contrasena FROM profesores WHERE usuario = ? AND contrasena = ?
              UNION
-             SELECT 'alumno' AS rol, usuario, contraseña FROM alumnos WHERE usuario = ? AND contraseña = ?`,
+             SELECT 'alumno' AS rol, usuario, contrasena FROM alumnos WHERE usuario = ? AND contrasena = ?`,
             [usuario, password, usuario, password, usuario, password]
         );
 
