@@ -6,28 +6,23 @@ async function importar() {
     console.log("🔌 Conectando a MySQL...");
 
     const connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST, // mysql.railway.internal
-      user: process.env.MYSQLUSER, // root
-      password:
-        process.env.MYSQLPASSWORD || process.env.MYSQL_ROOT_PASSWORD,
-      database: process.env.MYSQL_DATABASE, // railway
-      port: process.env.MYSQLPORT || 3306,
+      host: process.env.MYSQLHOST,
+      user: process.env.MYSQLUSER,
+      password: process.env.MYSQLPASSWORD,
+      database: process.env.MYSQLDATABASE,
+      port: process.env.MYSQLPORT,
       multipleStatements: true
     });
 
-    console.log("📄 Leyendo archivo SQL...");
     const sql = fs.readFileSync("Srca_Data_Base.sql", "utf8");
-
-    console.log("⚙️ Ejecutando consultas...");
     await connection.query(sql);
-
     await connection.end();
 
     console.log("✅ BASE DE DATOS IMPORTADA CORRECTAMENTE");
     process.exit(0);
-  } catch (error) {
+  } catch (err) {
     console.error("❌ ERROR AL IMPORTAR LA BD");
-    console.error(error);
+    console.error(err.message);
     process.exit(1);
   }
 }
