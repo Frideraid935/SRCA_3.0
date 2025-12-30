@@ -11,15 +11,19 @@ router.post("/login", async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT 'admin' AS rol, usuario AS usuario, contrasena AS password
+      `SELECT 'admin' AS rol, usuario AS nombre
        FROM administradores
        WHERE usuario = ? AND contrasena = ?
+
        UNION
-       SELECT 'profesor' AS rol, nombre AS usuario, numero_de_control AS password
+
+       SELECT 'profesor' AS rol, nombre AS nombre
        FROM profesores
        WHERE nombre = ? AND numero_de_control = ?
+
        UNION
-       SELECT 'alumno' AS rol, nombre AS usuario, numero_de_control AS password
+
+       SELECT 'alumno' AS rol, nombre AS nombre
        FROM alumnos
        WHERE nombre = ? AND numero_de_control = ?`,
       [usuario, password, usuario, password, usuario, password]
@@ -29,12 +33,15 @@ router.post("/login", async (req, res) => {
       return res.json({ success: false, message: "Credenciales incorrectas" });
     }
 
-    const usuarioEncontrado = rows[0];
-    return res.json({ success: true, rol: usuarioEncontrado.rol, usuario: usuarioEncontrado.usuario });
+    res.json({
+      success: true,
+      rol: rows[0].rol,
+      nombre: rows[0].nombre
+    });
 
   } catch (error) {
-    console.error("Error en login:", error.message);
-    return res.json({ success: false, message: "Error del servidor" });
+    console.error("Error en login:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
   }
 });
 

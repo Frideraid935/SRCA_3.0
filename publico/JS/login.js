@@ -1,11 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
 
-  if (!form) {
-    console.error("No se encontró el formulario loginForm");
-    return;
-  }
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -13,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password").value.trim();
 
     if (!usuario || !password) {
-      console.log("❌ Datos incompletos");
+      alert("Completa todos los campos");
       return;
     }
 
@@ -24,26 +19,23 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ usuario, password })
       });
 
-      if (!response.ok) throw new Error("Error de servidor");
-
       const data = await response.json();
 
-      if (data.success) {
-        if (data.rol === "admin") {
-          window.location.href = "/menu_inicio/menu_inicio_admin.html";
-        } else if (data.rol === "alumno") {
-          window.location.href = "/menu_inicio/menu_inicio_alumno.html";
-        } else if (data.rol === "profesor") {
-          window.location.href = "/menu_inicio/menu_inicio_profesor.html";
-        } else {
-          console.log("Rol no reconocido");
-        }
-      } else {
-        console.log(data.message || "Credenciales incorrectas");
+      if (!data.success) {
+        alert(data.message);
+        return;
+      }
+
+      if (data.rol === "admin") {
+        window.location.href = "/menu_inicio/menu_inicio_admin.html";
+      } else if (data.rol === "alumno") {
+        window.location.href = "/menu_inicio/menu_inicio_alumno.html";
+      } else if (data.rol === "profesor") {
+        window.location.href = "/menu_inicio/menu_inicio_profe.html";
       }
 
     } catch (error) {
-      console.error("Error en login:", error);
+      alert("Error de conexión");
     }
   });
 });
