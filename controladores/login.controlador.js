@@ -9,7 +9,7 @@ async function login(req, res) {
   const { usuario, contraseña } = req.body;
   
   if (!usuario || !contraseña) {
-    console.log("❌ Datos incompletos");
+    console.log(" Datos incompletos");
     return res.status(400).json({
       error: true,
       mensaje: 'Usuario y contraseña son requeridos'
@@ -18,7 +18,7 @@ async function login(req, res) {
   
   try {
     // PRUEBA: Verificar que el pool funciona
-    console.log("🔍 Verificando conexión a BD...");
+    console.log(" Verificando conexión a BD...");
     const testConn = await pool.getConnection();
     
     // 1. Buscar en administradores (PRIMERO, como en PHP)
@@ -30,11 +30,11 @@ async function login(req, res) {
     
     if (admins.length > 0) {
       const admin = admins[0];
-      console.log(`   ✅ Admin encontrado: ${admin.usuario}`);
+      console.log(`    Admin encontrado: ${admin.usuario}`);
       
       // Comparar contraseñas (las contraseñas están en texto plano en tu PHP)
       if (contraseña === admin.contrasena) {
-        console.log("   🔐 Contraseña admin correcta");
+        console.log("    Contraseña admin correcta");
         testConn.release();
         
         return res.json({
@@ -44,7 +44,7 @@ async function login(req, res) {
           usuario: admin.usuario
         });
       } else {
-        console.log("   ❌ Contraseña admin incorrecta");
+        console.log("    Contraseña admin incorrecta");
       }
     }
     
@@ -57,7 +57,7 @@ async function login(req, res) {
     
     if (alumnos.length > 0) {
       const alumno = alumnos[0];
-      console.log(`   ✅ Alumno encontrado: ${alumno.nombre}`);
+      console.log(`    Alumno encontrado: ${alumno.nombre}`);
       testConn.release();
       
       return res.json({
@@ -78,7 +78,7 @@ async function login(req, res) {
     
     if (profesores.length > 0) {
       const profesor = profesores[0];
-      console.log(`   ✅ Profesor encontrado: ${profesor.nombre}`);
+      console.log(`    Profesor encontrado: ${profesor.nombre}`);
       testConn.release();
       
       return res.json({
@@ -100,7 +100,7 @@ async function login(req, res) {
       
       if (usuarios.length > 0) {
         const user = usuarios[0];
-        console.log(`   ✅ Usuario encontrado: ${user.usuario}`);
+        console.log(`    Usuario encontrado: ${user.usuario}`);
         testConn.release();
         
         return res.json({
@@ -111,11 +111,11 @@ async function login(req, res) {
         });
       }
     } catch (tableError) {
-      console.log("   ℹ️  Tabla 'usuarios' no existe o tiene error:", tableError.message);
+      console.log("     Tabla 'usuarios' no existe o tiene error:", tableError.message);
     }
     
     // 5. Ningún usuario encontrado
-    console.log("   ❌ Credenciales incorrectas para todos los tipos");
+    console.log("   Credenciales incorrectas para todos los tipos");
     testConn.release();
     
     return res.status(401).json({
@@ -124,7 +124,7 @@ async function login(req, res) {
     });
     
   } catch (error) {
-    console.error("💥 ERROR EN LOGIN:", error.code || error.name);
+    console.error(" ERROR EN LOGIN:", error.code || error.name);
     console.error("   Mensaje:", error.message);
     console.error("   Stack:", error.stack);
     
