@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
       item.classList.add("active");
 
       const form = item.getAttribute("data-form");
+
       iframe.src = `/Modulo-Alumno-Profesores-Admin/${form}.html`;
     });
   });
@@ -17,3 +18,4 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/menu_inicio/menu_inicio_admin.html";
   });
 });
+

@@ -23,40 +23,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     BUSCAR / LISTAR ALUMNOS
+     LISTAR ALUMNOS
+  ================================ */
+  async function listarAlumnos(tablaId) {
+    const tabla = document.getElementById(tablaId);
+    if (!tabla) return;
+
+    const res = await fetch("/api/alumnos/listar");
+    const alumnos = await res.json();
+
+    tabla.innerHTML = "";
+    alumnos.forEach(a => {
+      tabla.innerHTML += `
+        <tr>
+          <td>${a.numero_de_control}</td>
+          <td>${a.nombre}</td>
+          <td>${a.fecha_nacimiento}</td>
+        </tr>
+      `;
+    });
+  }
+
+  /* ===============================
+     BUSCAR ALUMNO
   ================================ */
   const formBuscar = document.getElementById("formulario-buscar");
   if (formBuscar) {
+    listarAlumnos("tabla-buscar"); // mostrar todos al inicio
+
     formBuscar.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const numero = document.getElementById("numero_de_control").value;
 
       const res = await fetch("/api/alumnos/listar");
       const alumnos = await res.json();
 
-      const alumno = alumnos.find(a => a.numero_de_control == numero);
-      const contenedor = document.getElementById("datos-alumno");
+      const tabla = document.getElementById("tabla-buscar");
+      tabla.innerHTML = "";
 
-      if (!alumno) {
-        contenedor.style.display = "block";
-        contenedor.innerHTML = "<p> Alumno no encontrado</p>";
-        return;
-      }
-
-      contenedor.style.display = "block";
-      contenedor.innerHTML = `
-        <p><strong>Nombre:</strong> ${alumno.nombre}</p>
-        <p><strong>Número de control:</strong> ${alumno.numero_de_control}</p>
-        <p><strong>Fecha nacimiento:</strong> ${alumno.fecha_nacimiento}</p>
-      `;
-
-      // Para actualizar
-      const inputActualizar = document.getElementById("numero_de_control_actualizar");
-      if (inputActualizar) {
-        inputActualizar.value = alumno.numero_de_control;
-        document.getElementById("formulario-actualizar").style.display = "block";
-      }
+      alumnos
+        .filter(a => a.numero_de_control.includes(numero))
+        .forEach(a => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${a.numero_de_control}</td>
+              <td>${a.nombre}</td>
+              <td>${a.fecha_nacimiento}</td>
+            </tr>
+          `;
+        });
     });
   }
 
@@ -65,9 +80,10 @@ document.addEventListener("DOMContentLoaded", () => {
   ================================ */
   const formActualizar = document.getElementById("formulario-actualizar");
   if (formActualizar) {
+    listarAlumnos("tabla-actualizar"); // mostrar todos al inicio
+
     formActualizar.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const data = obtenerDatosAlumno(true);
 
       const res = await fetch("/api/alumnos/actualizar", {
@@ -78,6 +94,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const result = await res.json();
       mostrarMensaje("mensaje-actualizar", result.message);
+
+      listarAlumnos("tabla-actualizar"); // refrescar tabla
+      formActualizar.reset();
     });
   }
 
@@ -86,9 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
   ================================ */
   const formEliminar = document.getElementById("formulario-eliminar");
   if (formEliminar) {
+    listarAlumnos("tabla-eliminar"); // mostrar todos al inicio
+
     formEliminar.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const numero = document.getElementById("numero_de_control").value;
 
       if (!confirm("¿Seguro que deseas eliminar este alumno?")) return;
@@ -102,11 +122,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await res.json();
       mostrarMensaje("mensaje-eliminar", result.message);
 
+      listarAlumnos("tabla-eliminar"); // refrescar tabla
       document.getElementById("datos-alumno").style.display = "none";
       formEliminar.reset();
     });
   }
-
 });
 
 /* ===============================
