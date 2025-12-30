@@ -34,14 +34,13 @@ exports.registrarAlumno = async (req, res) => {
     );
 
     res.json({ status: "success", message: "Alumno registrado exitosamente." });
-
   } catch (error) {
     res.json({ status: "error", message: error.message });
   }
 };
 
 /* ===============================
-   LISTAR ALUMNOS
+   LISTAR TODOS LOS ALUMNOS
 ================================ */
 exports.listarAlumnos = async (req, res) => {
   try {
@@ -51,6 +50,27 @@ exports.listarAlumnos = async (req, res) => {
     res.json(rows);
   } catch (error) {
     res.json([]);
+  }
+};
+
+/* ===============================
+   BUSCAR UN ALUMNO
+================================ */
+exports.buscarAlumnoPorNumero = async (req, res) => {
+  try {
+    const { numero } = req.params;
+    const [rows] = await pool.query(
+      "SELECT * FROM alumnos WHERE numero_de_control = ?",
+      [numero]
+    );
+
+    if (rows.length === 0) {
+      return res.json({ status: "error", message: "Alumno no encontrado." });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    res.json({ status: "error", message: error.message });
   }
 };
 
@@ -85,7 +105,6 @@ exports.actualizarAlumno = async (req, res) => {
     }
 
     res.json({ status: "success", message: "Alumno actualizado correctamente." });
-
   } catch (error) {
     res.json({ status: "error", message: error.message });
   }
@@ -108,7 +127,6 @@ exports.eliminarAlumno = async (req, res) => {
     }
 
     res.json({ status: "success", message: "Alumno eliminado correctamente." });
-
   } catch (error) {
     res.json({ status: "error", message: error.message });
   }
