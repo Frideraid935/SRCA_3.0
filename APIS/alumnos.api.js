@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const alumnos = require("../controladores/controladores-alumnos/alumnos.controlador"); // Ajusta la ruta según tu proyecto
 
-const alumnos = require("../controladores/controladores-alumnos/alumnos.controlador");
-
+// Rutas
 router.post("/registrar", alumnos.registrarAlumno);
-router.post("/buscar", alumnos.buscarAlumno);
 router.get("/listar", alumnos.listarAlumnos);
 router.put("/actualizar", alumnos.actualizarAlumno);
 router.delete("/eliminar", alumnos.eliminarAlumno);

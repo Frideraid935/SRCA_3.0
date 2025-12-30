@@ -41,7 +41,7 @@ exports.registrarAlumno = async (req, res) => {
 };
 
 /* ===============================
-   LISTAR ALUMNOS (BUSCAR / BORRAR)
+   LISTAR ALUMNOS
 ================================ */
 exports.listarAlumnos = async (req, res) => {
   try {
