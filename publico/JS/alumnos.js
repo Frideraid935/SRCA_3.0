@@ -1,189 +1,138 @@
-// alumnos.js - Controlador principal para todas las páginas de alumnos
+// alumnos.js - Controlador para las operaciones CRUD de alumnos
 
-import { AlumnosAPI } from './alumnos-api.js';
+const API_BASE = '/api/alumnos';
 
-document.addEventListener("DOMContentLoaded", async () => {
-    console.log("✅ Sistema de Alumnos cargado");
-    
-    // Detectar en qué página estamos
-    const path = window.location.pathname;
-    const pagina = path.split('/').pop();
-    
-    // Inicializar funciones según la página
-    switch(pagina) {
-        case 'Ingresar_Alumno_admin.html':
-            inicializarRegistro();
-            break;
-        case 'Buscar_alumno_admin.html':
-            await inicializarBusqueda();
-            break;
-        case 'Actualizar_alumno_admin.html':
-            inicializarActualizacion();
-            break;
-        case 'Borrar_alumno_admin.html':
-            await inicializarEliminacion();
-            break;
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    initPage();
 });
 
-// ===============================
-// 1. REGISTRAR ALUMNO
-// ===============================
-function inicializarRegistro() {
-    const form = document.getElementById('formulario-registro');
-    const mensajeDiv = document.getElementById('mensaje-registro');
+function initPage() {
+    const path = window.location.pathname;
+    const page = path.split('/').pop();
     
+    if (page === 'Ingresar_Alumno_admin.html') {
+        initRegistro();
+    } else if (page === 'Buscar_alumno_admin.html') {
+        initBusqueda();
+    } else if (page === 'Actualizar_alumno_admin.html') {
+        initActualizacion();
+    } else if (page === 'Borrar_alumno_admin.html') {
+        initEliminacion();
+    }
+}
+
+// REGISTRAR ALUMNO
+function initRegistro() {
+    const form = document.getElementById('formulario-registro');
     if (!form) return;
     
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Deshabilitar botón para evitar doble envío
         const btnSubmit = form.querySelector('button[type="submit"]');
         const originalText = btnSubmit.textContent;
         btnSubmit.disabled = true;
         btnSubmit.textContent = 'Registrando...';
         
-        // Obtener datos del formulario
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
         
-        // Validación básica
-        if (!data.numero_de_control || !data.nombre || !data.curp) {
-            mostrarMensaje(mensajeDiv, 'Por favor complete los campos obligatorios', 'error');
+        try {
+            const response = await fetch(`${API_BASE}/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            showMessage('mensaje-registro', result.message, result.status);
+            
+            if (result.status === 'success') {
+                form.reset();
+            }
+        } catch (error) {
+            showMessage('mensaje-registro', 'Error de conexión', 'error');
+        } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = originalText;
-            return;
         }
-        
-        // Establecer estatus por defecto
-        data.estatus = 'activo';
-        
-        // Enviar al servidor
-        const resultado = await AlumnosAPI.registrar(data);
-        
-        if (resultado.status === 'success') {
-            mostrarMensaje(mensajeDiv, resultado.message, 'success');
-            form.reset();
-            
-            // Limpiar mensaje después de 3 segundos
-            setTimeout(() => {
-                mensajeDiv.style.display = 'none';
-            }, 3000);
-        } else {
-            mostrarMensaje(mensajeDiv, resultado.message, 'error');
-        }
-        
-        // Restaurar botón
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = originalText;
     });
 }
 
-// ===============================
-// 2. BUSCAR ALUMNO
-// ===============================
-async function inicializarBusqueda() {
+// BUSCAR ALUMNO
+function initBusqueda() {
     const form = document.getElementById('formulario-buscar');
-    const resultadosDiv = document.getElementById('resultados-busqueda');
-    const datosAlumnoDiv = document.getElementById('datos-alumno');
-    const mensajeDiv = document.getElementById('mensaje-busqueda');
-    
     if (!form) return;
     
-    // Cargar todos los alumnos al inicio
-    await cargarTodosLosAlumnos();
-    
-    // Buscar por número de control
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const numeroControl = document.getElementById('numero_de_control').value.trim();
+        const resultadosDiv = document.getElementById('resultados-busqueda');
+        const datosDiv = document.getElementById('datos-alumno');
+        const mensajeDiv = document.getElementById('mensaje-busqueda');
         
         if (!numeroControl) {
-            mostrarMensaje(mensajeDiv, 'Ingrese un número de control', 'error');
+            showMessage('mensaje-busqueda', 'Ingrese un número de control', 'error');
             return;
         }
         
-        const resultado = await AlumnosAPI.buscarPorNumero(numeroControl);
-        
-        if (resultado.status === 'error') {
-            mostrarMensaje(mensajeDiv, resultado.message, 'error');
-            resultadosDiv.style.display = 'none';
-        } else {
-            mostrarMensaje(mensajeDiv, 'Alumno encontrado', 'success');
-            mostrarDatosAlumno(datosAlumnoDiv, resultado);
-            resultadosDiv.style.display = 'block';
+        try {
+            const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                showMessage('mensaje-busqueda', result.message, 'error');
+                if (resultadosDiv) resultadosDiv.style.display = 'none';
+            } else {
+                showMessage('mensaje-busqueda', 'Alumno encontrado', 'success');
+                displayAlumnoData(datosDiv, result);
+                if (resultadosDiv) resultadosDiv.style.display = 'block';
+            }
+        } catch (error) {
+            showMessage('mensaje-busqueda', 'Error de conexión', 'error');
         }
     });
 }
 
-async function cargarTodosLosAlumnos() {
-    const datosAlumnoDiv = document.getElementById('datos-alumno');
-    if (!datosAlumnoDiv) return;
-    
-    const alumnos = await AlumnosAPI.listarTodos();
-    
-    if (alumnos.length === 0) {
-        datosAlumnoDiv.innerHTML = '<p class="no-data">No hay alumnos registrados</p>';
-        return;
-    }
-    
-    let html = '<div class="tabla-container"><table class="tabla-alumnos">';
-    html += '<thead><tr><th>No. Control</th><th>Nombre</th><th>Curso</th><th>Email</th><th>Estatus</th></tr></thead>';
-    html += '<tbody>';
-    
-    alumnos.forEach(alumno => {
-        html += `
-            <tr>
-                <td>${alumno.numero_de_control || ''}</td>
-                <td>${alumno.nombre || ''}</td>
-                <td>${alumno.curso || ''}</td>
-                <td>${alumno.email || ''}</td>
-                <td><span class="estatus ${alumno.estatus}">${alumno.estatus || ''}</span></td>
-            </tr>
-        `;
-    });
-    
-    html += '</tbody></table></div>';
-    datosAlumnoDiv.innerHTML = html;
-}
-
-// ===============================
-// 3. ACTUALIZAR ALUMNO
-// ===============================
-function inicializarActualizacion() {
+// ACTUALIZAR ALUMNO
+function initActualizacion() {
     const formBuscar = document.getElementById('formulario-buscar');
     const formActualizar = document.getElementById('formulario-actualizar');
-    const mensajeDiv = document.getElementById('mensaje-actualizar');
     
     if (!formBuscar || !formActualizar) return;
     
-    // Buscar alumno para actualizar
-    formBuscar.addEventListener('submit', async (e) => {
+    // Buscar alumno
+    formBuscar.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const numeroControl = document.getElementById('numero_de_control').value.trim();
+        const mensajeDiv = document.getElementById('mensaje-actualizar');
         
         if (!numeroControl) {
-            mostrarMensaje(mensajeDiv, 'Ingrese un número de control', 'error');
+            showMessage('mensaje-actualizar', 'Ingrese un número de control', 'error');
             return;
         }
         
-        const resultado = await AlumnosAPI.buscarPorNumero(numeroControl);
-        
-        if (resultado.status === 'error') {
-            mostrarMensaje(mensajeDiv, resultado.message, 'error');
-            formActualizar.style.display = 'none';
-        } else {
-            mostrarMensaje(mensajeDiv, 'Alumno encontrado. Modifique los datos necesarios.', 'success');
-            llenarFormularioActualizar(resultado);
-            formActualizar.style.display = 'block';
+        try {
+            const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                showMessage('mensaje-actualizar', result.message, 'error');
+                formActualizar.style.display = 'none';
+            } else {
+                showMessage('mensaje-actualizar', 'Alumno encontrado', 'success');
+                fillUpdateForm(result);
+                formActualizar.style.display = 'block';
+            }
+        } catch (error) {
+            showMessage('mensaje-actualizar', 'Error de conexión', 'error');
         }
     });
     
-    // Actualizar datos del alumno
-    formActualizar.addEventListener('submit', async (e) => {
+    // Actualizar datos
+    formActualizar.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const btnSubmit = formActualizar.querySelector('button[type="submit"]');
@@ -194,180 +143,143 @@ function inicializarActualizacion() {
         const formData = new FormData(formActualizar);
         const data = Object.fromEntries(formData);
         
-        const resultado = await AlumnosAPI.actualizar(data);
-        
-        if (resultado.status === 'success') {
-            mostrarMensaje(mensajeDiv, resultado.message, 'success');
+        try {
+            const response = await fetch(`${API_BASE}/actualizar`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
             
-            // Ocultar formulario después de actualizar
-            setTimeout(() => {
-                formActualizar.style.display = 'none';
-                formBuscar.reset();
-                mensajeDiv.style.display = 'none';
-            }, 2000);
-        } else {
-            mostrarMensaje(mensajeDiv, resultado.message, 'error');
+            const result = await response.json();
+            showMessage('mensaje-actualizar', result.message, result.status);
+            
+            if (result.status === 'success') {
+                setTimeout(() => {
+                    formActualizar.style.display = 'none';
+                    formBuscar.reset();
+                }, 2000);
+            }
+        } catch (error) {
+            showMessage('mensaje-actualizar', 'Error de conexión', 'error');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = originalText;
         }
-        
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = originalText;
     });
 }
 
-function llenarFormularioActualizar(alumno) {
+// ELIMINAR ALUMNO
+function initEliminacion() {
+    const form = document.getElementById('formulario-eliminar');
+    if (!form) return;
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const numeroControl = document.getElementById('numero_de_control').value.trim();
+        const datosDiv = document.getElementById('datos-alumno');
+        const mensajeDiv = document.getElementById('mensaje-eliminar');
+        
+        if (!numeroControl) {
+            showMessage('mensaje-eliminar', 'Ingrese un número de control', 'error');
+            return;
+        }
+        
+        try {
+            // Buscar alumno primero
+            const searchResponse = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const alumno = await searchResponse.json();
+            
+            if (alumno.status === 'error') {
+                showMessage('mensaje-eliminar', alumno.message, 'error');
+                if (datosDiv) datosDiv.style.display = 'none';
+                return;
+            }
+            
+            // Mostrar datos del alumno
+            displayAlumnoData(datosDiv, alumno);
+            if (datosDiv) datosDiv.style.display = 'block';
+            
+            // Confirmar eliminación
+            const confirmar = confirm(`¿Eliminar al alumno: ${alumno.nombre} (${numeroControl})?`);
+            
+            if (!confirmar) return;
+            
+            // Eliminar alumno
+            const deleteResponse = await fetch(`${API_BASE}/eliminar`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero_de_control: numeroControl })
+            });
+            
+            const result = await deleteResponse.json();
+            showMessage('mensaje-eliminar', result.message, result.status);
+            
+            if (result.status === 'success') {
+                form.reset();
+                if (datosDiv) {
+                    datosDiv.style.display = 'none';
+                    datosDiv.innerHTML = '';
+                }
+            }
+        } catch (error) {
+            showMessage('mensaje-eliminar', 'Error de conexión', 'error');
+        }
+    });
+}
+
+// FUNCIONES AUXILIARES
+function showMessage(elementId, text, type) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    element.textContent = text;
+    element.className = `mensaje mensaje-${type}`;
+    element.style.display = 'block';
+}
+
+function displayAlumnoData(container, alumno) {
+    if (!container) return;
+    
+    const html = `
+        <div class="alumno-info-card">
+            <h3>${alumno.nombre || ''}</h3>
+            <p><strong>Número de Control:</strong> ${alumno.numero_de_control || ''}</p>
+            <p><strong>Curso:</strong> ${alumno.curso || ''}</p>
+            <p><strong>Fecha Nacimiento:</strong> ${alumno.fecha_nacimiento || ''}</p>
+            <p><strong>CURP:</strong> ${alumno.curp || ''}</p>
+            <p><strong>Email:</strong> ${alumno.email || ''}</p>
+            <p><strong>Teléfono:</strong> ${alumno.telefonos || ''}</p>
+            <p><strong>Dirección:</strong> ${alumno.direccion || ''}</p>
+            <p><strong>Población:</strong> ${alumno.poblacion || ''}</p>
+            <p><strong>Estatus:</strong> ${alumno.estatus || ''}</p>
+            ${alumno.alergico ? `<p><strong>Alergias:</strong> ${alumno.alergico}</p>` : ''}
+            ${alumno.contacto_accidente ? `<p><strong>Contacto Emergencia:</strong> ${alumno.contacto_accidente}</p>` : ''}
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+function fillUpdateForm(alumno) {
+    // Campo oculto para el número de control
+    const controlHidden = document.getElementById('numero_de_control_actualizar');
+    if (controlHidden) {
+        controlHidden.value = alumno.numero_de_control || '';
+    }
+    
+    // Campos visibles
     const campos = [
-        'numero_de_control', 'nombre', 'fecha_nacimiento', 'curso',
-        'poblacion', 'direccion', 'email', 'telefonos', 'curp',
-        'estatus', 'alergico', 'contacto_accidente', 'telefonos_contacto',
+        'nombre', 'fecha_nacimiento', 'curso', 'poblacion',
+        'direccion', 'email', 'telefonos', 'curp', 'estatus',
+        'alergico', 'contacto_accidente', 'telefonos_contacto',
         'nombre_autorizado', 'curp_autorizado'
     ];
     
     campos.forEach(campo => {
         const input = document.getElementById(campo);
-        if (input && alumno[campo]) {
-            input.value = alumno[campo];
+        if (input && alumno[campo] !== undefined) {
+            input.value = alumno[campo] || '';
         }
     });
-    
-    // Campo oculto para el número de control
-    const controlActualizar = document.getElementById('numero_de_control_actualizar');
-    if (controlActualizar && alumno.numero_de_control) {
-        controlActualizar.value = alumno.numero_de_control;
-    }
-}
-
-// ===============================
-// 4. ELIMINAR ALUMNO
-// ===============================
-async function inicializarEliminacion() {
-    const form = document.getElementById('formulario-eliminar');
-    const datosAlumnoDiv = document.getElementById('datos-alumno');
-    const mensajeDiv = document.getElementById('mensaje-eliminar');
-    
-    if (!form) return;
-    
-    // Cargar todos los alumnos al inicio
-    await cargarTodosLosAlumnosParaEliminar();
-    
-    // Buscar para eliminar
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const numeroControl = document.getElementById('numero_de_control').value.trim();
-        
-        if (!numeroControl) {
-            mostrarMensaje(mensajeDiv, 'Ingrese un número de control', 'error');
-            return;
-        }
-        
-        // Mostrar confirmación
-        if (!confirm(`¿Está seguro de eliminar al alumno con número de control: ${numeroControl}?`)) {
-            return;
-        }
-        
-        const resultado = await AlumnosAPI.eliminar(numeroControl);
-        
-        if (resultado.status === 'success') {
-            mostrarMensaje(mensajeDiv, resultado.message, 'success');
-            form.reset();
-            
-            // Recargar lista de alumnos
-            setTimeout(() => {
-                cargarTodosLosAlumnosParaEliminar();
-                mensajeDiv.style.display = 'none';
-            }, 1500);
-        } else {
-            mostrarMensaje(mensajeDiv, resultado.message, 'error');
-        }
-    });
-}
-
-async function cargarTodosLosAlumnosParaEliminar() {
-    const datosAlumnoDiv = document.getElementById('datos-alumno');
-    if (!datosAlumnoDiv) return;
-    
-    const alumnos = await AlumnosAPI.listarTodos();
-    
-    if (alumnos.length === 0) {
-        datosAlumnoDiv.innerHTML = '<p class="no-data">No hay alumnos registrados</p>';
-        return;
-    }
-    
-    let html = '<h3>Alumnos Registrados</h3>';
-    html += '<div class="tabla-container"><table class="tabla-alumnos">';
-    html += '<thead><tr><th>No. Control</th><th>Nombre</th><th>Curso</th><th>Email</th><th>Acción</th></tr></thead>';
-    html += '<tbody>';
-    
-    alumnos.forEach(alumno => {
-        html += `
-            <tr>
-                <td>${alumno.numero_de_control || ''}</td>
-                <td>${alumno.nombre || ''}</td>
-                <td>${alumno.curso || ''}</td>
-                <td>${alumno.email || ''}</td>
-                <td>
-                    <button class="btn-eliminar-directo" 
-                            data-numero="${alumno.numero_de_control}"
-                            data-nombre="${alumno.nombre}">
-                        Eliminar
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-    
-    html += '</tbody></table></div>';
-    datosAlumnoDiv.innerHTML = html;
-    
-    // Agregar eventos a los botones de eliminar directo
-    document.querySelectorAll('.btn-eliminar-directo').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const numero = this.getAttribute('data-numero');
-            const nombre = this.getAttribute('data-nombre');
-            
-            if (confirm(`¿Eliminar al alumno: ${nombre} (${numero})?`)) {
-                const resultado = await AlumnosAPI.eliminar(numero);
-                const mensajeDiv = document.getElementById('mensaje-eliminar');
-                
-                if (resultado.status === 'success') {
-                    mostrarMensaje(mensajeDiv, resultado.message, 'success');
-                    setTimeout(() => {
-                        cargarTodosLosAlumnosParaEliminar();
-                        mensajeDiv.style.display = 'none';
-                    }, 1500);
-                } else {
-                    mostrarMensaje(mensajeDiv, resultado.message, 'error');
-                }
-            }
-        });
-    });
-}
-
-// ===============================
-// FUNCIONES AUXILIARES
-// ===============================
-function mostrarMensaje(elemento, texto, tipo = 'info') {
-    if (!elemento) return;
-    
-    elemento.textContent = texto;
-    elemento.className = `mensaje mensaje-${tipo}`;
-    elemento.style.display = 'block';
-}
-
-function mostrarDatosAlumno(elemento, alumno) {
-    if (!elemento || !alumno) return;
-    
-    const html = `
-        <div class="card-alumno">
-            <h3>${alumno.nombre || ''}</h3>
-            <p><strong>No. Control:</strong> ${alumno.numero_de_control || ''}</p>
-            <p><strong>Curso:</strong> ${alumno.curso || ''}</p>
-            <p><strong>Email:</strong> ${alumno.email || ''}</p>
-            <p><strong>Teléfono:</strong> ${alumno.telefonos || ''}</p>
-            <p><strong>Dirección:</strong> ${alumno.direccion || ''}</p>
-            <p><strong>Estatus:</strong> <span class="estatus ${alumno.estatus}">${alumno.estatus || ''}</span></p>
-        </div>
-    `;
-    
-    elemento.innerHTML = html;
 }
