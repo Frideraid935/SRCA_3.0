@@ -55,7 +55,7 @@ function initRegistro() {
                 form.reset();
             }
         } catch (error) {
-            showMessage('mensaje-registro', 'Error de conexión con el servidor', 'error');
+            showMessage('mensaje-registro', 'Error de conexión', 'error');
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = originalText;
@@ -64,7 +64,7 @@ function initRegistro() {
 }
 
 // ===============================
-// 2. BUSCAR ALUMNO - CORREGIDO
+// 2. BUSCAR ALUMNO
 // ===============================
 function initBusqueda() {
     const form = document.getElementById('formulario-buscar');
@@ -86,7 +86,6 @@ function initBusqueda() {
             const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
             const result = await response.json();
             
-            // Verificar si es un error o datos del alumno
             if (result.status === 'error') {
                 showMessage('mensaje-busqueda', result.message, 'error');
                 if (resultadosDiv) resultadosDiv.style.display = 'none';
@@ -96,20 +95,13 @@ function initBusqueda() {
                 }
             } else {
                 showMessage('mensaje-busqueda', 'Alumno encontrado', 'success');
+                displayAlumnoDataSimple(datosDiv, result);
                 
-                // Mostrar datos del alumno
-                displayAlumnoData(datosDiv, result);
-                
-                // Mostrar contenedor de resultados
-                if (resultadosDiv) {
-                    resultadosDiv.style.display = 'block';
-                }
-                
+                if (resultadosDiv) resultadosDiv.style.display = 'block';
                 if (datosDiv) datosDiv.style.display = 'block';
             }
         } catch (error) {
-            console.error('Error en búsqueda:', error);
-            showMessage('mensaje-busqueda', 'Error de conexión con el servidor', 'error');
+            showMessage('mensaje-busqueda', 'Error de conexión', 'error');
         }
     });
 }
@@ -123,7 +115,6 @@ function initActualizacion() {
     
     if (!formBuscar || !formActualizar) return;
     
-    // Buscar alumno para actualizar
     formBuscar.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -142,16 +133,15 @@ function initActualizacion() {
                 showMessage('mensaje-actualizar', result.message, 'error');
                 formActualizar.style.display = 'none';
             } else {
-                showMessage('mensaje-actualizar', 'Alumno encontrado. Modifique los datos.', 'success');
+                showMessage('mensaje-actualizar', 'Alumno encontrado', 'success');
                 fillUpdateForm(result);
                 formActualizar.style.display = 'block';
             }
         } catch (error) {
-            showMessage('mensaje-actualizar', 'Error de conexión con el servidor', 'error');
+            showMessage('mensaje-actualizar', 'Error de conexión', 'error');
         }
     });
     
-    // Actualizar datos del alumno
     formActualizar.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -180,7 +170,7 @@ function initActualizacion() {
                 }, 2000);
             }
         } catch (error) {
-            showMessage('mensaje-actualizar', 'Error de conexión con el servidor', 'error');
+            showMessage('mensaje-actualizar', 'Error de conexión', 'error');
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.textContent = originalText;
@@ -189,7 +179,7 @@ function initActualizacion() {
 }
 
 // ===============================
-// 4. ELIMINAR ALUMNO - CORREGIDO
+// 4. ELIMINAR ALUMNO
 // ===============================
 function initEliminacion() {
     const form = document.getElementById('formulario-eliminar');
@@ -207,7 +197,6 @@ function initEliminacion() {
         }
         
         try {
-            // Buscar alumno primero
             const searchResponse = await fetch(`${API_BASE}/buscar/${numeroControl}`);
             const result = await searchResponse.json();
             
@@ -220,15 +209,13 @@ function initEliminacion() {
                 return;
             }
             
-            // Mostrar datos con botones de acción
-            showMessage('mensaje-eliminar', 'Alumno encontrado. Revise los datos y confirme la eliminación.', 'info');
+            showMessage('mensaje-eliminar', 'Alumno encontrado', 'info');
             displayAlumnoDataWithDeleteButton(datosDiv, result, numeroControl);
             
             if (datosDiv) datosDiv.style.display = 'block';
             
         } catch (error) {
-            console.error('Error en búsqueda para eliminar:', error);
-            showMessage('mensaje-eliminar', 'Error de conexión con el servidor', 'error');
+            showMessage('mensaje-eliminar', 'Error de conexión', 'error');
         }
     });
 }
@@ -237,96 +224,87 @@ function initEliminacion() {
 // FUNCIONES AUXILIARES
 // ===============================
 
-// Mostrar datos del alumno (para búsqueda)
-function displayAlumnoData(container, alumno) {
+// Mostrar datos del alumno (formato simple para búsqueda)
+function displayAlumnoDataSimple(container, alumno) {
     if (!container) return;
     
-    const html = `
-        <div class="alumno-info-card" style="border: 1px solid #3498db; padding: 20px; border-radius: 8px; margin-top: 15px; background-color: #f8f9fa;">
-            <h3 style="color: #3498db; margin-top: 0;">Información del Alumno</h3>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                <div>
-                    <p><strong>Número de Control:</strong><br>${alumno.numero_de_control || 'No especificado'}</p>
-                    <p><strong>Nombre:</strong><br>${alumno.nombre || 'No especificado'}</p>
-                    <p><strong>Fecha Nacimiento:</strong><br>${alumno.fecha_nacimiento || 'No especificado'}</p>
-                    <p><strong>Curso:</strong><br>${alumno.curso || 'No especificado'}</p>
-                    <p><strong>CURP:</strong><br>${alumno.curp || 'No especificado'}</p>
-                </div>
-                
-                <div>
-                    <p><strong>Email:</strong><br>${alumno.email || 'No especificado'}</p>
-                    <p><strong>Teléfono:</strong><br>${alumno.telefonos || 'No especificado'}</p>
-                    <p><strong>Dirección:</strong><br>${alumno.direccion || 'No especificado'}</p>
-                    <p><strong>Población:</strong><br>${alumno.poblacion || 'No especificado'}</p>
-                    <p><strong>Estatus:</strong><br><span style="color: ${alumno.estatus === 'activo' ? '#27ae60' : '#e74c3c'}">${alumno.estatus || 'No especificado'}</span></p>
-                </div>
-            </div>
-            
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
-                <h4 style="color: #2c3e50;">Información Adicional</h4>
-                ${alumno.alergico ? `<p><strong>Alergias:</strong> ${alumno.alergico}</p>` : ''}
-                ${alumno.contacto_accidente ? `<p><strong>Contacto Emergencia:</strong> ${alumno.contacto_accidente}</p>` : ''}
-                ${alumno.telefonos_contacto ? `<p><strong>Teléfonos Contacto:</strong> ${alumno.telefonos_contacto}</p>` : ''}
-                ${alumno.nombre_autorizado ? `<p><strong>Nombre Autorizado:</strong> ${alumno.nombre_autorizado}</p>` : ''}
-                ${alumno.curp_autorizado ? `<p><strong>CURP Autorizado:</strong> ${alumno.curp_autorizado}</p>` : ''}
-            </div>
-        </div>
-    `;
+    let html = '<div><h4>Datos del Alumno:</h4>';
+    
+    // Información básica
+    html += '<p><b>Número de Control:</b> ' + (alumno.numero_de_control || 'No especificado') + '</p>';
+    html += '<p><b>Nombre:</b> ' + (alumno.nombre || 'No especificado') + '</p>';
+    html += '<p><b>Fecha Nacimiento:</b> ' + (alumno.fecha_nacimiento || 'No especificado') + '</p>';
+    html += '<p><b>Curso:</b> ' + (alumno.curso || 'No especificado') + '</p>';
+    html += '<p><b>CURP:</b> ' + (alumno.curp || 'No especificado') + '</p>';
+    html += '<p><b>Email:</b> ' + (alumno.email || 'No especificado') + '</p>';
+    html += '<p><b>Teléfono:</b> ' + (alumno.telefonos || 'No especificado') + '</p>';
+    html += '<p><b>Dirección:</b> ' + (alumno.direccion || 'No especificado') + '</p>';
+    html += '<p><b>Población:</b> ' + (alumno.poblacion || 'No especificado') + '</p>';
+    html += '<p><b>Estatus:</b> ' + (alumno.estatus || 'No especificado') + '</p>';
+    
+    // Información adicional si existe
+    if (alumno.alergico) {
+        html += '<p><b>Alergias:</b> ' + alumno.alergico + '</p>';
+    }
+    if (alumno.contacto_accidente) {
+        html += '<p><b>Contacto Emergencia:</b> ' + alumno.contacto_accidente + '</p>';
+    }
+    if (alumno.telefonos_contacto) {
+        html += '<p><b>Teléfonos Contacto:</b> ' + alumno.telefonos_contacto + '</p>';
+    }
+    if (alumno.nombre_autorizado) {
+        html += '<p><b>Nombre Autorizado:</b> ' + alumno.nombre_autorizado + '</p>';
+    }
+    if (alumno.curp_autorizado) {
+        html += '<p><b>CURP Autorizado:</b> ' + alumno.curp_autorizado + '</p>';
+    }
+    
+    html += '</div>';
     
     container.innerHTML = html;
 }
 
-// Mostrar datos con botón eliminar (para eliminación)
+// Mostrar datos con botón eliminar
 function displayAlumnoDataWithDeleteButton(container, alumno, numeroControl) {
     if (!container) return;
     
-    const html = `
-        <div class="alumno-info-card" style="border: 2px solid #e74c3c; padding: 20px; border-radius: 8px; margin-top: 15px; background-color: #fff5f5;">
-            <h3 style="color: #e74c3c; margin-top: 0;">Alumno Encontrado - Confirmar Eliminación</h3>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                <div>
-                    <p><strong>Número de Control:</strong><br>${alumno.numero_de_control || 'No especificado'}</p>
-                    <p><strong>Nombre:</strong><br>${alumno.nombre || 'No especificado'}</p>
-                    <p><strong>Fecha Nacimiento:</strong><br>${alumno.fecha_nacimiento || 'No especificado'}</p>
-                    <p><strong>Curso:</strong><br>${alumno.curso || 'No especificado'}</p>
-                    <p><strong>CURP:</strong><br>${alumno.curp || 'No especificado'}</p>
-                </div>
-                
-                <div>
-                    <p><strong>Email:</strong><br>${alumno.email || 'No especificado'}</p>
-                    <p><strong>Teléfono:</strong><br>${alumno.telefonos || 'No especificado'}</p>
-                    <p><strong>Dirección:</strong><br>${alumno.direccion || 'No especificado'}</p>
-                    <p><strong>Población:</strong><br>${alumno.poblacion || 'No especificado'}</p>
-                    <p><strong>Estatus:</strong><br>${alumno.estatus || 'No especificado'}</p>
-                </div>
-            </div>
-            
-            <div style="margin-top: 25px; padding: 20px; background-color: #ffeaea; border-radius: 6px; border: 1px solid #f5c6cb;">
-                <h4 style="color: #721c24; margin-top: 0;">⚠️ ADVERTENCIA: Esta acción no se puede deshacer</h4>
-                <p style="color: #721c24;">¿Está completamente seguro de eliminar permanentemente a este alumno del sistema?</p>
-                
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button id="btn-confirmar-eliminar" 
-                            class="btn btn-danger" 
-                            style="padding: 12px 24px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1;">
-                        <i class="fas fa-trash-alt"></i> Sí, Eliminar Permanentemente
-                    </button>
-                    
-                    <button id="btn-cancelar-eliminar" 
-                            class="btn btn-secondary" 
-                            style="padding: 12px 24px; background-color: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
-                        <i class="fas fa-times"></i> Cancelar Eliminación
-                    </button>
-                </div>
-                
-                <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-                    <i class="fas fa-exclamation-triangle"></i> Todos los datos del alumno serán eliminados permanentemente y no podrán recuperarse.
-                </p>
-            </div>
-        </div>
-    `;
+    let html = '<div><h4>Datos del Alumno a Eliminar:</h4>';
+    
+    // Información básica
+    html += '<p><b>Número de Control:</b> ' + (alumno.numero_de_control || 'No especificado') + '</p>';
+    html += '<p><b>Nombre:</b> ' + (alumno.nombre || 'No especificado') + '</p>';
+    html += '<p><b>Fecha Nacimiento:</b> ' + (alumno.fecha_nacimiento || 'No especificado') + '</p>';
+    html += '<p><b>Curso:</b> ' + (alumno.curso || 'No especificado') + '</p>';
+    html += '<p><b>CURP:</b> ' + (alumno.curp || 'No especificado') + '</p>';
+    html += '<p><b>Email:</b> ' + (alumno.email || 'No especificado') + '</p>';
+    html += '<p><b>Teléfono:</b> ' + (alumno.telefonos || 'No especificado') + '</p>';
+    html += '<p><b>Dirección:</b> ' + (alumno.direccion || 'No especificado') + '</p>';
+    html += '<p><b>Población:</b> ' + (alumno.poblacion || 'No especificado') + '</p>';
+    html += '<p><b>Estatus:</b> ' + (alumno.estatus || 'No especificado') + '</p>';
+    
+    // Información adicional si existe
+    if (alumno.alergico) {
+        html += '<p><b>Alergias:</b> ' + alumno.alergico + '</p>';
+    }
+    if (alumno.contacto_accidente) {
+        html += '<p><b>Contacto Emergencia:</b> ' + alumno.contacto_accidente + '</p>';
+    }
+    if (alumno.telefonos_contacto) {
+        html += '<p><b>Teléfonos Contacto:</b> ' + alumno.telefonos_contacto + '</p>';
+    }
+    if (alumno.nombre_autorizado) {
+        html += '<p><b>Nombre Autorizado:</b> ' + alumno.nombre_autorizado + '</p>';
+    }
+    if (alumno.curp_autorizado) {
+        html += '<p><b>CURP Autorizado:</b> ' + alumno.curp_autorizado + '</p>';
+    }
+    
+    // Botones de acción
+    html += '<div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 15px;">';
+    html += '<p><b>¿Eliminar este alumno?</b></p>';
+    html += '<button id="btn-confirmar-eliminar" style="padding: 8px 16px; background: #dc3545; color: white; border: none; margin-right: 10px; cursor: pointer;">Eliminar</button>';
+    html += '<button id="btn-cancelar-eliminar" style="padding: 8px 16px; background: #6c757d; color: white; border: none; cursor: pointer;">Cancelar</button>';
+    html += '</div></div>';
     
     container.innerHTML = html;
     
@@ -347,7 +325,6 @@ function displayAlumnoDataWithDeleteButton(container, alumno, numeroControl) {
                 showMessage('mensaje-eliminar', result.message, result.status);
                 
                 if (result.status === 'success') {
-                    // Limpiar todo después de eliminar
                     const form = document.getElementById('formulario-eliminar');
                     if (form) form.reset();
                     
@@ -356,15 +333,13 @@ function displayAlumnoDataWithDeleteButton(container, alumno, numeroControl) {
                         container.style.display = 'none';
                     }
                     
-                    // Ocultar mensaje después de 3 segundos
                     setTimeout(() => {
                         const msg = document.getElementById('mensaje-eliminar');
                         if (msg) msg.style.display = 'none';
                     }, 3000);
                 }
             } catch (error) {
-                console.error('Error al eliminar:', error);
-                showMessage('mensaje-eliminar', 'Error al eliminar el alumno', 'error');
+                showMessage('mensaje-eliminar', 'Error al eliminar', 'error');
             }
         });
     }
@@ -382,13 +357,11 @@ function displayAlumnoDataWithDeleteButton(container, alumno, numeroControl) {
 
 // Llenar formulario de actualización
 function fillUpdateForm(alumno) {
-    // Campo oculto para el número de control
     const controlHidden = document.getElementById('numero_de_control_actualizar');
     if (controlHidden) {
         controlHidden.value = alumno.numero_de_control || '';
     }
     
-    // Llenar todos los campos del formulario
     const campos = [
         'nombre', 'fecha_nacimiento', 'curso', 'poblacion',
         'direccion', 'email', 'telefonos', 'curp', 'estatus',
@@ -413,36 +386,10 @@ function showMessage(elementId, text, type) {
     element.className = `mensaje mensaje-${type}`;
     element.style.display = 'block';
     
-    // Configurar colores según el tipo de mensaje
-    if (type === 'success') {
-        element.style.backgroundColor = '#d4edda';
-        element.style.color = '#155724';
-        element.style.borderColor = '#c3e6cb';
-    } else if (type === 'error') {
-        element.style.backgroundColor = '#f8d7da';
-        element.style.color = '#721c24';
-        element.style.borderColor = '#f5c6cb';
-    } else if (type === 'info') {
-        element.style.backgroundColor = '#d1ecf1';
-        element.style.color = '#0c5460';
-        element.style.borderColor = '#bee5eb';
-    }
-    
-    // Auto-ocultar mensajes de éxito/info después de tiempo
+    // Auto-ocultar mensajes después de tiempo
     if (type === 'success' || type === 'info') {
         setTimeout(() => {
             element.style.display = 'none';
         }, 5000);
-    }
-}
-
-// Verificar conexión con el servidor (opcional)
-async function checkServerConnection() {
-    try {
-        const response = await fetch(`${API_BASE}/listar`);
-        return response.ok;
-    } catch (error) {
-        console.warn('No se pudo conectar con el servidor:', error);
-        return false;
     }
 }
