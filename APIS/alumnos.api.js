@@ -1,20 +1,73 @@
-const express = require("express");
-const router = express.Router();
-const alumnos = require("../controladores/controladores-alumnos/alumnos.controlador");
+// alumnos-api.js - Funciones para comunicarse con el backend
 
-// Crear alumno
-router.post("/registrar", alumnos.registrarAlumno);
+const API_BASE = "/api/alumnos";
 
-// Listar todos
-router.get("/listar", alumnos.listarAlumnos);
+export class AlumnosAPI {
+    // Registrar alumno
+    static async registrar(data) {
+        try {
+            const response = await fetch(`${API_BASE}/registrar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            return { status: 'error', message: 'Error de conexión' };
+        }
+    }
 
-// Buscar por número de control
-router.get("/buscar/:numero", alumnos.buscarAlumnoPorNumero);
+    // Listar todos los alumnos
+    static async listarTodos() {
+        try {
+            const response = await fetch(`${API_BASE}/listar`);
+            return await response.json();
+        } catch (error) {
+            return [];
+        }
+    }
 
-// Actualizar alumno
-router.put("/actualizar", alumnos.actualizarAlumno);
+    // Buscar alumno por número de control
+    static async buscarPorNumero(numero) {
+        try {
+            const response = await fetch(`${API_BASE}/buscar/${numero}`);
+            return await response.json();
+        } catch (error) {
+            return { status: 'error', message: 'Error de conexión' };
+        }
+    }
 
-// Eliminar alumno
-router.delete("/eliminar", alumnos.eliminarAlumno);
+    // Actualizar alumno
+    static async actualizar(data) {
+        try {
+            const response = await fetch(`${API_BASE}/actualizar`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            return { status: 'error', message: 'Error de conexión' };
+        }
+    }
 
-module.exports = router;
+    // Eliminar alumno
+    static async eliminar(numero) {
+        try {
+            const response = await fetch(`${API_BASE}/eliminar`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ numero_de_control: numero })
+            });
+            return await response.json();
+        } catch (error) {
+            return { status: 'error', message: 'Error de conexión' };
+        }
+    }
+}
