@@ -2,27 +2,24 @@
 const db = require("../../BD/BD.js");
 
 const materiasController = {
-    // Registrar nueva materia (SIMPLIFICADO)
+    // Registrar nueva materia
     registrarMateria: (req, res) => {
         try {
-            const { nombre } = req.body; // SOLO nombre si es lo único que tienes
+            const { nombre } = req.body;
             
-            if (!nombre) {
+            if (!nombre || nombre.trim() === '') {
                 return res.json({ 
                     success: false, 
-                    message: "El nombre es requerido" 
+                    message: "El nombre de la materia es requerido" 
                 });
             }
             
-            // Consulta SIMPLE para tu tabla
-            const insertQuery = `
-                INSERT INTO materias (nombre, estado) 
-                VALUES (?, 'activo')
-            `;
+            // Consulta SIMPLE - solo nombre
+            const query = "INSERT INTO materias (nombre) VALUES (?)";
             
-            db.query(insertQuery, [nombre], (err, result) => {
+            db.query(query, [nombre.trim()], (err, result) => {
                 if (err) {
-                    console.error("Error al registrar materia:", err);
+                    console.error("Error en base de datos:", err);
                     return res.json({ 
                         success: false, 
                         message: "Error al registrar la materia" 
@@ -45,19 +42,14 @@ const materiasController = {
         }
     },
 
-    // Listar todas las materias (SIMPLIFICADO)
+    // Listar todas las materias
     listarMaterias: (req, res) => {
         try {
-            const query = `
-                SELECT id, nombre, estado 
-                FROM materias 
-                WHERE estado = 'activo'
-                ORDER BY nombre ASC
-            `;
+            const query = "SELECT id, nombre FROM materias ORDER BY id DESC";
             
             db.query(query, (err, results) => {
                 if (err) {
-                    console.error("Error al listar materias:", err);
+                    console.error("Error en base de datos:", err);
                     return res.json({ 
                         success: false, 
                         message: "Error al obtener las materias" 
@@ -79,7 +71,7 @@ const materiasController = {
         }
     },
 
-    // Eliminar materia (SIMPLIFICADO)
+    // Eliminar materia (DELETE real, no UPDATE)
     eliminarMateria: (req, res) => {
         try {
             const { id } = req.body;
@@ -91,15 +83,11 @@ const materiasController = {
                 });
             }
             
-            const deleteQuery = `
-                UPDATE materias 
-                SET estado = 'inactivo'
-                WHERE id = ?
-            `;
+            const query = "DELETE FROM materias WHERE id = ?";
             
-            db.query(deleteQuery, [id], (err, result) => {
+            db.query(query, [id], (err, result) => {
                 if (err) {
-                    console.error("Error al eliminar materia:", err);
+                    console.error("Error en base de datos:", err);
                     return res.json({ 
                         success: false, 
                         message: "Error al eliminar la materia" 
