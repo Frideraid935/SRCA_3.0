@@ -19,11 +19,11 @@ app.use(express.static(path.join(__dirname, "publico")));
 const loginApi = require("./APIS/login.api");
 app.use("/api", loginApi);
 
-//  Alumnos
+//  Alumnos (CRUD + listar)
 const alumnosApi = require("./APIS/alumnos.api");
 app.use("/api/alumnos", alumnosApi);
 
-// Materias
+//
 const materiasRoutes = require('./APIS/materias.api.js');
 app.use('/api/materias', materiasRoutes);
 
