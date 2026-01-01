@@ -2,7 +2,7 @@
 const db = require("../../BD/BD.js");
 
 const materiasController = {
-    // 1. REGISTRAR materia
+    // REGISTRAR materia
     registrarMateria: function(req, res) {
         try {
             const { nombre } = req.body;
@@ -41,7 +41,7 @@ const materiasController = {
         }
     },
 
-    // 2. BUSCAR materia por nombre (PARA ELIMINAR) - SIMPLIFICADA
+    // BUSCAR materia por nombre (PARA ELIMINAR)
     buscarMateriaParaEliminar: function(req, res) {
         try {
             const { nombre } = req.query;
@@ -88,7 +88,7 @@ const materiasController = {
         }
     },
 
-    // 3. ELIMINAR materia
+    // ELIMINAR materia
     eliminarMateria: function(req, res) {
         try {
             const { id } = req.body;
@@ -121,35 +121,6 @@ const materiasController = {
                 res.json({
                     success: true,
                     message: "✅ Materia eliminada exitosamente"
-                });
-            });
-            
-        } catch (error) {
-            console.error("Error:", error);
-            res.json({ 
-                success: false, 
-                message: "Error interno" 
-            });
-        }
-    },
-
-    // 4. LISTAR todas las materias
-    listarMaterias: function(req, res) {
-        try {
-            const query = "SELECT id, nombre FROM materias ORDER BY nombre";
-            
-            db.query(query, (err, results) => {
-                if (err) {
-                    console.error("Error SQL:", err);
-                    return res.json({ 
-                        success: false, 
-                        message: "Error al listar" 
-                    });
-                }
-                
-                res.json({
-                    success: true,
-                    materias: results
                 });
             });
             
