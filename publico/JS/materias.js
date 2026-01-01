@@ -1,101 +1,91 @@
-// publico/JS/materias.js
+// publico/JS/materias.js - VERSIÓN DEFINITIVA
+
+// Variable global para configurar rutas
+const API_BASE_URL = '/api/materias'; // ¡ESTO ES CLAVE!
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('materias.js cargado');
+    console.log('=== MATERIAS.JS INICIADO ===');
     
-    // Verificar si estamos en formulario de registro
-    if (document.querySelector('input[name="nombre"], #nombre, [id*="nombre"]')) {
-        console.log('Formulario de registro detectado');
-        configurarFormulario();
+    // 1. Buscar formulario de registro
+    const form = document.querySelector('form');
+    if (form) {
+        console.log('Formulario encontrado');
+        configurarFormulario(form);
     }
     
-    // Verificar si estamos en página de lista
-    if (document.querySelector('table, #tabla-materias, #tablaMaterias')) {
-        console.log('Tabla de materias detectada');
-        configurarTabla();
+    // 2. Buscar tabla de materias
+    const table = document.querySelector('table');
+    if (table) {
+        console.log('Tabla encontrada');
+        cargarMaterias();
     }
 });
 
-function configurarFormulario() {
-    console.log('Configurando formulario...');
+function configurarFormulario(form) {
+    // Buscar botón de guardar
+    const btnGuardar = form.querySelector('button[type="submit"], button');
     
-    // Buscar botón de guardar de diferentes maneras
-    const btnGuardar = document.querySelector('#btnGuardar, #btn-guardar, button[type="submit"], button:contains("Guardar"), button:contains("Registrar")');
-    const inputNombre = document.querySelector('#nombre, input[name="nombre"], [id*="nombre"]');
-    
-    if (!btnGuardar || !inputNombre) {
-        console.error('No se encontraron elementos del formulario');
+    if (!btnGuardar) {
+        console.error('No hay botón en el formulario');
         return;
     }
     
-    btnGuardar.addEventListener('click', function(e) {
+    // Prevenir envío normal del formulario
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
+    });
+    
+    // Asignar evento al botón
+    btnGuardar.addEventListener('click', function() {
         registrarMateria();
     });
     
     console.log('Formulario configurado');
 }
 
-function configurarTabla() {
-    console.log('Configurando tabla...');
-    
-    // Cargar materias inicialmente
-    cargarMaterias();
-    
-    // Configurar eventos de eliminación después de cargar
-    setTimeout(() => {
-        document.querySelectorAll('.btn-eliminar, button:contains("Eliminar")').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const id = this.getAttribute('data-id') || this.closest('tr').querySelector('td:first-child')?.textContent;
-                if (id) eliminarMateria(id);
-            });
-        });
-    }, 1000);
-}
-
 function cargarMaterias() {
-    console.log('Cargando materias...');
+    console.log('Solicitando materias a:', API_BASE_URL + '/listar');
     
-    const tablaBody = document.querySelector('tbody');
-    if (!tablaBody) {
-        console.error('No se encontró tbody en la tabla');
-        return;
+    const tbody = document.querySelector('tbody');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
     }
     
-    tablaBody.innerHTML = '<tr><td colspan="3">Cargando materias...</td></tr>';
-    
-    fetch('/api/materias/listar', {
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include'
+    fetch(API_BASE_URL + '/listar', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error: ' + response.status);
+        console.log('Respuesta status:', response.status);
         return response.json();
     })
     .then(data => {
-        console.log('Respuesta:', data);
+        console.log('Datos recibidos:', data);
         
-        if (data.success && data.materias) {
-            mostrarMaterias(data.materias);
+        if (data.success) {
+            mostrarMaterias(data.materias || []);
         } else {
-            alert('Error: ' + (data.message || 'No se pudieron cargar las materias'));
+            alert('Error: ' + (data.message || 'No se pudieron cargar'));
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Error de conexión al servidor');
+        console.error('Error fetch:', error);
+        alert('No se pudo conectar al servidor');
     });
 }
 
 function mostrarMaterias(materias) {
-    const tablaBody = document.querySelector('tbody');
-    if (!tablaBody) return;
+    const tbody = document.querySelector('tbody');
+    if (!tbody) return;
     
     if (!materias || materias.length === 0) {
-        tablaBody.innerHTML = '<tr><td colspan="3">No hay materias registradas</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3">No hay materias</td></tr>';
         return;
     }
     
-    tablaBody.innerHTML = '';
+    tbody.innerHTML = '';
     
     materias.forEach(materia => {
         const tr = document.createElement('tr');
@@ -103,56 +93,58 @@ function mostrarMaterias(materias) {
             <td>${materia.id}</td>
             <td>${materia.nombre}</td>
             <td>
-                <button class="btn-eliminar" data-id="${materia.id}">Eliminar</button>
+                <button onclick="eliminarMateria(${materia.id})" style="color: red; border: 1px solid red; padding: 5px;">
+                    Eliminar
+                </button>
             </td>
         `;
-        tablaBody.appendChild(tr);
-    });
-    
-    // Re-configurar eventos de eliminación
-    document.querySelectorAll('.btn-eliminar').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            eliminarMateria(id);
-        });
+        tbody.appendChild(tr);
     });
 }
 
 function registrarMateria() {
+    console.log('Intentando registrar materia...');
+    
+    // Buscar campo nombre
     const inputNombre = document.querySelector('#nombre, input[name="nombre"]');
     if (!inputNombre) {
-        alert('No se encontró el campo nombre');
+        alert('ERROR: No se encontró campo "nombre"');
+        console.error('No se encontró input nombre');
         return;
     }
     
     const nombre = inputNombre.value.trim();
     if (!nombre) {
-        alert('El nombre es requerido');
+        alert('El nombre es obligatorio');
         return;
     }
     
-    const btnGuardar = document.querySelector('#btnGuardar, #btn-guardar, button[type="submit"]');
+    const btnGuardar = document.querySelector('button[type="submit"], button');
     if (btnGuardar) {
         btnGuardar.disabled = true;
-        btnGuardar.textContent = 'Guardando...';
+        btnGuardar.textContent = 'Enviando...';
     }
     
-    const formData = { nombre: nombre };
+    const datos = {
+        nombre: nombre
+    };
     
-    console.log('Enviando datos:', formData);
+    console.log('Enviando datos:', datos);
+    console.log('URL:', API_BASE_URL + '/registrar');
     
-    fetch('/api/materias/registrar', {
+    fetch(API_BASE_URL + '/registrar', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(formData),
-        credentials: 'include'
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datos)
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error: ' + response.status);
+        console.log('Respuesta status:', response.status);
         return response.json();
     })
     .then(data => {
-        console.log('Respuesta:', data);
+        console.log('Respuesta completa:', data);
         
         if (btnGuardar) {
             btnGuardar.disabled = false;
@@ -160,61 +152,52 @@ function registrarMateria() {
         }
         
         if (data.success) {
-            alert(' ' + data.message);
+            alert('ÉXITO: ' + data.message);
             inputNombre.value = '';
             
-            // Si estamos en una tabla, recargarla
-            if (document.querySelector('tbody')) {
+            // Recargar lista si existe
+            if (document.querySelector('table')) {
                 cargarMaterias();
             }
         } else {
-            alert(' ' + data.message);
+            alert('ERROR: ' + data.message);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Error completo:', error);
         if (btnGuardar) {
             btnGuardar.disabled = false;
             btnGuardar.textContent = 'Guardar';
         }
-        alert('Error de conexión');
+        alert('Error de conexión con el servidor');
     });
 }
 
 function eliminarMateria(id) {
-    if (!id) {
-        alert('ID no válido');
-        return;
-    }
+    if (!confirm('¿Eliminar esta materia?')) return;
     
-    if (!confirm('¿Está seguro de eliminar esta materia?')) {
-        return;
-    }
+    console.log('Eliminando ID:', id);
     
-    console.log('Eliminando materia ID:', id);
-    
-    fetch('/api/materias/eliminar', {
+    fetch(API_BASE_URL + '/eliminar', {
         method: 'DELETE',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ id: id }),
-        credentials: 'include'
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: id })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Error: ' + response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Respuesta:', data);
+        console.log('Respuesta eliminación:', data);
         
         if (data.success) {
-            alert(' ' + data.message);
+            alert('Materia eliminada');
             cargarMaterias();
         } else {
-            alert(' ' + data.message);
+            alert('Error: ' + data.message);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Error eliminación:', error);
         alert('Error de conexión');
     });
 }
@@ -223,3 +206,5 @@ function eliminarMateria(id) {
 window.registrarMateria = registrarMateria;
 window.eliminarMateria = eliminarMateria;
 window.cargarMaterias = cargarMaterias;
+
+console.log('Funciones disponibles: registrarMateria(), eliminarMateria(id), cargarMaterias()');
