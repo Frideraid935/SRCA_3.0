@@ -3,7 +3,7 @@ const db = require("../../BD/BD.js");
 
 const materiasController = {
     // 1. REGISTRAR materia
-    registrarMateria: function(req, res) {
+    registrarMateria: async function(req, res) {
         try {
             const { nombre } = req.body;
             console.log('Registrando materia:', nombre);
@@ -51,7 +51,7 @@ const materiasController = {
     },
 
     // 2. BUSCAR materia por nombre
-    buscarMateriaParaEliminar: function(req, res) {
+    buscarMateriaParaEliminar: async function(req, res) {
         try {
             const nombre = req.query.nombre || '';
             console.log('Buscando materia:', nombre);
@@ -69,7 +69,7 @@ const materiasController = {
             db.query(query, [searchTerm], (err, results) => {
                 if (err) {
                     console.error('Error SQL:', err);
-                    return res.json({ 
+                    return res.status(500).json({ 
                         success: false, 
                         message: "Error en la base de datos" 
                     });
@@ -78,7 +78,7 @@ const materiasController = {
                 if (results.length === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "Materia no encontrada. Verifica el nombre." 
+                        message: "Materia no encontrada" 
                     });
                 }
                 
@@ -99,7 +99,7 @@ const materiasController = {
     },
 
     // 3. ELIMINAR materia
-    eliminarMateria: function(req, res) {
+    eliminarMateria: async function(req, res) {
         try {
             const { id } = req.body;
             console.log('Eliminando materia ID:', id);
@@ -107,7 +107,7 @@ const materiasController = {
             if (!id || isNaN(id)) {
                 return res.json({ 
                     success: false, 
-                    message: "ID de materia invalido" 
+                    message: "ID de materia inválido" 
                 });
             }
             
@@ -116,7 +116,7 @@ const materiasController = {
             db.query(query, [parseInt(id)], (err, result) => {
                 if (err) {
                     console.error('Error SQL:', err);
-                    return res.json({ 
+                    return res.status(500).json({ 
                         success: false, 
                         message: "Error al eliminar de la base de datos" 
                     });
@@ -125,7 +125,7 @@ const materiasController = {
                 if (result.affectedRows === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "La materia ya fue eliminada o no existe" 
+                        message: "La materia no existe o ya fue eliminada" 
                     });
                 }
                 

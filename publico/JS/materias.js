@@ -1,370 +1,276 @@
 // publico/JS/materias.js
 
-// URL base para las APIs - IMPORTANTE: Ajusta según tu despliegue
-let API_BASE_URL = '/api/materias';
+const API_BASE = '/api/materias';
 
-// Si estás en Railway, la URL debería ser relativa
-console.log('API URL:', API_BASE_URL);
-console.log('URL actual:', window.location.origin);
-
+// Inicializar cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('JS de materias cargado');
-    
-    // ===== CONFIGURAR REGISTRAR =====
-    const formRegistrar = document.getElementById('formulario-ingresar');
-    if (formRegistrar) {
-        console.log('Formulario de registro encontrado');
-        formRegistrar.addEventListener('submit', function(e) {
-            e.preventDefault();
-            registrarMateria();
-        });
-    }
-    
-    // ===== CONFIGURAR ELIMINAR =====
-    const formBuscar = document.getElementById('form-buscar-materia');
-    if (formBuscar) {
-        console.log('Formulario de eliminar encontrado');
-        formBuscar.addEventListener('submit', function(e) {
-            e.preventDefault();
-            buscarMateriaParaEliminar();
-        });
-    }
-    
-    const formConfirmar = document.getElementById('form-confirmar-eliminar');
-    if (formConfirmar) {
-        formConfirmar.addEventListener('submit', function(e) {
-            e.preventDefault();
-            confirmarEliminacion();
-        });
-    }
+    initPage();
 });
 
-// ===== FUNCION PARA REGISTRAR MATERIA =====
-function registrarMateria() {
-    const inputNombre = document.getElementById('materia-nombre');
-    const btnGuardar = document.querySelector('#formulario-ingresar button[type="submit"]');
+// Determinar qué página se está cargando
+function initPage() {
+    const path = window.location.pathname;
     
-    if (!inputNombre || !btnGuardar) {
-        alert('Error: Elementos del formulario no encontrados');
+    console.log('Ruta actual:', path);
+    
+    if (path.includes('registrar_materia')) {
+        initRegistro();
+    } else if (path.includes('eliminar_materia')) {
+        initEliminacion();
+    }
+}
+
+// ===============================
+// 1. REGISTRAR MATERIA
+// ===============================
+function initRegistro() {
+    const form = document.getElementById('formulario-ingresar');
+    if (!form) {
+        console.error('Formulario de registro no encontrado');
         return;
     }
     
-    const nombre = inputNombre.value.trim();
-    if (!nombre) {
-        alert('El nombre de la materia es obligatorio');
-        inputNombre.focus();
-        return;
-    }
+    console.log('Inicializando registro de materia');
     
-    // Guardar estado original del boton
-    const textoOriginal = btnGuardar.innerHTML;
-    
-    // Cambiar estado del boton
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = 'Enviando...';
-    
-    // Preparar datos
-    const datos = { 
-        nombre: nombre 
-    };
-    
-    console.log('Enviando datos de registro:', datos);
-    
-    // Enviar peticion
-    fetch(API_BASE_URL + '/registrar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(datos)
-    })
-    .then(response => {
-        console.log('Status de respuesta:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Respuesta del servidor:', data);
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        if (data.success) {
-            alert(data.message);
-            
-            // Limpiar formulario
-            inputNombre.value = '';
-            const inputId = document.getElementById('materia-id');
-            if (inputId) inputId.value = '';
-            
-            // Enfocar campo de nombre
-            inputNombre.focus();
-        } else {
-            alert('Error: ' + data.message);
+        const btnSubmit = form.querySelector('button[type="submit"]');
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = 'Enviando...';
+        
+        // Obtener datos
+        const nombre = document.getElementById('materia-nombre').value.trim();
+        
+        if (!nombre) {
+            showMessage('mensaje-ingresar', 'El nombre de la materia es obligatorio', 'error');
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error en registro:', error);
-        alert('Error de conexion con el servidor. Verifica tu conexion a internet.');
-    })
-    .finally(() => {
-        // IMPORTANTE: Siempre restaurar el boton
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = textoOriginal;
-        console.log('Boton de registro restaurado');
+        
+        const data = { nombre: nombre };
+        
+        try {
+            const response = await fetch(`${API_BASE}/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('mensaje-ingresar', result.message, 'success');
+                form.reset();
+            } else {
+                showMessage('mensaje-ingresar', result.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showMessage('mensaje-ingresar', 'Error de conexión', 'error');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalText;
+        }
     });
 }
 
-// ===== FUNCIONES PARA ELIMINAR MATERIA =====
-function buscarMateriaParaEliminar() {
-    const inputBuscar = document.getElementById('buscar-nombre');
-    const btnBuscar = document.querySelector('#form-buscar-materia button[type="submit"]');
+// ===============================
+// 2. ELIMINAR MATERIA
+// ===============================
+function initEliminacion() {
+    console.log('Inicializando eliminación de materia');
     
-    if (!inputBuscar || !btnBuscar) {
-        mostrarMensaje('mensaje-eliminar', 'Error: Elementos no encontrados', 'error');
+    const formBuscar = document.getElementById('form-buscar-materia');
+    const formConfirmar = document.getElementById('form-confirmar-eliminar');
+    
+    if (!formBuscar) {
+        console.error('Formulario de búsqueda no encontrado');
         return;
     }
     
-    const nombre = inputBuscar.value.trim();
-    if (!nombre) {
-        mostrarMensaje('mensaje-eliminar', 'Escribe el nombre de la materia que deseas eliminar', 'warning');
-        inputBuscar.focus();
-        return;
-    }
-    
-    // Guardar estado original del boton
-    const textoOriginal = btnBuscar.innerHTML;
-    
-    // Cambiar estado del boton
-    btnBuscar.disabled = true;
-    btnBuscar.innerHTML = 'Buscando...';
-    
-    // Ocultar informacion anterior
-    const infoDiv = document.getElementById('info-materia');
-    if (infoDiv) {
-        infoDiv.style.display = 'none';
-    }
-    
-    console.log('Buscando materia:', nombre);
-    
-    // Construir URL de busqueda
-    const url = API_BASE_URL + '/buscar?nombre=' + encodeURIComponent(nombre);
-    console.log('URL de busqueda:', url);
-    
-    // Hacer peticion con timeout mas corto
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos
-    
-    fetch(url, {
-        signal: controller.signal
-    })
-    .then(response => {
-        clearTimeout(timeoutId);
+    // Configurar búsqueda
+    formBuscar.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Resultado de busqueda:', data);
+        const btnBuscar = formBuscar.querySelector('button[type="submit"]');
+        const originalText = btnBuscar.innerHTML;
+        btnBuscar.disabled = true;
+        btnBuscar.innerHTML = 'Buscando...';
         
-        if (data.success) {
-            // Exito: mostrar materia encontrada
-            mostrarMateriaEncontrada(data.materia);
-            mostrarMensaje('mensaje-eliminar', data.message, 'success');
-        } else {
-            // Error: materia no encontrada
-            mostrarMensaje('mensaje-eliminar', data.message, 'warning');
-        }
-    })
-    .catch(error => {
-        clearTimeout(timeoutId);
-        console.error('Error en busqueda:', error);
+        const nombre = document.getElementById('buscar-nombre').value.trim();
         
-        if (error.name === 'AbortError') {
-            mostrarMensaje('mensaje-eliminar', 'Tiempo de espera agotado. El servidor no respondio.', 'error');
-        } else if (error.message.includes('Failed to fetch')) {
-            mostrarMensaje('mensaje-eliminar', 'Error de conexion. Verifica tu conexion a internet.', 'error');
-        } else {
-            mostrarMensaje('mensaje-eliminar', 'Error: ' + error.message, 'error');
+        if (!nombre) {
+            showMessage('mensaje-eliminar', 'Ingrese el nombre de la materia', 'error');
+            btnBuscar.disabled = false;
+            btnBuscar.innerHTML = originalText;
+            return;
         }
-    })
-    .finally(() => {
-        // Restaurar boton
-        btnBuscar.disabled = false;
-        btnBuscar.innerHTML = textoOriginal;
+        
+        try {
+            const response = await fetch(`${API_BASE}/buscar?nombre=${encodeURIComponent(nombre)}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('mensaje-eliminar', 'Materia encontrada', 'success');
+                mostrarMateriaEncontrada(result.materia);
+            } else {
+                showMessage('mensaje-eliminar', result.message, 'error');
+                ocultarInformacionMateria();
+            }
+        } catch (error) {
+            console.error('Error en búsqueda:', error);
+            
+            if (error.message.includes('Failed to fetch')) {
+                showMessage('mensaje-eliminar', 'No se pudo conectar al servidor. Verifique su conexión.', 'error');
+            } else {
+                showMessage('mensaje-eliminar', 'Error en la búsqueda: ' + error.message, 'error');
+            }
+            
+            ocultarInformacionMateria();
+        } finally {
+            btnBuscar.disabled = false;
+            btnBuscar.innerHTML = originalText;
+        }
     });
+    
+    // Configurar confirmación de eliminación
+    if (formConfirmar) {
+        formConfirmar.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btnEliminar = formConfirmar.querySelector('button[type="submit"]');
+            const originalText = btnEliminar.innerHTML;
+            btnEliminar.disabled = true;
+            btnEliminar.innerHTML = 'Eliminando...';
+            
+            const id = document.getElementById('info-id').textContent.trim();
+            const nombre = document.getElementById('info-nombre').textContent.trim();
+            
+            if (!id) {
+                showMessage('mensaje-eliminar', 'Primero debe buscar una materia', 'error');
+                btnEliminar.disabled = false;
+                btnEliminar.innerHTML = originalText;
+                return;
+            }
+            
+            // Confirmación
+            if (!confirm(`¿Está seguro de eliminar la materia "${nombre}"? Esta acción no se puede deshacer.`)) {
+                btnEliminar.disabled = false;
+                btnEliminar.innerHTML = originalText;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/eliminar`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: parseInt(id) })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('mensaje-eliminar', result.message, 'success');
+                    
+                    // Limpiar todo
+                    document.getElementById('buscar-nombre').value = '';
+                    ocultarInformacionMateria();
+                    
+                    // Ocultar mensaje después de 3 segundos
+                    setTimeout(() => {
+                        const msg = document.getElementById('mensaje-eliminar');
+                        if (msg) msg.style.display = 'none';
+                    }, 3000);
+                } else {
+                    showMessage('mensaje-eliminar', result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error en eliminación:', error);
+                showMessage('mensaje-eliminar', 'Error de conexión al eliminar', 'error');
+            } finally {
+                btnEliminar.disabled = false;
+                btnEliminar.innerHTML = originalText;
+            }
+        });
+    }
 }
+
+// ===============================
+// FUNCIONES AUXILIARES
+// ===============================
 
 function mostrarMateriaEncontrada(materia) {
-    console.log('Mostrando materia encontrada:', materia);
+    console.log('Mostrando materia:', materia);
     
-    // Actualizar informacion en la pagina
     document.getElementById('info-id').textContent = materia.id;
     document.getElementById('info-nombre').textContent = materia.nombre;
     
-    // Mostrar el div de informacion
     const infoDiv = document.getElementById('info-materia');
     if (infoDiv) {
         infoDiv.style.display = 'block';
-        
-        // Desplazar vista para que se vea
-        setTimeout(() => {
-            infoDiv.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }, 100);
     }
 }
 
-function confirmarEliminacion() {
-    const idElement = document.getElementById('info-id');
-    const nombreElement = document.getElementById('info-nombre');
-    
-    if (!idElement || !nombreElement) {
-        mostrarMensaje('mensaje-eliminar', 'Error: Informacion no disponible', 'error');
-        return;
-    }
-    
-    const id = idElement.textContent.trim();
-    const nombre = nombreElement.textContent.trim();
-    
-    // Validar que haya informacion
-    if (!id || !nombre || id === '' || nombre === '') {
-        mostrarMensaje('mensaje-eliminar', 'Primero debes buscar una materia', 'warning');
-        return;
-    }
-    
-    // Confirmacion
-    if (!confirm('¿ESTAS SEGURO DE ELIMINAR ESTA MATERIA?\n\nMateria: ' + nombre + '\nID: ' + id + '\n\nESTA ACCION NO SE PUEDE DESHACER.')) {
-        console.log('Eliminacion cancelada por el usuario');
-        return;
-    }
-    
-    // Obtener boton de confirmacion
-    const btnConfirmar = document.querySelector('#form-confirmar-eliminar button[type="submit"]');
-    const textoOriginal = btnConfirmar.innerHTML;
-    
-    // Cambiar estado del boton
-    btnConfirmar.disabled = true;
-    btnConfirmar.innerHTML = 'Eliminando...';
-    
-    console.log('Enviando solicitud de eliminacion para ID:', id);
-    
-    // Enviar solicitud de eliminacion
-    fetch(API_BASE_URL + '/eliminar', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: parseInt(id) })
-    })
-    .then(response => {
-        return response.json();
-    })
-    .then(data => {
-        console.log('Respuesta de eliminacion:', data);
-        
-        if (data.success) {
-            // Exito
-            mostrarMensaje('mensaje-eliminar', data.message, 'success');
-            
-            // Limpiar todo el formulario
-            limpiarFormularioEliminar();
-            
-            // Mostrar alerta final
-            setTimeout(() => {
-                alert('Materia eliminada exitosamente:\n\n' + nombre);
-            }, 300);
-        } else {
-            // Error del servidor
-            mostrarMensaje('mensaje-eliminar', data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error en eliminacion:', error);
-        mostrarMensaje('mensaje-eliminar', 'Error de conexion al eliminar', 'error');
-    })
-    .finally(() => {
-        // Restaurar boton
-        btnConfirmar.disabled = false;
-        btnConfirmar.innerHTML = textoOriginal;
-    });
-}
-
-function limpiarFormularioEliminar() {
-    console.log('Limpiando formulario de eliminacion');
-    
-    // Limpiar campo de busqueda
-    const inputBuscar = document.getElementById('buscar-nombre');
-    if (inputBuscar) {
-        inputBuscar.value = '';
-    }
-    
-    // Ocultar informacion de materia
+function ocultarInformacionMateria() {
     const infoDiv = document.getElementById('info-materia');
     if (infoDiv) {
         infoDiv.style.display = 'none';
     }
     
-    // Limpiar datos mostrados
     document.getElementById('info-id').textContent = '';
     document.getElementById('info-nombre').textContent = '';
-    
-    // Limpiar mensajes
-    const mensajeDiv = document.getElementById('mensaje-eliminar');
-    if (mensajeDiv) {
-        mensajeDiv.innerHTML = '';
-    }
-    
-    // Enfocar campo de busqueda para nueva busqueda
-    if (inputBuscar) {
-        inputBuscar.focus();
-    }
 }
 
-// ===== FUNCIONES AUXILIARES =====
-function mostrarMensaje(elementId, texto, tipo) {
-    const mensajeDiv = document.getElementById(elementId);
-    if (!mensajeDiv) {
+function showMessage(elementId, text, type) {
+    const element = document.getElementById(elementId);
+    if (!element) {
         console.warn('Elemento no encontrado:', elementId);
-        alert(texto); // Fallback
+        alert(text);
         return;
     }
     
-    let color = '#333';
+    // Colores según tipo
+    let color = '#17a2b8'; // info por defecto
+    let backgroundColor = '#d1ecf1';
     
-    switch(tipo) {
-        case 'success':
-            color = '#28a745';
-            break;
-        case 'error':
-            color = '#dc3545';
-            break;
-        case 'warning':
-            color = '#ffc107';
-            break;
-        default:
-            color = '#17a2b8';
+    if (type === 'success') {
+        color = '#28a745';
+        backgroundColor = '#d4edda';
+    } else if (type === 'error') {
+        color = '#dc3545';
+        backgroundColor = '#f8d7da';
+    } else if (type === 'warning') {
+        color = '#ffc107';
+        backgroundColor = '#fff3cd';
     }
     
-    mensajeDiv.innerHTML = `
-        <div style="padding: 10px; margin: 10px 0; border-left: 4px solid ${color}; background: ${color}15; color: ${color};">
-            ${texto}
+    element.innerHTML = `
+        <div style="
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid ${color};
+            background-color: ${backgroundColor};
+            color: ${color === '#ffc107' ? '#856404' : color === '#17a2b8' ? '#0c5460' : color === '#28a745' ? '#155724' : '#721c24'};
+        ">
+            ${text}
         </div>
     `;
-    mensajeDiv.style.display = 'block';
+    element.style.display = 'block';
     
-    // Auto-ocultar despues de 5 segundos (excepto success)
-    if (tipo !== 'success') {
-        setTimeout(() => {
-            if (mensajeDiv.innerHTML.includes(texto)) {
-                mensajeDiv.innerHTML = '';
-                mensajeDiv.style.display = 'none';
-            }
-        }, 5000);
-    }
+    // Auto-ocultar después de 5 segundos
+    setTimeout(() => {
+        if (element.innerHTML.includes(text)) {
+            element.style.display = 'none';
+            element.innerHTML = '';
+        }
+    }, 5000);
 }
-
-// ===== EXPORTAR FUNCIONES PARA HTML =====
-window.registrarMateria = registrarMateria;
-window.buscarMateriaParaEliminar = buscarMateriaParaEliminar;
-window.confirmarEliminacion = confirmarEliminacion;
