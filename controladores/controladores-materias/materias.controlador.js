@@ -2,7 +2,7 @@
 const db = require("../../BD/BD.js");
 
 const materiasController = {
-    // REGISTRAR materia
+    // 1. REGISTRAR materia
     registrarMateria: function(req, res) {
         try {
             const { nombre } = req.body;
@@ -21,7 +21,7 @@ const materiasController = {
                     console.error("Error SQL:", err);
                     return res.json({ 
                         success: false, 
-                        message: "Error al registrar en la base de datos" 
+                        message: "Error al registrar" 
                     });
                 }
                 
@@ -36,91 +36,45 @@ const materiasController = {
             console.error("Error:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     },
 
-    // BUSCAR materia por nombre
-    buscarMateria: function(req, res) {
+    // 2. ELIMINAR materia por NOMBRE (directo)
+    eliminarMateriaPorNombre: function(req, res) {
         try {
-            const nombre = req.query.nombre || '';
+            const { nombre } = req.body;
             
             if (!nombre || nombre.trim() === '') {
                 return res.json({ 
                     success: false, 
-                    message: "Debe escribir un nombre para buscar" 
+                    message: "El nombre de la materia es requerido" 
                 });
             }
             
-            const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? LIMIT 1";
-            const searchTerm = `%${nombre.trim()}%`;
+            const query = "DELETE FROM materias WHERE nombre = ?";
             
-            db.query(query, [searchTerm], (err, results) => {
+            db.query(query, [nombre.trim()], (err, result) => {
                 if (err) {
                     console.error("Error SQL:", err);
-                    return res.status(500).json({ 
-                        success: false, 
-                        message: "Error en la base de datos" 
-                    });
-                }
-                
-                if (results.length === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "Materia no encontrada" 
-                    });
-                }
-                
-                res.json({
-                    success: true,
-                    message: "Materia encontrada",
-                    materia: results[0]
-                });
-            });
-            
-        } catch (error) {
-            console.error("Error:", error);
-            res.status(500).json({ 
-                success: false, 
-                message: "Error interno del servidor" 
-            });
-        }
-    },
-
-    // ELIMINAR materia por ID
-    eliminarMateria: function(req, res) {
-        try {
-            const { id } = req.body;
-            
-            if (!id || isNaN(id)) {
-                return res.json({ 
-                    success: false, 
-                    message: "ID de materia invalido" 
-                });
-            }
-            
-            const query = "DELETE FROM materias WHERE id = ?";
-            
-            db.query(query, [parseInt(id)], (err, result) => {
-                if (err) {
-                    console.error("Error SQL:", err);
-                    return res.status(500).json({ 
-                        success: false, 
-                        message: "Error al eliminar de la base de datos" 
+                        message: "Error al eliminar" 
                     });
                 }
                 
                 if (result.affectedRows === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "Materia no encontrada" 
+                        message: "No se encontró ninguna materia con ese nombre" 
                     });
                 }
                 
                 res.json({
                     success: true,
-                    message: "Materia eliminada exitosamente"
+                    message: "Materia eliminada exitosamente",
+                    affectedRows: result.affectedRows
                 });
             });
             
@@ -128,7 +82,7 @@ const materiasController = {
             console.error("Error:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     }

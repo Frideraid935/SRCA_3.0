@@ -3,9 +3,8 @@ const express = require("express");
 const router = express.Router();
 const materiasController = require("../controladores/controladores-materias/materias.controlador");
 
-// RUTAS PARA MATERIAS
+// SOLO 2 endpoints
 router.post("/registrar", materiasController.registrarMateria);
-router.get("/buscar", materiasController.buscarMateria);
-router.delete("/eliminar", materiasController.eliminarMateria);
+router.delete("/eliminar", materiasController.eliminarMateriaPorNombre);
 
 module.exports = router;
