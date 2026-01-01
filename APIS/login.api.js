@@ -3,11 +3,9 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../BD/BD");
 
-// Login 
+// Login endpoint
 router.post("/login", async (req, res) => {
   const { usuario, password } = req.body;
-
-  console.log("Intento de login:", { usuario, password });
 
   if (!usuario || !password) {
     return res.json({ success: false, message: "Datos incompletos" });
@@ -25,7 +23,6 @@ router.post("/login", async (req, res) => {
     if (admin.length) {
       userData = admin[0];
       rol = "admin";
-      console.log("Login exitoso como ADMIN:", userData);
     }
 
     // ALUMNO
@@ -37,7 +34,6 @@ router.post("/login", async (req, res) => {
       if (alumno.length) {
         userData = alumno[0];
         rol = "alumno";
-        console.log("Login exitoso como ALUMNO:", userData);
       }
     }
 
@@ -50,92 +46,65 @@ router.post("/login", async (req, res) => {
       if (profesor.length) {
         userData = profesor[0];
         rol = "profesor";
-        console.log("Login exitoso como PROFESOR:", userData);
       }
     }
 
     if (userData && rol) {
-      // GUARDAR EN SESIÓN
+      // Guardar en sesión
       req.session.user = {
-        id: userData.id || userData.numero_de_control || 'N/A',
+        id: userData.id || userData.numero_de_control,
         username: usuario,
         nombre: userData.nombre || usuario,
         rol: rol,
-        email: userData.email || '',
-        loginTime: new Date().toISOString()
+        timestamp: new Date()
       };
       
-      console.log("Sesión creada:", req.session.user);
+      console.log('Login exitoso:', req.session.user);
       
       return res.json({ 
         success: true, 
         rol: rol,
-        user: req.session.user,
-        message: `Bienvenido ${userData.nombre || usuario}`
+        user: req.session.user
       });
     }
 
-    res.json({ 
-      success: false, 
-      message: "Credenciales incorrectas" 
-    });
+    res.json({ success: false, message: "Credenciales incorrectas" });
   } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error del servidor" 
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
   }
 });
 
-// Endpoint para verificar sesión (NUEVO)
+// Endpoint para verificar sesión (ESTO ES LO QUE FALTA)
 router.get("/check", (req, res) => {
-  console.log("Verificando sesión - Usuario en sesión:", req.session.user || "No hay usuario");
+  console.log('Solicitando check de sesión');
   
   if (req.session && req.session.user) {
     res.json({ 
-      success: true,
       loggedIn: true, 
       user: req.session.user 
     });
   } else {
     res.json({ 
-      success: true,
-      loggedIn: false,
-      message: "No hay sesión activa" 
+      loggedIn: false 
     });
   }
 });
 
-// Endpoint para cerrar sesión (NUEVO)
+// Endpoint para cerrar sesión
 router.get("/logout", (req, res) => {
-  console.log("Cerrando sesión para:", req.session.user?.username || "Usuario desconocido");
-  
-  const username = req.session.user?.username || 'Usuario';
+  console.log('Cerrando sesión');
   
   req.session.destroy((err) => {
     if (err) {
-      console.error("Error al destruir sesión:", err);
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Error al cerrar sesión' 
-      });
+      console.error('Error al destruir sesión:', err);
+      return res.status(500).json({ success: false, message: 'Error al cerrar sesión' });
     }
     
     res.json({ 
       success: true, 
-      message: `Sesión de ${username} cerrada exitosamente` 
+      message: 'Sesión cerrada exitosamente' 
     });
-  });
-});
-
-// Endpoint para información de sesión (debug)
-router.get("/session-info", (req, res) => {
-  res.json({
-    sessionID: req.sessionID,
-    session: req.session,
-    user: req.session.user || null,
-    cookie: req.session.cookie
   });
 });
 
