@@ -23,9 +23,10 @@ app.use("/api", loginApi);
 const alumnosApi = require("./APIS/alumnos.api");
 app.use("/api/alumnos", alumnosApi);
 
-//
-const materiasRoutes = require('./APIS/materias.api.js');
-app.use('/api/materias', materiasRoutes);
+
+// Importar rutas de materias
+const materiasAPI = require('./APIS/materias.api.js');
+app.use('/api/materias', materiasAPI);
 
 /* ===============================
    RUTAS DE VISTAS
