@@ -14,7 +14,6 @@ const materiasController = {
                 });
             }
             
-            // Consulta SIMPLE - solo nombre
             const query = "INSERT INTO materias (nombre) VALUES (?)";
             
             db.query(query, [nombre.trim()], (err, result) => {
@@ -71,7 +70,92 @@ const materiasController = {
         }
     },
 
-    // Eliminar materia (DELETE real, no UPDATE)
+    // Buscar materia por ID (para eliminar por nombre)
+    buscarMateriaPorId: (req, res) => {
+        try {
+            const materiaId = req.params.id;
+            
+            if (!materiaId) {
+                return res.json({ 
+                    success: false, 
+                    message: "ID de materia es requerido" 
+                });
+            }
+            
+            const query = "SELECT id, nombre FROM materias WHERE id = ?";
+            
+            db.query(query, [materiaId], (err, results) => {
+                if (err) {
+                    console.error("Error en base de datos:", err);
+                    return res.json({ 
+                        success: false, 
+                        message: "Error al buscar la materia" 
+                    });
+                }
+                
+                if (results.length === 0) {
+                    return res.json({ 
+                        success: false, 
+                        message: "Materia no encontrada" 
+                    });
+                }
+                
+                res.json({
+                    success: true,
+                    materia: results[0]
+                });
+            });
+            
+        } catch (error) {
+            console.error("Error en buscarMateriaPorId:", error);
+            res.json({ 
+                success: false, 
+                message: "Error interno del servidor" 
+            });
+        }
+    },
+
+    // Buscar materias por nombre (nuevo método)
+    buscarMateriasPorNombre: (req, res) => {
+        try {
+            const nombre = req.params.nombre;
+            
+            if (!nombre || nombre.trim() === '') {
+                return res.json({ 
+                    success: false, 
+                    message: "Nombre de materia es requerido" 
+                });
+            }
+            
+            const searchTerm = `%${nombre}%`;
+            const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? ORDER BY nombre";
+            
+            db.query(query, [searchTerm], (err, results) => {
+                if (err) {
+                    console.error("Error en base de datos:", err);
+                    return res.json({ 
+                        success: false, 
+                        message: "Error al buscar materias" 
+                    });
+                }
+                
+                res.json({
+                    success: true,
+                    materias: results,
+                    count: results.length
+                });
+            });
+            
+        } catch (error) {
+            console.error("Error en buscarMateriasPorNombre:", error);
+            res.json({ 
+                success: false, 
+                message: "Error interno del servidor" 
+            });
+        }
+    },
+
+    // Eliminar materia
     eliminarMateria: (req, res) => {
         try {
             const { id } = req.body;
