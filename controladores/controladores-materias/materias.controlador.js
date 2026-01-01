@@ -6,10 +6,8 @@ const materiasController = {
     registrarMateria: function(req, res) {
         try {
             const { nombre } = req.body;
-            
             console.log('📝 Registrando materia:', nombre);
             
-            // Validación simple
             if (!nombre || nombre.trim() === '') {
                 return res.json({ 
                     success: false, 
@@ -23,23 +21,19 @@ const materiasController = {
             db.query(query, [nombreLimpio], (err, result) => {
                 if (err) {
                     console.error('❌ Error SQL:', err);
-                    
-                    // Manejar error de duplicado
                     if (err.code === 'ER_DUP_ENTRY') {
                         return res.json({ 
                             success: false, 
                             message: "Esta materia ya existe" 
                         });
                     }
-                    
                     return res.json({ 
                         success: false, 
-                        message: "Error al guardar en la base de datos" 
+                        message: "Error al guardar" 
                     });
                 }
                 
-                console.log('✅ Materia registrada. ID:', result.insertId);
-                
+                console.log('✅ Registrada. ID:', result.insertId);
                 res.json({
                     success: true,
                     message: "Materia registrada exitosamente",
@@ -48,20 +42,20 @@ const materiasController = {
             });
             
         } catch (error) {
-            console.error('❌ Error general:', error);
-            res.json({ 
+            console.error('❌ Error:', error);
+            res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     },
 
-    // 2. BUSCAR materia por nombre (para eliminar)
+    // 2. BUSCAR materia por nombre (CORREGIDO)
     buscarMateriaParaEliminar: function(req, res) {
         try {
-            const { nombre } = req.query;
-            
-            console.log('🔍 Buscando materia para eliminar:', nombre);
+            // Obtener parámetro de la URL
+            const nombre = req.query.nombre || '';
+            console.log('🔍 Buscando materia:', nombre);
             
             if (!nombre || nombre.trim() === '') {
                 return res.json({ 
@@ -73,23 +67,25 @@ const materiasController = {
             const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? LIMIT 1";
             const searchTerm = `%${nombre.trim()}%`;
             
+            console.log('🔍 SQL:', query, 'Parámetro:', searchTerm);
+            
             db.query(query, [searchTerm], (err, results) => {
                 if (err) {
                     console.error('❌ Error SQL:', err);
                     return res.json({ 
                         success: false, 
-                        message: "Error al buscar en la base de datos" 
+                        message: "Error en la base de datos" 
                     });
                 }
+                
+                console.log('🔍 Resultados:', results);
                 
                 if (results.length === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "Materia no encontrada. Verifica el nombre." 
+                        message: "Materia no encontrada" 
                     });
                 }
-                
-                console.log('✅ Materia encontrada:', results[0]);
                 
                 res.json({
                     success: true,
@@ -99,10 +95,10 @@ const materiasController = {
             });
             
         } catch (error) {
-            console.error('❌ Error general:', error);
-            res.json({ 
+            console.error('❌ Error:', error);
+            res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     },
@@ -111,13 +107,12 @@ const materiasController = {
     eliminarMateria: function(req, res) {
         try {
             const { id } = req.body;
-            
-            console.log('🗑️ Eliminando materia ID:', id);
+            console.log('🗑️ Eliminando ID:', id);
             
             if (!id || isNaN(id)) {
                 return res.json({ 
                     success: false, 
-                    message: "ID de materia inválido" 
+                    message: "ID inválido" 
                 });
             }
             
@@ -128,18 +123,16 @@ const materiasController = {
                     console.error('❌ Error SQL:', err);
                     return res.json({ 
                         success: false, 
-                        message: "Error al eliminar de la base de datos" 
+                        message: "Error al eliminar" 
                     });
                 }
                 
                 if (result.affectedRows === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "La materia ya fue eliminada o no existe" 
+                        message: "Materia no encontrada" 
                     });
                 }
-                
-                console.log('✅ Materia eliminada. Filas afectadas:', result.affectedRows);
                 
                 res.json({
                     success: true,
@@ -148,10 +141,10 @@ const materiasController = {
             });
             
         } catch (error) {
-            console.error('❌ Error general:', error);
-            res.json({ 
+            console.error('❌ Error:', error);
+            res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     }
