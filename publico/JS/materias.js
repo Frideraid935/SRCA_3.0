@@ -5,80 +5,81 @@ const API_BASE_URL = '/api/materias';
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ Materias JS cargado');
     
-    // Formulario de registro
+    // ===== REGISTRAR MATERIA =====
     const formRegistro = document.getElementById('formulario-ingresar');
     if (formRegistro) {
+        console.log('Formulario de registro encontrado');
         formRegistro.addEventListener('submit', function(e) {
             e.preventDefault();
             registrarMateria();
         });
     }
     
-    // Página de eliminación
+    // ===== ELIMINAR MATERIA =====
+    // Verificar si estamos en página de eliminar
     if (window.location.pathname.includes('eliminar')) {
-        setTimeout(() => {
-            inicializarBusquedaEliminar();
-        }, 100);
+        console.log('Página de eliminación detectada');
+        inicializarEliminacion();
     }
 });
 
-// ========== REGISTRAR MATERIA (CORREGIDO) ==========
+// ========== FUNCIÓN PARA REGISTRAR MATERIA ==========
 function registrarMateria() {
     const inputNombre = document.getElementById('materia-nombre');
     const btnGuardar = document.querySelector('#formulario-ingresar button[type="submit"]');
     
     if (!inputNombre || !btnGuardar) {
-        alert('Error: Formulario no encontrado');
+        alert('Error: Elementos no encontrados');
         return;
     }
     
     const nombre = inputNombre.value.trim();
     if (!nombre) {
         alert('El nombre es obligatorio');
+        inputNombre.focus();
         return;
     }
     
     // Guardar estado original
     const textoOriginal = btnGuardar.innerHTML;
-    const estadoOriginal = btnGuardar.disabled;
     
     // Cambiar estado
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = 'Enviando...';
     
-    // Datos
     const datos = { nombre: nombre };
     
-    console.log('📤 Enviando:', datos);
+    console.log('Registrando:', datos);
     
-    // Enviar
     fetch(API_BASE_URL + '/registrar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify(datos)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Status:', response.status);
+        return response.json();
+    })
     .then(data => {
-        console.log('📥 Respuesta:', data);
+        console.log('Respuesta:', data);
         
         if (data.success) {
-            alert('✅ ' + data.message);
-            inputNombre.value = '';
+            alert(data.message);
+            inputNombre.value = ''; // Limpiar campo
             
-            // Limpiar búsqueda si estamos en página de eliminar
+            // Si estamos en página de eliminar, limpiar búsqueda
             if (window.location.pathname.includes('eliminar')) {
-                const busquedaInput = document.getElementById('buscar-input');
-                if (busquedaInput) busquedaInput.value = '';
-                ocultarResultados();
-                ocultarSeleccion();
+                limpiarBusqueda();
             }
         } else {
-            alert('❌ ' + data.message);
+            alert(data.message);
         }
     })
     .catch(error => {
-        console.error('❌ Error:', error);
-        alert('⚠️ Error de conexión');
+        console.error('Error:', error);
+        alert('Error de conexión');
     })
     .finally(() => {
         // IMPORTANTE: SIEMPRE RESTAURAR EL BOTÓN
@@ -87,69 +88,76 @@ function registrarMateria() {
     });
 }
 
-// ========== SISTEMA DE ELIMINACIÓN ==========
-function inicializarBusquedaEliminar() {
-    console.log('🔍 Inicializando búsqueda para eliminar...');
+// ========== FUNCIONES PARA ELIMINAR MATERIA ==========
+function inicializarEliminacion() {
+    console.log('Inicializando sistema de eliminación...');
     
-    // Buscar o crear contenedor
-    let container = document.querySelector('.container, main, .contenedor, .content, .app-container') || document.body;
+    // Buscar o crear contenedor para eliminar
+    const container = document.querySelector('.container, main, .contenedor') || document.body;
     
-    let busquedaDiv = document.getElementById('eliminar-busqueda-container');
+    // Verificar si ya existe el formulario de búsqueda
+    let busquedaDiv = document.getElementById('eliminar-busqueda-div');
     if (!busquedaDiv) {
+        // Crear estructura HTML para eliminar
         busquedaDiv = document.createElement('div');
-        busquedaDiv.id = 'eliminar-busqueda-container';
-        container.prepend(busquedaDiv);
-    }
-    
-    // HTML simple
-    busquedaDiv.innerHTML = `
-        <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
-            <h3 style="margin-bottom: 20px; color: #333;">
-                <i class="fas fa-trash-alt" style="color: #dc3545;"></i> Eliminar Materia
+        busquedaDiv.id = 'eliminar-busqueda-div';
+        busquedaDiv.style.cssText = `
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        `;
+        
+        busquedaDiv.innerHTML = `
+            <h3 style="color: #dc3545; margin-bottom: 20px;">
+                <i class="fas fa-trash-alt"></i> Eliminar Materia
             </h3>
             
-            <!-- Búsqueda -->
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: bold;">
-                    Buscar materia por nombre:
+            <!-- Búsqueda por nombre -->
+            <div class="form-group">
+                <label style="font-weight: bold; margin-bottom: 8px; display: block;">
+                    <i class="fas fa-search"></i> Buscar materia por nombre:
                 </label>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <input type="text" 
-                           id="buscar-input" 
-                           placeholder="Ej: Matemáticas"
-                           style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                           id="buscar-materia-input" 
+                           placeholder="Ej: Matemáticas, Física, etc."
+                           style="flex: 1; padding: 10px; border: 1px solid #ced4da; border-radius: 4px;"
                            autocomplete="off">
-                    <button id="btn-buscar" 
+                    <button id="btn-buscar-eliminar" 
                             style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                         <i class="fas fa-search"></i> Buscar
                     </button>
                 </div>
-                <small style="color: #666; display: block; margin-top: 5px;">
-                    Escribe al menos 2 letras del nombre
+                <small style="color: #6c757d;">
+                    Escribe el nombre exacto o parcial de la materia
                 </small>
             </div>
             
-            <!-- Resultados -->
-            <div id="resultados-container" style="display: none; margin-top: 20px;">
-                <h5 style="margin-bottom: 10px;">Resultados:</h5>
-                <div id="lista-resultados" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;"></div>
-            </div>
-            
-            <!-- Materia seleccionada -->
-            <div id="seleccion-container" style="display: none; margin-top: 20px; padding: 15px; border: 2px solid #28a745; border-radius: 6px; background: #f8fff9;">
-                <h5 style="color: #28a745; margin-bottom: 15px;">
-                    <i class="fas fa-check-circle"></i> Materia seleccionada para eliminar:
+            <!-- Resultado de búsqueda -->
+            <div id="resultado-materia" style="display: none; margin-top: 20px;">
+                <h5 style="color: #28a745;">
+                    <i class="fas fa-check-circle"></i> Materia encontrada:
                 </h5>
-                <div style="margin-bottom: 15px;">
-                    <p><strong>ID:</strong> <span id="selected-id" style="font-weight: bold;">-</span></p>
-                    <p><strong>Nombre:</strong> <span id="selected-nombre" style="font-weight: bold; color: #28a745;">-</span></p>
+                
+                <!-- Información de la materia -->
+                <div id="info-materia" style="padding: 15px; background: white; border-radius: 6px; border: 2px solid #28a745; margin: 10px 0;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>ID:</strong> <span id="materia-id-encontrada" style="font-weight: bold;">-</span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Nombre:</strong> <span id="materia-nombre-encontrada" style="font-weight: bold; color: #28a745;">-</span>
+                    </div>
                 </div>
-                <div style="text-align: center;">
-                    <button id="btn-eliminar-final" 
+                
+                <!-- Botón ELIMINAR (solo aparece aquí) -->
+                <div id="btn-eliminar-container" style="text-align: center; margin-top: 20px; display: none;">
+                    <button id="btn-eliminar-materia" 
                             style="padding: 12px 30px; background: #dc3545; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
-                        <i class="fas fa-trash"></i> ELIMINAR MATERIA
+                        <i class="fas fa-trash"></i> ELIMINAR ESTA MATERIA
                     </button>
-                    <button id="btn-cancelar-busqueda" 
+                    <button id="btn-cancelar-eliminar" 
                             style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 10px;">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
@@ -157,186 +165,187 @@ function inicializarBusquedaEliminar() {
             </div>
             
             <!-- Mensajes -->
-            <div id="mensaje-area" style="margin-top: 15px;"></div>
-        </div>
-    `;
-    
-    // Eventos
-    document.getElementById('btn-buscar').addEventListener('click', buscarParaEliminar);
-    document.getElementById('buscar-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') buscarParaEliminar();
-    });
-    document.getElementById('btn-eliminar-final').addEventListener('click', confirmarEliminar);
-    document.getElementById('btn-cancelar-busqueda').addEventListener('click', cancelarSeleccionMateria);
+            <div id="mensaje-eliminar" style="margin-top: 15px;"></div>
+        `;
+        
+        container.prepend(busquedaDiv);
+        
+        // Agregar eventos
+        document.getElementById('btn-buscar-eliminar').addEventListener('click', buscarMateriaParaEliminar);
+        document.getElementById('buscar-materia-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') buscarMateriaParaEliminar();
+        });
+        document.getElementById('btn-eliminar-materia').addEventListener('click', confirmarEliminacionMateria);
+        document.getElementById('btn-cancelar-eliminar').addEventListener('click', cancelarEliminacion);
+    }
 }
 
-function buscarParaEliminar() {
-    const input = document.getElementById('buscar-input');
-    const query = input.value.trim();
+function buscarMateriaParaEliminar() {
+    const input = document.getElementById('buscar-materia-input');
+    const btnBuscar = document.getElementById('btn-buscar-eliminar');
     
-    if (query.length < 2) {
-        mostrarMensaje('Escribe al menos 2 caracteres', 'warning');
+    if (!input || !btnBuscar) {
+        alert('Error: Elementos no encontrados');
         return;
     }
     
-    mostrarMensaje('Buscando...', 'info');
-    ocultarResultados();
-    ocultarSeleccion();
+    const nombre = input.value.trim();
     
-    fetch(`${API_BASE_URL}/buscar?nombre=${encodeURIComponent(query)}`)
+    if (!nombre) {
+        mostrarMensajeEliminar('Escribe el nombre de la materia', 'warning');
+        input.focus();
+        return;
+    }
+    
+    // Guardar estado original
+    const textoOriginal = btnBuscar.innerHTML;
+    
+    // Cambiar estado
+    btnBuscar.disabled = true;
+    btnBuscar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+    
+    // Ocultar resultados anteriores
+    document.getElementById('resultado-materia').style.display = 'none';
+    document.getElementById('btn-eliminar-container').style.display = 'none';
+    
+    // Realizar búsqueda
+    console.log('Buscando para eliminar:', nombre);
+    
+    fetch(`${API_BASE_URL}/buscar?nombre=${encodeURIComponent(nombre)}`)
     .then(response => response.json())
     .then(data => {
+        console.log('Respuesta búsqueda:', data);
+        
         if (data.success) {
-            if (data.materias.length > 0) {
-                mostrarResultadosBusqueda(data.materias);
-                mostrarMensaje(`Encontradas ${data.materias.length} materias`, 'success');
-            } else {
-                mostrarMensaje(`No se encontraron materias con "${query}"`, 'warning');
-            }
+            // Mostrar la materia encontrada
+            mostrarMateriaParaEliminar(data.materia);
+            mostrarMensajeEliminar('✅ Materia encontrada. Revisa la información abajo.', 'success');
         } else {
-            mostrarMensaje(data.message, 'error');
+            mostrarMensajeEliminar(data.message, 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarMensaje('Error de conexión', 'error');
+        mostrarMensajeEliminar('Error de conexión', 'danger');
+    })
+    .finally(() => {
+        // Restaurar botón
+        btnBuscar.disabled = false;
+        btnBuscar.innerHTML = textoOriginal;
     });
 }
 
-function mostrarResultadosBusqueda(materias) {
-    const container = document.getElementById('resultados-container');
-    const lista = document.getElementById('lista-resultados');
+function mostrarMateriaParaEliminar(materia) {
+    console.log('Mostrando materia para eliminar:', materia);
     
-    lista.innerHTML = '';
+    // Mostrar información
+    document.getElementById('materia-id-encontrada').textContent = materia.id;
+    document.getElementById('materia-nombre-encontrada').textContent = materia.nombre;
     
-    materias.forEach(materia => {
-        const div = document.createElement('div');
-        div.style.padding = '10px';
-        div.style.borderBottom = '1px solid #eee';
-        div.style.cursor = 'pointer';
-        div.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>${materia.nombre}</strong>
-                    <br>
-                    <small style="color: #666;">ID: ${materia.id}</small>
-                </div>
-                <span style="color: #007bff;">
-                    <i class="fas fa-chevron-right"></i>
-                </span>
-            </div>
-        `;
-        
-        div.addEventListener('click', function() {
-            seleccionarMateriaParaEliminar(materia);
-        });
-        
-        div.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = '#f0f8ff';
-        });
-        
-        div.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
-        });
-        
-        lista.appendChild(div);
+    // Mostrar contenedores
+    document.getElementById('resultado-materia').style.display = 'block';
+    document.getElementById('info-materia').style.display = 'block';
+    document.getElementById('btn-eliminar-container').style.display = 'block';
+    
+    // Desplazar vista
+    document.getElementById('resultado-materia').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
     });
-    
-    container.style.display = 'block';
 }
 
-function seleccionarMateriaParaEliminar(materia) {
-    console.log('Seleccionada para eliminar:', materia);
+function confirmarEliminacionMateria() {
+    const id = document.getElementById('materia-id-encontrada').textContent;
+    const nombre = document.getElementById('materia-nombre-encontrada').textContent;
     
-    document.getElementById('selected-id').textContent = materia.id;
-    document.getElementById('selected-nombre').textContent = materia.nombre;
-    
-    document.getElementById('seleccion-container').style.display = 'block';
-    document.getElementById('resultados-container').style.display = 'none';
-    
-    mostrarMensaje('Materia seleccionada. Puedes eliminarla con el botón rojo.', 'info');
-}
-
-function confirmarEliminar() {
-    const id = document.getElementById('selected-id').textContent;
-    const nombre = document.getElementById('selected-nombre').textContent;
-    
-    if (id === '-' || !id) {
-        mostrarMensaje('Primero selecciona una materia', 'warning');
+    if (!id || id === '-') {
+        mostrarMensajeEliminar('Primero busca una materia', 'warning');
         return;
     }
     
-    if (!confirm(`¿ESTÁS SEGURO de eliminar la materia?\n\n"${nombre}"\n\nEsta acción no se puede deshacer.`)) {
+    // Confirmación DOBLE
+    if (!confirm(`¿ESTÁS SEGURO DE ELIMINAR ESTA MATERIA?\n\nMATERIA: ${nombre}\nID: ${id}\n\n⚠️ Esta acción NO se puede deshacer.`)) {
         return;
     }
     
-    const btn = document.getElementById('btn-eliminar-final');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    const btnEliminar = document.getElementById('btn-eliminar-materia');
+    const textoOriginal = btnEliminar.innerHTML;
     
+    btnEliminar.disabled = true;
+    btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    
+    // Enviar solicitud de eliminación
     fetch(API_BASE_URL + '/eliminar', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({ id: parseInt(id) })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            mostrarMensaje(`✅ ${data.message}`, 'success');
-            cancelarSeleccionMateria();
-            document.getElementById('buscar-input').value = '';
+            alert(`✅ ${data.message}\n\nMateria eliminada: ${nombre}`);
+            limpiarBusqueda();
         } else {
-            mostrarMensaje(`❌ ${data.message}`, 'error');
+            alert(`❌ ${data.message}`);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarMensaje('❌ Error de conexión', 'error');
+        alert('❌ Error de conexión');
     })
     .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        btnEliminar.disabled = false;
+        btnEliminar.innerHTML = textoOriginal;
     });
 }
 
-function cancelarSeleccionMateria() {
-    ocultarSeleccion();
-    ocultarResultados();
-    document.getElementById('buscar-input').focus();
+function cancelarEliminacion() {
+    limpiarBusqueda();
+    document.getElementById('buscar-materia-input').focus();
 }
 
-function ocultarResultados() {
-    document.getElementById('resultados-container').style.display = 'none';
+function limpiarBusqueda() {
+    // Ocultar resultados
+    document.getElementById('resultado-materia').style.display = 'none';
+    document.getElementById('btn-eliminar-container').style.display = 'none';
+    
+    // Limpiar campos
+    document.getElementById('materia-id-encontrada').textContent = '-';
+    document.getElementById('materia-nombre-encontrada').textContent = '-';
+    
+    // Limpiar mensajes
+    document.getElementById('mensaje-eliminar').innerHTML = '';
+    
+    // Limpiar input de búsqueda (opcional)
+    // document.getElementById('buscar-materia-input').value = '';
 }
 
-function ocultarSeleccion() {
-    document.getElementById('seleccion-container').style.display = 'none';
-}
-
-function mostrarMensaje(texto, tipo) {
-    const area = document.getElementById('mensaje-area');
-    let color = '#333';
+function mostrarMensajeEliminar(texto, tipo) {
+    const mensajeDiv = document.getElementById('mensaje-eliminar');
+    let clase = 'alert ';
     
     switch(tipo) {
-        case 'success': color = '#28a745'; break;
-        case 'error': color = '#dc3545'; break;
-        case 'warning': color = '#ffc107'; break;
-        case 'info': color = '#17a2b8'; break;
+        case 'success': clase += 'alert-success'; break;
+        case 'danger': clase += 'alert-danger'; break;
+        case 'warning': clase += 'alert-warning'; break;
+        default: clase += 'alert-info';
     }
     
-    area.innerHTML = `
-        <div style="padding: 10px; background: ${color}15; border-left: 4px solid ${color}; color: ${color};">
+    mensajeDiv.innerHTML = `
+        <div class="${clase}" style="padding: 10px; border-radius: 4px; margin-top: 10px;">
             ${texto}
         </div>
     `;
     
+    // Auto-ocultar después de 5 segundos
     setTimeout(() => {
-        if (area.innerHTML.includes(texto)) {
-            area.innerHTML = '';
-        }
-    }, 4000);
+        mensajeDiv.innerHTML = '';
+    }, 5000);
 }
 
-// Exportar
+// ========== EXPORTAR FUNCIONES ==========
 window.registrarMateria = registrarMateria;
+window.buscarMateriaParaEliminar = buscarMateriaParaEliminar;
+window.confirmarEliminacionMateria = confirmarEliminacionMateria;

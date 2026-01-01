@@ -2,10 +2,9 @@
 const db = require("../../BD/BD.js");
 
 const materiasController = {
-    // 1. Registrar materia
+    // 1. REGISTRAR materia
     registrarMateria: function(req, res) {
         try {
-            console.log('📝 Registrando materia...');
             const { nombre } = req.body;
             
             if (!nombre || nombre.trim() === '') {
@@ -19,24 +18,22 @@ const materiasController = {
             
             db.query(query, [nombre.trim()], (err, result) => {
                 if (err) {
-                    console.error("❌ Error SQL:", err);
+                    console.error("Error SQL:", err);
                     return res.json({ 
                         success: false, 
                         message: "Error al registrar" 
                     });
                 }
                 
-                console.log('✅ Materia registrada ID:', result.insertId);
-                
                 res.json({
                     success: true,
-                    message: "Materia registrada exitosamente",
+                    message: "✅ Materia registrada exitosamente",
                     id: result.insertId
                 });
             });
             
         } catch (error) {
-            console.error("❌ Error:", error);
+            console.error("Error:", error);
             res.json({ 
                 success: false, 
                 message: "Error interno" 
@@ -44,124 +41,46 @@ const materiasController = {
         }
     },
 
-    // 2. Listar todas las materias
-    listarMaterias: function(req, res) {
+    // 2. BUSCAR materia por nombre (PARA ELIMINAR) - SIMPLIFICADA
+    buscarMateriaParaEliminar: function(req, res) {
         try {
-            console.log('📋 Listando materias...');
+            const { nombre } = req.query;
             
-            const query = "SELECT id, nombre FROM materias ORDER BY nombre ASC";
-            
-            db.query(query, (err, results) => {
-                if (err) {
-                    console.error("❌ Error SQL:", err);
-                    return res.json({ 
-                        success: false, 
-                        message: "Error al listar" 
-                    });
-                }
-                
-                console.log(`✅ ${results.length} materias encontradas`);
-                
-                res.json({
-                    success: true,
-                    materias: results
-                });
-            });
-            
-        } catch (error) {
-            console.error("❌ Error:", error);
-            res.json({ 
-                success: false, 
-                message: "Error interno" 
-            });
-        }
-    },
-
-    // 3. Buscar materias por nombre (PARA ELIMINAR)
-    buscarMateriasPorNombre: function(req, res) {
-        try {
-            const nombre = req.query.nombre || '';
-            console.log('🔍 Buscando materias con:', nombre);
-            
-            if (!nombre || nombre.trim().length < 2) {
+            if (!nombre || nombre.trim() === '') {
                 return res.json({ 
-                    success: true,
-                    materias: [],
-                    message: "Escribe al menos 2 caracteres"
+                    success: false, 
+                    message: "Escribe el nombre de la materia" 
                 });
             }
             
-            const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? ORDER BY nombre LIMIT 10";
+            const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? LIMIT 1";
             const searchTerm = `%${nombre.trim()}%`;
             
             db.query(query, [searchTerm], (err, results) => {
                 if (err) {
-                    console.error("❌ Error SQL:", err);
+                    console.error("Error SQL:", err);
                     return res.json({ 
                         success: false, 
-                        message: "Error en búsqueda" 
-                    });
-                }
-                
-                console.log(`✅ ${results.length} resultados`);
-                
-                res.json({
-                    success: true,
-                    materias: results,
-                    count: results.length
-                });
-            });
-            
-        } catch (error) {
-            console.error("❌ Error:", error);
-            res.json({ 
-                success: false, 
-                message: "Error interno" 
-            });
-        }
-    },
-
-    // 4. Obtener materia por ID (ESTA ES LA FUNCIÓN QUE FALTABA)
-    obtenerMateriaPorId: function(req, res) {
-        try {
-            const { id } = req.params;
-            console.log('🔎 Buscando materia ID:', id);
-            
-            if (!id || isNaN(id)) {
-                return res.json({ 
-                    success: false, 
-                    message: "ID inválido" 
-                });
-            }
-            
-            const query = "SELECT id, nombre FROM materias WHERE id = ?";
-            
-            db.query(query, [id], (err, results) => {
-                if (err) {
-                    console.error("❌ Error SQL:", err);
-                    return res.json({ 
-                        success: false, 
-                        message: "Error al buscar" 
+                        message: "Error en la búsqueda" 
                     });
                 }
                 
                 if (results.length === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "Materia no encontrada" 
+                        message: "❌ Materia no encontrada" 
                     });
                 }
                 
-                console.log('✅ Materia encontrada:', results[0]);
-                
                 res.json({
                     success: true,
+                    message: "Materia encontrada",
                     materia: results[0]
                 });
             });
             
         } catch (error) {
-            console.error("❌ Error:", error);
+            console.error("Error:", error);
             res.json({ 
                 success: false, 
                 message: "Error interno" 
@@ -169,11 +88,10 @@ const materiasController = {
         }
     },
 
-    // 5. Eliminar materia
+    // 3. ELIMINAR materia
     eliminarMateria: function(req, res) {
         try {
             const { id } = req.body;
-            console.log('🗑️ Eliminando materia ID:', id);
             
             if (!id || isNaN(id)) {
                 return res.json({ 
@@ -186,7 +104,7 @@ const materiasController = {
             
             db.query(query, [id], (err, result) => {
                 if (err) {
-                    console.error("❌ Error SQL:", err);
+                    console.error("Error SQL:", err);
                     return res.json({ 
                         success: false, 
                         message: "Error al eliminar" 
@@ -200,16 +118,43 @@ const materiasController = {
                     });
                 }
                 
-                console.log('✅ Materia eliminada');
-                
                 res.json({
                     success: true,
-                    message: "Materia eliminada exitosamente"
+                    message: "✅ Materia eliminada exitosamente"
                 });
             });
             
         } catch (error) {
-            console.error("❌ Error:", error);
+            console.error("Error:", error);
+            res.json({ 
+                success: false, 
+                message: "Error interno" 
+            });
+        }
+    },
+
+    // 4. LISTAR todas las materias
+    listarMaterias: function(req, res) {
+        try {
+            const query = "SELECT id, nombre FROM materias ORDER BY nombre";
+            
+            db.query(query, (err, results) => {
+                if (err) {
+                    console.error("Error SQL:", err);
+                    return res.json({ 
+                        success: false, 
+                        message: "Error al listar" 
+                    });
+                }
+                
+                res.json({
+                    success: true,
+                    materias: results
+                });
+            });
+            
+        } catch (error) {
+            console.error("Error:", error);
             res.json({ 
                 success: false, 
                 message: "Error interno" 

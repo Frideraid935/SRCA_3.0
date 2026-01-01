@@ -3,11 +3,10 @@ const express = require("express");
 const router = express.Router();
 const materiasController = require("../controladores/controladores-materias/materias.controlador");
 
-// SOLO las rutas que SÍ existen en el controlador
+// SOLO las rutas que EXISTEN
 router.post("/registrar", materiasController.registrarMateria);
-router.get("/listar", materiasController.listarMaterias);
-router.get("/buscar", materiasController.buscarMateriasPorNombre);
-// NOTA: Quité router.get("/:id") porque obtenerMateriaPorId NO existe
+router.get("/buscar", materiasController.buscarMateriaParaEliminar);
 router.delete("/eliminar", materiasController.eliminarMateria);
+router.get("/listar", materiasController.listarMaterias);
 
 module.exports = router;
