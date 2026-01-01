@@ -2,9 +2,8 @@
 const db = require("../../BD/BD.js");
 
 const materiasController = {
-    // Registrar nueva materia - CORREGIDO
+    // Registrar nueva materia
     registrarMateria: (req, res) => {
-        const btnGuardar = req.body.btnGuardar; // Para debugging
         console.log('=== REGISTRAR MATERIA ===');
         console.log('Datos recibidos:', req.body);
         
@@ -32,7 +31,6 @@ const materiasController = {
                 
                 console.log('✅ Materia registrada, ID:', result.insertId);
                 
-                // RESPONDE INMEDIATAMENTE
                 res.json({
                     success: true,
                     message: "Materia registrada exitosamente",
@@ -80,7 +78,7 @@ const materiasController = {
         }
     },
 
-    // Buscar materias por nombre - CORREGIDO
+    // Buscar materias por nombre
     buscarMateriasPorNombre: (req, res) => {
         console.log('=== BUSCAR MATERIAS ===');
         console.log('Query params:', req.query);
@@ -178,6 +176,8 @@ const materiasController = {
             });
         }
     }
+    
+    // NOTA: Quité obtenerMateriaPorId porque no la necesitas en el nuevo flujo
 };
 
 module.exports = materiasController;
