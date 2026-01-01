@@ -5,68 +5,59 @@ const API_BASE_URL = '/api/materias';
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Materias JS cargado');
     
-    // Configurar formulario de registro
+    // ===== FORMULARIO DE REGISTRO =====
     const formRegistro = document.getElementById('formulario-ingresar');
     if (formRegistro) {
+        console.log('Formulario de registro encontrado');
         formRegistro.addEventListener('submit', function(e) {
             e.preventDefault();
             registrarMateria();
         });
     }
     
-    // Configurar formulario de búsqueda
-    const formBusqueda = document.getElementById('form-buscar-materia');
-    if (formBusqueda) {
-        formBusqueda.addEventListener('submit', function(e) {
-            e.preventDefault();
-            buscarMateria();
-        });
+    // ===== PÁGINA DE ELIMINACIÓN =====
+    if (window.location.pathname.includes('eliminar')) {
+        console.log('Página de eliminación detectada');
+        cargarMateriasParaEliminar();
     }
     
-    // Configurar formulario de eliminación
-    const formEliminar = document.getElementById('form-confirmar-eliminar');
-    if (formEliminar) {
-        formEliminar.addEventListener('submit', function(e) {
-            e.preventDefault();
-            confirmarEliminacion();
-        });
-    }
-    
-    // Cargar tabla si existe
+    // ===== TABLA DE MATERIAS =====
     if (document.querySelector('table')) {
-        cargarMaterias();
+        cargarMateriasEnTabla();
     }
 });
 
-// ========== FUNCIONES PARA REGISTRAR ==========
-
+// ========== REGISTRAR MATERIA ==========
 function registrarMateria() {
     const inputNombre = document.getElementById('materia-nombre');
     if (!inputNombre) {
-        alert('Error: No se encontró el campo nombre');
+        alert('Error: Campo nombre no encontrado');
         return;
     }
     
     const nombre = inputNombre.value.trim();
     if (!nombre) {
-        alert('El nombre de la materia es obligatorio');
+        alert('El nombre es obligatorio');
         return;
     }
     
     const btnGuardar = document.querySelector('#formulario-ingresar button[type="submit"]');
     if (!btnGuardar) {
-        alert('Error: No se encontró el botón guardar');
+        alert('Error: Botón no encontrado');
         return;
     }
     
-    // Guardar texto original y desactivar botón
+    // Guardar texto original
     const textoOriginal = btnGuardar.innerHTML;
+    
+    // Desactivar botón
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = 'Enviando...';
     
     const datos = { nombre: nombre };
     
-    // Hacer la petición
+    console.log('Enviando datos:', datos);
+    
     fetch(API_BASE_URL + '/registrar', {
         method: 'POST',
         headers: {
@@ -74,237 +65,255 @@ function registrarMateria() {
         },
         body: JSON.stringify(datos)
     })
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
+    .then(response => {
+        console.log('Status respuesta:', response.status);
+        
         // RESTAURAR BOTÓN INMEDIATAMENTE
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = textoOriginal;
         
+        if (!response.ok) {
+            throw new Error('Error HTTP: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta:', data);
+        
         if (data.success) {
-            alert('Éxito: ' + data.message);
-            inputNombre.value = '';
+            alert('Materia registrada: ' + data.message);
             
-            // Limpiar campo ID si existe
+            // Limpiar formulario
+            inputNombre.value = '';
             const inputId = document.getElementById('materia-id');
             if (inputId) inputId.value = '';
+            
+            // Si estamos en página de eliminación, recargar
+            if (window.location.pathname.includes('eliminar')) {
+                cargarMateriasParaEliminar();
+            }
+            
+            // Si hay tabla, recargar
+            if (document.querySelector('table')) {
+                cargarMateriasEnTabla();
+            }
         } else {
             alert('Error: ' + data.message);
         }
     })
-    .catch(function(error) {
-        // RESTAURAR BOTÓN SI HAY ERROR
+    .catch(error => {
+        console.error('Error completo:', error);
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = textoOriginal;
         alert('Error de conexión con el servidor');
-        console.error('Error:', error);
     });
 }
 
-// ========== FUNCIONES PARA BUSCAR Y ELIMINAR ==========
-
-function buscarMateria() {
-    const inputNombre = document.getElementById('buscar-nombre');
-    if (!inputNombre) {
-        alert('Error: No se encontró el campo de búsqueda');
-        return;
-    }
+// ========== FUNCIONES PARA ELIMINAR ==========
+function cargarMateriasParaEliminar() {
+    console.log('Cargando materias para eliminar...');
     
-    const nombre = inputNombre.value.trim();
-    if (!nombre) {
-        alert('Ingrese un nombre para buscar');
-        return;
-    }
-    
-    console.log('Buscando materia con nombre:', nombre);
-    
-    // Primero intentar con el endpoint de búsqueda por nombre
-    fetch(API_BASE_URL + '/buscar/nombre/' + encodeURIComponent(nombre))
-    .then(function(response) {
+    fetch(API_BASE_URL + '/listar')
+    .then(response => {
         if (!response.ok) {
-            // Si falla, usar el endpoint de listar
-            console.log('Endpoint de búsqueda falló, usando listar');
-            return fetch(API_BASE_URL + '/listar');
+            throw new Error('Error HTTP: ' + response.status);
         }
         return response.json();
     })
-    .then(function(response) {
-        // Si response es Response, obtener JSON
-        if (response instanceof Response) {
-            return response.json();
-        }
-        return response;
-    })
-    .then(function(data) {
-        console.log('Datos recibidos:', data);
+    .then(data => {
+        console.log('Materias cargadas:', data);
         
-        if (data.success && data.materias) {
-            // Filtrar por nombre si usamos /listar
-            let materiasEncontradas = data.materias;
-            if (nombre) {
-                materiasEncontradas = data.materias.filter(function(materia) {
-                    return materia.nombre.toLowerCase().includes(nombre.toLowerCase());
-                });
-            }
-            
-            if (materiasEncontradas.length === 0) {
-                alert('No se encontraron materias con el nombre: ' + nombre);
-                ocultarInformacionMateria();
-            } else if (materiasEncontradas.length === 1) {
-                mostrarInformacionMateria(materiasEncontradas[0]);
-            } else {
-                mostrarListaMaterias(materiasEncontradas, nombre);
-            }
+        if (data.success) {
+            crearSelectorMaterias(data.materias);
         } else {
-            alert('Error: ' + (data.message || 'No se pudieron cargar las materias'));
+            alert('Error al cargar materias: ' + data.message);
         }
     })
-    .catch(function(error) {
-        console.error('Error en búsqueda:', error);
-        alert('Error de conexión');
+    .catch(error => {
+        console.error('Error:', error);
+        alert('No se pudo cargar la lista de materias');
     });
 }
 
-function mostrarListaMaterias(materias, nombreBusqueda) {
-    let mensaje = 'Se encontraron ' + materias.length + ' materias:\n\n';
+function crearSelectorMaterias(materias) {
+    const formBusqueda = document.getElementById('form-buscar-materia');
+    if (!formBusqueda) return;
     
-    materias.forEach(function(materia, index) {
-        mensaje += (index + 1) + '. ID: ' + materia.id + ' - Nombre: ' + materia.nombre + '\n';
-    });
+    // Limpiar formulario
+    formBusqueda.innerHTML = '';
     
-    mensaje += '\nIngrese el número de la materia que desea eliminar:';
-    
-    const seleccion = prompt(mensaje);
-    if (seleccion && !isNaN(seleccion)) {
-        const index = parseInt(seleccion) - 1;
-        if (index >= 0 && index < materias.length) {
-            mostrarInformacionMateria(materias[index]);
-        } else {
-            alert('Selección inválida');
-        }
-    }
-}
-
-function mostrarInformacionMateria(materia) {
-    console.log('Mostrando materia para eliminar:', materia);
-    
-    if (!materia || !materia.id) {
-        alert('Error: Información de materia no válida');
+    if (!materias || materias.length === 0) {
+        formBusqueda.innerHTML = '<p class="text-center">No hay materias registradas</p>';
         return;
     }
     
-    document.getElementById('info-id').textContent = materia.id;
-    document.getElementById('info-nombre').textContent = materia.nombre;
-    document.getElementById('info-materia').style.display = 'block';
+    // Crear selector
+    const divCampo = document.createElement('div');
+    divCampo.className = 'campo';
+    
+    const label = document.createElement('label');
+    label.textContent = 'Seleccionar Materia:';
+    label.htmlFor = 'selector-materia';
+    
+    const select = document.createElement('select');
+    select.id = 'selector-materia';
+    select.className = 'form-control';
+    
+    // Opción por defecto
+    const opcionDefault = document.createElement('option');
+    opcionDefault.value = '';
+    opcionDefault.textContent = '-- Seleccione una materia --';
+    select.appendChild(opcionDefault);
+    
+    // Agregar materias
+    materias.forEach(materia => {
+        const opcion = document.createElement('option');
+        opcion.value = materia.id;
+        opcion.textContent = materia.nombre + ' (ID: ' + materia.id + ')';
+        select.appendChild(opcion);
+    });
+    
+    divCampo.appendChild(label);
+    divCampo.appendChild(select);
+    formBusqueda.appendChild(divCampo);
+    
+    // Botón para mostrar información
+    const divBotones = document.createElement('div');
+    divBotones.className = 'botones';
+    
+    const btnMostrar = document.createElement('button');
+    btnMostrar.type = 'button';
+    btnMostrar.className = 'btn btn-primary';
+    btnMostrar.innerHTML = '<i class="fas fa-search"></i> Mostrar Información';
+    btnMostrar.onclick = mostrarInfoMateriaSeleccionada;
+    
+    divBotones.appendChild(btnMostrar);
+    formBusqueda.appendChild(divBotones);
 }
 
-function ocultarInformacionMateria() {
-    document.getElementById('info-materia').style.display = 'none';
+function mostrarInfoMateriaSeleccionada() {
+    const select = document.getElementById('selector-materia');
+    if (!select) return;
+    
+    const materiaId = select.value;
+    if (!materiaId) {
+        alert('Seleccione una materia');
+        return;
+    }
+    
+    // Buscar la materia en la lista ya cargada
+    fetch(API_BASE_URL + '/listar')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.materias) {
+            const materia = data.materias.find(m => m.id == materiaId);
+            if (materia) {
+                document.getElementById('info-id').textContent = materia.id;
+                document.getElementById('info-nombre').textContent = materia.nombre;
+                document.getElementById('info-materia').style.display = 'block';
+            } else {
+                alert('Materia no encontrada');
+            }
+        }
+    })
+    .catch(error => {
+        alert('Error al buscar materia');
+    });
 }
 
 function confirmarEliminacion() {
     const idElement = document.getElementById('info-id');
     const id = idElement ? idElement.textContent.trim() : '';
     
-    if (!id || id === '') {
-        alert('Primero busque y seleccione una materia para eliminar');
+    if (!id) {
+        alert('Primero seleccione una materia');
         return;
     }
     
-    eliminarMateriaPorId(id);
+    if (!confirm('¿ESTÁ SEGURO de eliminar esta materia?')) {
+        return;
+    }
+    
+    eliminarMateria(id);
 }
 
-function eliminarMateriaPorId(id) {
+function eliminarMateria(id) {
     if (!id || isNaN(id)) {
         alert('ID no válido');
         return;
     }
-    
-    if (!confirm('¿Está seguro de eliminar esta materia?\nEsta acción no se puede deshacer.')) {
-        return;
-    }
-    
-    id = parseInt(id);
     
     fetch(API_BASE_URL + '/eliminar', {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: id })
+        body: JSON.stringify({ id: parseInt(id) })
     })
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
+    .then(response => response.json())
+    .then(data => {
         if (data.success) {
-            alert('Éxito: ' + data.message);
+            alert('Materia eliminada: ' + data.message);
             
-            // Limpiar formulario de búsqueda
-            const inputBusqueda = document.getElementById('buscar-nombre');
-            if (inputBusqueda) inputBusqueda.value = '';
+            // Ocultar panel
+            document.getElementById('info-materia').style.display = 'none';
             
-            // Ocultar información
-            ocultarInformacionMateria();
+            // Recargar selector
+            cargarMateriasParaEliminar();
             
             // Recargar tabla si existe
             if (document.querySelector('table')) {
-                cargarMaterias();
+                cargarMateriasEnTabla();
             }
         } else {
             alert('Error: ' + data.message);
         }
     })
-    .catch(function(error) {
-        alert('Error de conexión');
+    .catch(error => {
         console.error('Error:', error);
+        alert('Error de conexión');
     });
 }
 
-// ========== FUNCIÓN PARA TABLA ==========
-
-function cargarMaterias() {
+// ========== FUNCIONES PARA TABLA ==========
+function cargarMateriasEnTabla() {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
     
     tbody.innerHTML = '<tr><td colspan="3">Cargando materias...</td></tr>';
     
     fetch(API_BASE_URL + '/listar')
-    .then(function(response) {
-        return response.json();
-    })
-    .then(function(data) {
-        if (data.success && data.materias) {
-            mostrarMateriasEnTabla(data.materias);
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarMateriasTabla(data.materias);
         } else {
-            tbody.innerHTML = '<tr><td colspan="3">Error: ' + (data.message || 'No se pudieron cargar') + '</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3">Error: ' + data.message + '</td></tr>';
         }
     })
-    .catch(function(error) {
+    .catch(error => {
         tbody.innerHTML = '<tr><td colspan="3">Error de conexión</td></tr>';
-        console.error('Error:', error);
     });
 }
 
-function mostrarMateriasEnTabla(materias) {
+function mostrarMateriasTabla(materias) {
     const tbody = document.querySelector('tbody');
     if (!tbody) return;
     
     if (!materias || materias.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">No hay materias registradas</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3">No hay materias</td></tr>';
         return;
     }
     
     tbody.innerHTML = '';
     
-    materias.forEach(function(materia) {
+    materias.forEach(materia => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${materia.id}</td>
             <td>${materia.nombre}</td>
             <td>
-                <button onclick="eliminarMateriaPorId(${materia.id})" class="btn btn-danger btn-sm">
+                <button onclick="eliminarMateria(${materia.id})" class="btn btn-danger btn-sm">
                     Eliminar
                 </button>
             </td>
@@ -314,9 +323,8 @@ function mostrarMateriasEnTabla(materias) {
 }
 
 // ========== EXPORTAR FUNCIONES ==========
-
 window.registrarMateria = registrarMateria;
-window.eliminarMateriaPorId = eliminarMateriaPorId;
-window.cargarMaterias = cargarMaterias;
-window.buscarMateria = buscarMateria;
+window.eliminarMateria = eliminarMateria;
+window.cargarMateriasParaEliminar = cargarMateriasParaEliminar;
+window.mostrarInfoMateriaSeleccionada = mostrarInfoMateriaSeleccionada;
 window.confirmarEliminacion = confirmarEliminacion;

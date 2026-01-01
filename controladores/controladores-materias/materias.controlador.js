@@ -7,8 +7,10 @@ const materiasController = {
         try {
             const { nombre } = req.body;
             
+            console.log('Intentando registrar materia:', nombre);
+            
             if (!nombre || nombre.trim() === '') {
-                return res.json({ 
+                return res.status(400).json({ 
                     success: false, 
                     message: "El nombre de la materia es requerido" 
                 });
@@ -18,12 +20,14 @@ const materiasController = {
             
             db.query(query, [nombre.trim()], (err, result) => {
                 if (err) {
-                    console.error("Error en base de datos:", err);
-                    return res.json({ 
+                    console.error("Error SQL al registrar:", err);
+                    return res.status(500).json({ 
                         success: false, 
-                        message: "Error al registrar la materia" 
+                        message: "Error en la base de datos al registrar" 
                     });
                 }
+                
+                console.log('Materia registrada, ID:', result.insertId);
                 
                 res.json({
                     success: true,
@@ -34,7 +38,7 @@ const materiasController = {
             
         } catch (error) {
             console.error("Error en registrarMateria:", error);
-            res.json({ 
+            res.status(500).json({ 
                 success: false, 
                 message: "Error interno del servidor" 
             });
@@ -44,16 +48,20 @@ const materiasController = {
     // Listar todas las materias
     listarMaterias: (req, res) => {
         try {
+            console.log('Listando todas las materias');
+            
             const query = "SELECT id, nombre FROM materias ORDER BY id DESC";
             
             db.query(query, (err, results) => {
                 if (err) {
-                    console.error("Error en base de datos:", err);
-                    return res.json({ 
+                    console.error("Error SQL al listar:", err);
+                    return res.status(500).json({ 
                         success: false, 
-                        message: "Error al obtener las materias" 
+                        message: "Error en la base de datos al listar" 
                     });
                 }
+                
+                console.log('Materias encontradas:', results.length);
                 
                 res.json({
                     success: true,
@@ -63,92 +71,7 @@ const materiasController = {
             
         } catch (error) {
             console.error("Error en listarMaterias:", error);
-            res.json({ 
-                success: false, 
-                message: "Error interno del servidor" 
-            });
-        }
-    },
-
-    // Buscar materia por ID (para eliminar por nombre)
-    buscarMateriaPorId: (req, res) => {
-        try {
-            const materiaId = req.params.id;
-            
-            if (!materiaId) {
-                return res.json({ 
-                    success: false, 
-                    message: "ID de materia es requerido" 
-                });
-            }
-            
-            const query = "SELECT id, nombre FROM materias WHERE id = ?";
-            
-            db.query(query, [materiaId], (err, results) => {
-                if (err) {
-                    console.error("Error en base de datos:", err);
-                    return res.json({ 
-                        success: false, 
-                        message: "Error al buscar la materia" 
-                    });
-                }
-                
-                if (results.length === 0) {
-                    return res.json({ 
-                        success: false, 
-                        message: "Materia no encontrada" 
-                    });
-                }
-                
-                res.json({
-                    success: true,
-                    materia: results[0]
-                });
-            });
-            
-        } catch (error) {
-            console.error("Error en buscarMateriaPorId:", error);
-            res.json({ 
-                success: false, 
-                message: "Error interno del servidor" 
-            });
-        }
-    },
-
-    // Buscar materias por nombre (nuevo método)
-    buscarMateriasPorNombre: (req, res) => {
-        try {
-            const nombre = req.params.nombre;
-            
-            if (!nombre || nombre.trim() === '') {
-                return res.json({ 
-                    success: false, 
-                    message: "Nombre de materia es requerido" 
-                });
-            }
-            
-            const searchTerm = `%${nombre}%`;
-            const query = "SELECT id, nombre FROM materias WHERE nombre LIKE ? ORDER BY nombre";
-            
-            db.query(query, [searchTerm], (err, results) => {
-                if (err) {
-                    console.error("Error en base de datos:", err);
-                    return res.json({ 
-                        success: false, 
-                        message: "Error al buscar materias" 
-                    });
-                }
-                
-                res.json({
-                    success: true,
-                    materias: results,
-                    count: results.length
-                });
-            });
-            
-        } catch (error) {
-            console.error("Error en buscarMateriasPorNombre:", error);
-            res.json({ 
+            res.status(500).json({ 
                 success: false, 
                 message: "Error interno del servidor" 
             });
@@ -160,8 +83,10 @@ const materiasController = {
         try {
             const { id } = req.body;
             
+            console.log('Intentando eliminar materia ID:', id);
+            
             if (!id) {
-                return res.json({ 
+                return res.status(400).json({ 
                     success: false, 
                     message: "ID de materia es requerido" 
                 });
@@ -171,19 +96,21 @@ const materiasController = {
             
             db.query(query, [id], (err, result) => {
                 if (err) {
-                    console.error("Error en base de datos:", err);
-                    return res.json({ 
+                    console.error("Error SQL al eliminar:", err);
+                    return res.status(500).json({ 
                         success: false, 
-                        message: "Error al eliminar la materia" 
+                        message: "Error en la base de datos al eliminar" 
                     });
                 }
                 
                 if (result.affectedRows === 0) {
-                    return res.json({ 
+                    return res.status(404).json({ 
                         success: false, 
                         message: "Materia no encontrada" 
                     });
                 }
+                
+                console.log('Materia eliminada, filas afectadas:', result.affectedRows);
                 
                 res.json({
                     success: true,
@@ -193,7 +120,7 @@ const materiasController = {
             
         } catch (error) {
             console.error("Error en eliminarMateria:", error);
-            res.json({ 
+            res.status(500).json({ 
                 success: false, 
                 message: "Error interno del servidor" 
             });
