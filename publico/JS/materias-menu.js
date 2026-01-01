@@ -1,12 +1,19 @@
 // publico/JS/materias-menu.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar el menú
+    console.log('Materias Menu - Inicializando...');
+    
+    // Primero inicializar el menú
     inicializarMenu();
     
-    // Verificar sesión al cargar
-    verificarSesion();
+    // Luego verificar sesión (pero sin redireccionar inmediatamente en desarrollo)
+    verificarSesionConTolerancia();
     
+    // Configurar eventos
+    configurarEventos();
+});
+
+function configurarEventos() {
     // Configurar evento de logout
     const btnLogout = document.getElementById('btn-logout');
     if (btnLogout) {
@@ -17,15 +24,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnVolverInicio = document.getElementById('btn-volver-inicio');
     if (btnVolverInicio) {
         btnVolverInicio.addEventListener('click', function() {
-            // RUTA CORREGIDA: Desde Modulo-Materias-Admin apunta a ../menu_inicio/menu_inicio_admin.html
             window.location.href = '../menu_inicio/menu_inicio_admin.html';
         });
     }
-});
+}
 
 function inicializarMenu() {
+    console.log('Inicializando menú...');
+    
     // Obtener todos los elementos del menú
     const menuItems = document.querySelectorAll('.menu-item[data-url]');
+    
+    if (menuItems.length === 0) {
+        console.warn('No se encontraron elementos de menú con data-url');
+        return;
+    }
     
     // Agregar evento click a cada elemento del menú
     menuItems.forEach(item => {
@@ -39,6 +52,7 @@ function inicializarMenu() {
             // Obtener la URL del data-url
             const url = this.getAttribute('data-url');
             if (url) {
+                console.log('Cargando formulario:', url);
                 cargarFormulario(url);
             }
         });
@@ -49,6 +63,14 @@ function inicializarMenu() {
     if (activeItem) {
         const url = activeItem.getAttribute('data-url');
         if (url) {
+            console.log('Cargando formulario por defecto:', url);
+            cargarFormulario(url);
+        }
+    } else if (menuItems.length > 0) {
+        // Si no hay activo, activar el primero
+        menuItems[0].classList.add('active');
+        const url = menuItems[0].getAttribute('data-url');
+        if (url) {
             cargarFormulario(url);
         }
     }
@@ -56,18 +78,23 @@ function inicializarMenu() {
 
 function cargarFormulario(url) {
     const iframe = document.getElementById('contenido-iframe');
-    if (!iframe) return;
+    if (!iframe) {
+        console.error('No se encontró el iframe con id "contenido-iframe"');
+        return;
+    }
+    
+    console.log('Cargando URL en iframe:', url);
     
     // Mostrar indicador de carga
     iframe.style.opacity = '0.5';
     
     // Cargar el contenido en el iframe
-    // RUTA CORREGIDA: Asumiendo que los HTML están en la misma carpeta (Modulo-Materias-Admin)
     iframe.src = url;
     
     // Restaurar opacidad cuando se cargue
     iframe.onload = function() {
         iframe.style.opacity = '1';
+        console.log('Iframe cargado exitosamente');
         
         // Enviar mensaje al iframe para notificar la carga
         try {
@@ -82,7 +109,7 @@ function cargarFormulario(url) {
     };
     
     iframe.onerror = function() {
-        console.error('Error al cargar:', url);
+        console.error('Error al cargar el iframe:', url);
         iframe.innerHTML = `
             <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
                 <h3 style="color: #e74c3c;">
@@ -100,122 +127,178 @@ function cargarFormulario(url) {
     };
 }
 
-function verificarSesion() {
-    // Verificar si hay una sesión activa
-    // RUTA CORREGIDA: Dependiendo de dónde esté este archivo
+function verificarSesionConTolerancia() {
+    console.log('Verificando sesión con tolerancia...');
     
-    // Determinar ruta base basada en la ubicación actual
-    let basePath = '';
-    const currentPath = window.location.pathname;
+    // Determinar si estamos en desarrollo
+    const esDesarrollo = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '';
     
-    if (currentPath.includes('Modulo-Materias-Admin') || 
-        currentPath.includes('Menu_principal_materia')) {
-        // Si estamos en módulo de materias
-        basePath = '../APIS/login.api.js';
-    } else if (currentPath.includes('publico') || 
-               currentPath.includes('JS')) {
-        // Si estamos en carpeta publico/JS
-        basePath = '../APIS/login.api.js';
-    } else {
-        // Por defecto
-        basePath = 'APIS/login.api.js';
-    }
-    
-    fetch(`${basePath}/check`, {
-        method: 'GET',
-        credentials: 'include'
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (!data.loggedIn) {
-            // RUTA CORREGIDA: Redirigir al login
-            window.location.href = '../Login/login.html';
-            return;
-        }
+    if (esDesarrollo) {
+        console.log('Modo desarrollo activado - Sesión tolerada');
         
-        // Verificar que sea admin
-        if (data.user && data.user.tipo && data.user.tipo !== 'admin') {
-            alert('Acceso denegado. Solo administradores pueden acceder a este módulo.');
-            // RUTA CORREGIDA: Redirigir al menú admin
-            window.location.href = '../menu_inicio/menu_inicio_admin.html';
-            return;
-        }
-        
-        // Mostrar nombre de usuario si existe el elemento
+        // En desarrollo, establecer usuario por defecto
         const nombreUsuario = document.getElementById('nombre-usuario');
-        if (nombreUsuario && data.user) {
-            nombreUsuario.textContent = data.user.nombre || data.user.username || 'Usuario';
+        if (nombreUsuario) {
+            nombreUsuario.textContent = 'Administrador (Modo Desarrollo)';
         }
-    })
-    .catch(error => {
-        console.error('Error verificando sesión:', error);
         
-        // Si estamos en desarrollo, permitir continuar
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.warn('Modo desarrollo: Continuando sin verificación de sesión');
+        // Intentar verificar sesión pero no redirigir si falla
+        verificarSesion(false); // false = no redirigir automáticamente
+    } else {
+        // En producción, verificar normalmente
+        verificarSesion(true); // true = redirigir si falla
+    }
+}
+
+function verificarSesion(redirigirSiFalla = true) {
+    console.log('Verificando sesión, redirigirSiFalla:', redirigirSiFalla);
+    
+    // Intentar diferentes rutas posibles
+    const rutasPosibles = [
+        '/api/login/check',
+        '../APIS/login.api.js/check',
+        'APIS/login.api.js/check',
+        '../../APIS/login.api.js/check'
+    ];
+    
+    // Función recursiva para probar rutas
+    const probarRuta = (index) => {
+        if (index >= rutasPosibles.length) {
+            console.log('Todas las rutas fallaron');
             
-            // Simular usuario admin para desarrollo
-            const nombreUsuario = document.getElementById('nombre-usuario');
-            if (nombreUsuario) {
-                nombreUsuario.textContent = 'Admin (Desarrollo)';
+            if (redirigirSiFalla) {
+                console.log('Redirigiendo a login...');
+                window.location.href = '../Login/login.html';
             }
-        } else {
-            // En producción, redirigir al login
-            window.location.href = '../Login/login.html';
+            return;
         }
-    });
+        
+        const ruta = rutasPosibles[index];
+        console.log(`Probando ruta ${index + 1}/${rutasPosibles.length}: ${ruta}`);
+        
+        fetch(ruta, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            console.log(`Respuesta de ${ruta}: Status ${response.status}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos de sesión recibidos:', data);
+            
+            if (data.loggedIn) {
+                console.log('Sesión activa - Usuario:', data.user);
+                
+                // Verificar que sea admin
+                if (data.user && data.user.tipo && data.user.tipo !== 'admin') {
+                    console.warn('Usuario no es administrador');
+                    if (redirigirSiFalla) {
+                        alert('Acceso denegado. Solo administradores pueden acceder a este módulo.');
+                        window.location.href = '../menu_inicio/menu_inicio_admin.html';
+                    }
+                    return;
+                }
+                
+                // Mostrar nombre de usuario
+                const nombreUsuario = document.getElementById('nombre-usuario');
+                if (nombreUsuario && data.user) {
+                    nombreUsuario.textContent = data.user.nombre || data.user.username || 'Administrador';
+                }
+            } else {
+                console.log('No hay sesión activa');
+                if (redirigirSiFalla) {
+                    window.location.href = '../Login/login.html';
+                }
+            }
+        })
+        .catch(error => {
+            console.error(`Error con ruta ${ruta}:`, error.message);
+            
+            // Intentar con la siguiente ruta
+            setTimeout(() => probarRuta(index + 1), 100);
+        });
+    };
+    
+    // Comenzar con la primera ruta
+    probarRuta(0);
 }
 
 function cerrarSesion() {
-    // Determinar ruta base
-    let basePath = '../APIS/login.api.js';
-    const currentPath = window.location.pathname;
+    console.log('Cerrando sesión...');
     
-    if (currentPath.includes('Modulo-Materias-Admin') || 
-        currentPath.includes('Menu_principal_materia')) {
-        basePath = '../APIS/login.api.js';
-    }
+    // Intentar diferentes rutas para logout
+    const rutasLogout = [
+        '/api/logout',
+        '../APIS/login.api.js/logout',
+        'APIS/login.api.js/logout'
+    ];
     
-    fetch(`${basePath}/logout`, {
-        method: 'GET',
-        credentials: 'include'
-    })
-    .then(() => {
-        // RUTA CORREGIDA
-        window.location.href = '../Login/login.html';
-    })
-    .catch(error => {
-        console.error('Error al cerrar sesión:', error);
-        // Redirigir de todos modos
-        window.location.href = '../Login/login.html';
-    });
+    const intentarLogout = (index) => {
+        if (index >= rutasLogout.length) {
+            console.log('Todas las rutas de logout fallaron, redirigiendo de todos modos');
+            window.location.href = '../Login/login.html';
+            return;
+        }
+        
+        const ruta = rutasLogout[index];
+        console.log(`Intentando logout con ruta: ${ruta}`);
+        
+        fetch(ruta, {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(() => {
+            console.log('Logout exitoso');
+            window.location.href = '../Login/login.html';
+        })
+        .catch(error => {
+            console.error(`Error con logout ruta ${ruta}:`, error.message);
+            
+            if (index === rutasLogout.length - 1) {
+                // Última ruta falló, redirigir de todos modos
+                window.location.href = '../Login/login.html';
+            } else {
+                // Intentar con la siguiente ruta
+                setTimeout(() => intentarLogout(index + 1), 100);
+            }
+        });
+    };
+    
+    intentarLogout(0);
 }
 
 // Función para manejar mensajes de iframes hijos
 window.addEventListener('message', function(event) {
-    // Aceptar mensajes de cualquier origen (en desarrollo)
-    // En producción, deberías verificar event.origin
-    
     console.log('Mensaje recibido desde iframe:', event.data);
     
+    // Verificar el origen si es necesario (en producción deberías verificar event.origin)
+    
     if (event.data.type === 'materiaRegistrada') {
-        // Mostrar notificación cuando se registre una materia
-        mostrarNotificacion(`${event.data.message}`, 'success');
+        mostrarNotificacion(` ${event.data.message}`, 'success');
     }
     
     if (event.data.type === 'materiaEliminada') {
-        // Mostrar notificación cuando se elimine una materia
         mostrarNotificacion(` ${event.data.message}`, 'info');
     }
     
     if (event.data.type === 'error') {
-        // Mostrar notificación de error
         mostrarNotificacion(` ${event.data.message}`, 'error');
+    }
+    
+    if (event.data.type === 'necesitaSesion') {
+        console.log('Iframe reporta que necesita sesión');
+        verificarSesion(true); // Forzar verificación con redirección
     }
 });
 
@@ -342,3 +425,14 @@ window.cargarFormulario = cargarFormulario;
 window.verificarSesion = verificarSesion;
 window.cerrarSesion = cerrarSesion;
 window.mostrarNotificacion = mostrarNotificacion;
+
+// Función de emergencia para desactivar verificación
+window.desactivarVerificacionSesion = function() {
+    console.log('Verificación de sesión desactivada manualmente');
+    const nombreUsuario = document.getElementById('nombre-usuario');
+    if (nombreUsuario) {
+        nombreUsuario.textContent = 'Admin (Verificación desactivada)';
+    }
+};
+
+console.log('Materias Menu - Cargado exitosamente');
