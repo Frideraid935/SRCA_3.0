@@ -58,10 +58,7 @@ function cargarMaterias() {
     
     tbody.innerHTML = '<tr><td colspan="3">Cargando...</td></tr>';
     
-    fetch(API_BASE_URL + '/listar', {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
-    })
+    fetch(API_BASE_URL + '/listar')
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -111,21 +108,18 @@ function buscarMateriaPorNombre() {
         return;
     }
     
-    // Mostrar que está buscando
-    const infoMateria = document.getElementById('info-materia');
-    if (infoMateria) {
-        infoMateria.style.display = 'block';
-        document.getElementById('info-id').textContent = 'Buscando...';
-        document.getElementById('info-nombre').textContent = 'Buscando...';
-    }
+    // Ocultar información anterior
+    ocultarInformacionMateria();
     
-    fetch(API_BASE_URL + '/buscar/nombre/' + encodeURIComponent(nombre), {
-        method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+    fetch(API_BASE_URL + '/buscar/nombre/' + encodeURIComponent(nombre))
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta');
+        }
+        return response.json();
     })
-    .then(response => response.json())
     .then(data => {
-        console.log('Respuesta búsqueda:', data);
+        console.log('Resultados búsqueda:', data);
         
         if (data.success) {
             if (data.materias && data.materias.length > 0) {
@@ -135,18 +129,15 @@ function buscarMateriaPorNombre() {
                     mostrarListaMaterias(data.materias, nombre);
                 }
             } else {
-                alert('No se encontró ninguna materia con ese nombre');
-                ocultarInformacionMateria();
+                alert('No se encontraron materias con ese nombre');
             }
         } else {
             alert('Error: ' + data.message);
-            ocultarInformacionMateria();
         }
     })
     .catch(error => {
         console.error('Error en búsqueda:', error);
-        alert('Error de conexión');
-        ocultarInformacionMateria();
+        alert('Error de conexión con el servidor');
     });
 }
 
@@ -163,17 +154,20 @@ function mostrarListaMaterias(materias, nombreBusqueda) {
             mostrarInformacionMateria(materias[index]);
         } else {
             alert('Selección inválida');
-            ocultarInformacionMateria();
         }
-    } else {
-        ocultarInformacionMateria();
     }
 }
 
 function mostrarInformacionMateria(materia) {
-    console.log('Mostrando información de materia:', materia);
+    console.log('Mostrando materia:', materia);
+    
+    if (!materia || !materia.id) {
+        console.error('Materia no válida:', materia);
+        return;
+    }
+    
     document.getElementById('info-id').textContent = materia.id;
-    document.getElementById('info-nombre').textContent = materia.nombre;
+    document.getElementById('info-nombre').textContent = materia.nombre || 'Sin nombre';
     document.getElementById('info-materia').style.display = 'block';
 }
 
@@ -185,8 +179,8 @@ function confirmarEliminacion() {
     const idElement = document.getElementById('info-id');
     const id = idElement ? idElement.textContent.trim() : '';
     
-    if (!id || id === 'Buscando...') {
-        alert('No hay materia seleccionada para eliminar');
+    if (!id || id === '' || id === 'Buscando...') {
+        alert('No hay materia seleccionada para eliminar. Busque una materia primero.');
         return;
     }
     
@@ -209,16 +203,15 @@ function registrarMateria() {
     }
     
     const btnGuardar = document.querySelector('#formulario-ingresar button[type="submit"]');
-    const originalText = btnGuardar ? btnGuardar.innerHTML : '';
+    let originalText = '';
     
     if (btnGuardar) {
+        originalText = btnGuardar.innerHTML;
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = 'Enviando...';
     }
     
     const datos = { nombre: nombre };
-    
-    console.log('Enviando datos:', datos);
     
     fetch(API_BASE_URL + '/registrar', {
         method: 'POST',
@@ -226,18 +219,16 @@ function registrarMateria() {
         body: JSON.stringify(datos)
     })
     .then(response => {
-        console.log('Respuesta recibida');
-        return response.json();
-    })
-    .then(data => {
-        console.log('Datos recibidos:', data);
-        
-        // RESTAURAR BOTÓN SIEMPRE
+        // Primero restaurar el botón
         if (btnGuardar) {
             btnGuardar.disabled = false;
             btnGuardar.innerHTML = originalText;
         }
         
+        // Luego procesar la respuesta
+        return response.json();
+    })
+    .then(data => {
         if (data.success) {
             alert(data.message);
             inputNombre.value = '';
@@ -253,13 +244,14 @@ function registrarMateria() {
         }
     })
     .catch(error => {
-        console.error('Error completo:', error);
+        console.error('Error:', error);
         
-        // RESTAURAR BOTÓN EN CASO DE ERROR
+        // Restaurar botón en caso de error
         if (btnGuardar) {
             btnGuardar.disabled = false;
             btnGuardar.innerHTML = originalText;
         }
+        
         alert('Error de conexión con el servidor');
     });
 }
@@ -300,6 +292,7 @@ function eliminarMateriaPorId(id) {
         }
     })
     .catch(error => {
+        console.error('Error:', error);
         alert('Error de conexión');
     });
 }
