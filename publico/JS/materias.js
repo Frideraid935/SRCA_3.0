@@ -3,32 +3,32 @@
 const API_BASE_URL = '/api/materias';
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Materias JS cargado');
+    console.log('✅ Materias JS cargado');
     
-    // ===== FORMULARIO DE REGISTRO =====
+    // Formulario de registro
     const formRegistro = document.getElementById('formulario-ingresar');
     if (formRegistro) {
-        console.log('Formulario de registro encontrado');
         formRegistro.addEventListener('submit', function(e) {
             e.preventDefault();
             registrarMateria();
         });
     }
     
-    // ===== INICIALIZAR BÚSQUEDA SI ESTAMOS EN PÁGINA DE ELIMINAR =====
+    // Página de eliminación
     if (window.location.pathname.includes('eliminar')) {
-        console.log('Página de eliminación detectada');
-        inicializarBusquedaParaEliminar();
+        setTimeout(() => {
+            inicializarBusquedaEliminar();
+        }, 100);
     }
 });
 
-// ========== REGISTRAR MATERIA - SIMPLIFICADA ==========
+// ========== REGISTRAR MATERIA (CORREGIDO) ==========
 function registrarMateria() {
     const inputNombre = document.getElementById('materia-nombre');
     const btnGuardar = document.querySelector('#formulario-ingresar button[type="submit"]');
     
     if (!inputNombre || !btnGuardar) {
-        alert('Error: Elementos del formulario no encontrados');
+        alert('Error: Formulario no encontrado');
         return;
     }
     
@@ -46,135 +46,132 @@ function registrarMateria() {
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = 'Enviando...';
     
-    // Datos a enviar
+    // Datos
     const datos = { nombre: nombre };
     
-    console.log('Enviando:', datos);
+    console.log('📤 Enviando:', datos);
     
-    // Enviar petición
+    // Enviar
     fetch(API_BASE_URL + '/registrar', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos)
     })
-    .then(response => {
-        console.log('Status:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Respuesta:', data);
+        console.log('📥 Respuesta:', data);
         
         if (data.success) {
             alert('✅ ' + data.message);
-            inputNombre.value = ''; // Limpiar campo
+            inputNombre.value = '';
             
-            // Si estamos en página de eliminar, limpiar búsqueda
+            // Limpiar búsqueda si estamos en página de eliminar
             if (window.location.pathname.includes('eliminar')) {
-                const busquedaInput = document.getElementById('busqueda-nombre');
+                const busquedaInput = document.getElementById('buscar-input');
                 if (busquedaInput) busquedaInput.value = '';
-                document.getElementById('resultados-busqueda')?.style?.display = 'none';
-                document.getElementById('info-materia')?.style?.display = 'none';
+                ocultarResultados();
+                ocultarSeleccion();
             }
         } else {
             alert('❌ ' + data.message);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('⚠️ Error de conexión. Verifica si la materia se registró.');
+        console.error('❌ Error:', error);
+        alert('⚠️ Error de conexión');
     })
     .finally(() => {
-        // SIEMPSE RESTAURAR EL BOTÓN
+        // IMPORTANTE: SIEMPRE RESTAURAR EL BOTÓN
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = textoOriginal;
     });
 }
 
-// ========== SISTEMA DE BÚSQUEDA PARA ELIMINAR ==========
-function inicializarBusquedaParaEliminar() {
-    console.log('Inicializando sistema de búsqueda...');
+// ========== SISTEMA DE ELIMINACIÓN ==========
+function inicializarBusquedaEliminar() {
+    console.log('🔍 Inicializando búsqueda para eliminar...');
     
-    // Crear interfaz de búsqueda si no existe
-    let busquedaContainer = document.getElementById('busqueda-container');
-    if (!busquedaContainer) {
-        // Buscar un lugar donde insertar
-        const mainContainer = document.querySelector('.container, main, .contenedor') || document.body;
-        
-        // Crear contenedor
-        busquedaContainer = document.createElement('div');
-        busquedaContainer.id = 'busqueda-container';
-        busquedaContainer.innerHTML = `
-            <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-                <h3 style="margin-bottom: 20px; color: #333;">
-                    <i class="fas fa-search"></i> Buscar Materia para Eliminar
-                </h3>
-                
-                <!-- Campo de búsqueda -->
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" 
-                               id="busqueda-nombre" 
-                               placeholder="Escribe el nombre de la materia..."
-                               style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
-                               autocomplete="off">
-                        <button id="btn-buscar" 
-                                style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                    <small style="color: #666; display: block; margin-top: 5px;">
-                        Escribe al menos 2 caracteres
-                    </small>
-                </div>
-                
-                <!-- Resultados -->
-                <div id="resultados-busqueda" style="display: none; margin-top: 20px;">
-                    <h5>Resultados:</h5>
-                    <div id="lista-resultados" style="border: 1px solid #ddd; border-radius: 4px; max-height: 300px; overflow-y: auto;"></div>
-                </div>
-                
-                <!-- Materia seleccionada -->
-                <div id="info-materia" style="display: none; margin-top: 30px; padding: 20px; border: 2px solid #28a745; border-radius: 8px; background: #f8fff9;">
-                    <h5 style="color: #28a745; margin-bottom: 15px;">
-                        <i class="fas fa-check-circle"></i> Materia Seleccionada
-                    </h5>
-                    <div style="margin-bottom: 20px;">
-                        <p><strong>ID:</strong> <span id="materia-id">-</span></p>
-                        <p><strong>Nombre:</strong> <span id="materia-nombre-text">-</span></p>
-                    </div>
-                    <div style="text-align: center;">
-                        <button id="btn-eliminar" 
-                                style="padding: 12px 30px; background: #dc3545; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer;">
-                            <i class="fas fa-trash"></i> ELIMINAR MATERIA
-                        </button>
-                        <button id="btn-cancelar" 
-                                style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 10px;">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Mensajes -->
-                <div id="mensaje" style="margin-top: 10px;"></div>
-            </div>
-        `;
-        
-        mainContainer.prepend(busquedaContainer);
-        
-        // Agregar eventos
-        document.getElementById('btn-buscar').addEventListener('click', buscarMaterias);
-        document.getElementById('busqueda-nombre').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') buscarMaterias();
-        });
-        document.getElementById('btn-eliminar').addEventListener('click', confirmarEliminacion);
-        document.getElementById('btn-cancelar').addEventListener('click', cancelarSeleccion);
+    // Buscar o crear contenedor
+    let container = document.querySelector('.container, main, .contenedor, .content, .app-container') || document.body;
+    
+    let busquedaDiv = document.getElementById('eliminar-busqueda-container');
+    if (!busquedaDiv) {
+        busquedaDiv = document.createElement('div');
+        busquedaDiv.id = 'eliminar-busqueda-container';
+        container.prepend(busquedaDiv);
     }
+    
+    // HTML simple
+    busquedaDiv.innerHTML = `
+        <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+            <h3 style="margin-bottom: 20px; color: #333;">
+                <i class="fas fa-trash-alt" style="color: #dc3545;"></i> Eliminar Materia
+            </h3>
+            
+            <!-- Búsqueda -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold;">
+                    Buscar materia por nombre:
+                </label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" 
+                           id="buscar-input" 
+                           placeholder="Ej: Matemáticas"
+                           style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                           autocomplete="off">
+                    <button id="btn-buscar" 
+                            style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Escribe al menos 2 letras del nombre
+                </small>
+            </div>
+            
+            <!-- Resultados -->
+            <div id="resultados-container" style="display: none; margin-top: 20px;">
+                <h5 style="margin-bottom: 10px;">Resultados:</h5>
+                <div id="lista-resultados" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;"></div>
+            </div>
+            
+            <!-- Materia seleccionada -->
+            <div id="seleccion-container" style="display: none; margin-top: 20px; padding: 15px; border: 2px solid #28a745; border-radius: 6px; background: #f8fff9;">
+                <h5 style="color: #28a745; margin-bottom: 15px;">
+                    <i class="fas fa-check-circle"></i> Materia seleccionada para eliminar:
+                </h5>
+                <div style="margin-bottom: 15px;">
+                    <p><strong>ID:</strong> <span id="selected-id" style="font-weight: bold;">-</span></p>
+                    <p><strong>Nombre:</strong> <span id="selected-nombre" style="font-weight: bold; color: #28a745;">-</span></p>
+                </div>
+                <div style="text-align: center;">
+                    <button id="btn-eliminar-final" 
+                            style="padding: 12px 30px; background: #dc3545; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                        <i class="fas fa-trash"></i> ELIMINAR MATERIA
+                    </button>
+                    <button id="btn-cancelar-busqueda" 
+                            style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-left: 10px;">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mensajes -->
+            <div id="mensaje-area" style="margin-top: 15px;"></div>
+        </div>
+    `;
+    
+    // Eventos
+    document.getElementById('btn-buscar').addEventListener('click', buscarParaEliminar);
+    document.getElementById('buscar-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') buscarParaEliminar();
+    });
+    document.getElementById('btn-eliminar-final').addEventListener('click', confirmarEliminar);
+    document.getElementById('btn-cancelar-busqueda').addEventListener('click', cancelarSeleccionMateria);
 }
 
-function buscarMaterias() {
-    const input = document.getElementById('busqueda-nombre');
+function buscarParaEliminar() {
+    const input = document.getElementById('buscar-input');
     const query = input.value.trim();
     
     if (query.length < 2) {
@@ -183,16 +180,18 @@ function buscarMaterias() {
     }
     
     mostrarMensaje('Buscando...', 'info');
+    ocultarResultados();
+    ocultarSeleccion();
     
     fetch(`${API_BASE_URL}/buscar?nombre=${encodeURIComponent(query)}`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            mostrarResultados(data.materias);
-            if (data.materias.length === 0) {
-                mostrarMensaje(`No se encontraron materias con "${query}"`, 'warning');
-            } else {
+            if (data.materias.length > 0) {
+                mostrarResultadosBusqueda(data.materias);
                 mostrarMensaje(`Encontradas ${data.materias.length} materias`, 'success');
+            } else {
+                mostrarMensaje(`No se encontraron materias con "${query}"`, 'warning');
             }
         } else {
             mostrarMensaje(data.message, 'error');
@@ -204,72 +203,63 @@ function buscarMaterias() {
     });
 }
 
-function mostrarResultados(materias) {
-    const resultadosDiv = document.getElementById('resultados-busqueda');
+function mostrarResultadosBusqueda(materias) {
+    const container = document.getElementById('resultados-container');
     const lista = document.getElementById('lista-resultados');
     
     lista.innerHTML = '';
     
-    if (!materias || materias.length === 0) {
-        resultadosDiv.style.display = 'none';
-        return;
-    }
-    
     materias.forEach(materia => {
-        const item = document.createElement('div');
-        item.style.padding = '10px';
-        item.style.borderBottom = '1px solid #eee';
-        item.style.cursor = 'pointer';
-        item.innerHTML = `
+        const div = document.createElement('div');
+        div.style.padding = '10px';
+        div.style.borderBottom = '1px solid #eee';
+        div.style.cursor = 'pointer';
+        div.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <strong>${materia.nombre}</strong><br>
+                    <strong>${materia.nombre}</strong>
+                    <br>
                     <small style="color: #666;">ID: ${materia.id}</small>
                 </div>
-                <span style="color: #28a745; font-size: 12px;">
+                <span style="color: #007bff;">
                     <i class="fas fa-chevron-right"></i>
                 </span>
             </div>
         `;
         
-        item.addEventListener('click', function() {
-            seleccionarMateria(materia);
+        div.addEventListener('click', function() {
+            seleccionarMateriaParaEliminar(materia);
         });
         
-        // Efecto hover
-        item.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = '#f5f5f5';
+        div.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f0f8ff';
         });
-        item.addEventListener('mouseleave', function() {
+        
+        div.addEventListener('mouseleave', function() {
             this.style.backgroundColor = '';
         });
         
-        lista.appendChild(item);
+        lista.appendChild(div);
     });
     
-    resultadosDiv.style.display = 'block';
+    container.style.display = 'block';
 }
 
-function seleccionarMateria(materia) {
-    console.log('Seleccionada:', materia);
+function seleccionarMateriaParaEliminar(materia) {
+    console.log('Seleccionada para eliminar:', materia);
     
-    // Mostrar información
-    document.getElementById('materia-id').textContent = materia.id;
-    document.getElementById('materia-nombre-text').textContent = materia.nombre;
-    document.getElementById('info-materia').style.display = 'block';
+    document.getElementById('selected-id').textContent = materia.id;
+    document.getElementById('selected-nombre').textContent = materia.nombre;
     
-    // Ocultar resultados
-    document.getElementById('resultados-busqueda').style.display = 'none';
+    document.getElementById('seleccion-container').style.display = 'block';
+    document.getElementById('resultados-container').style.display = 'none';
     
-    // Desplazar vista
-    document.getElementById('info-materia').scrollIntoView({ behavior: 'smooth' });
-    
-    mostrarMensaje('Materia seleccionada. Haz clic en ELIMINAR MATERIA para continuar.', 'info');
+    mostrarMensaje('Materia seleccionada. Puedes eliminarla con el botón rojo.', 'info');
 }
 
-function confirmarEliminacion() {
-    const id = document.getElementById('materia-id').textContent;
-    const nombre = document.getElementById('materia-nombre-text').textContent;
+function confirmarEliminar() {
+    const id = document.getElementById('selected-id').textContent;
+    const nombre = document.getElementById('selected-nombre').textContent;
     
     if (id === '-' || !id) {
         mostrarMensaje('Primero selecciona una materia', 'warning');
@@ -280,24 +270,22 @@ function confirmarEliminacion() {
         return;
     }
     
-    const btnEliminar = document.getElementById('btn-eliminar');
-    const originalText = btnEliminar.innerHTML;
-    btnEliminar.disabled = true;
-    btnEliminar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+    const btn = document.getElementById('btn-eliminar-final');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
     
     fetch(API_BASE_URL + '/eliminar', {
         method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: parseInt(id) })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             mostrarMensaje(`✅ ${data.message}`, 'success');
-            cancelarSeleccion();
-            document.getElementById('busqueda-nombre').value = '';
+            cancelarSeleccionMateria();
+            document.getElementById('buscar-input').value = '';
         } else {
             mostrarMensaje(`❌ ${data.message}`, 'error');
         }
@@ -307,39 +295,48 @@ function confirmarEliminacion() {
         mostrarMensaje('❌ Error de conexión', 'error');
     })
     .finally(() => {
-        btnEliminar.disabled = false;
-        btnEliminar.innerHTML = originalText;
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     });
 }
 
-function cancelarSeleccion() {
-    document.getElementById('info-materia').style.display = 'none';
-    document.getElementById('materia-id').textContent = '-';
-    document.getElementById('materia-nombre-text').textContent = '-';
-    document.getElementById('resultados-busqueda').style.display = 'none';
-    document.getElementById('busqueda-nombre').focus();
+function cancelarSeleccionMateria() {
+    ocultarSeleccion();
+    ocultarResultados();
+    document.getElementById('buscar-input').focus();
+}
+
+function ocultarResultados() {
+    document.getElementById('resultados-container').style.display = 'none';
+}
+
+function ocultarSeleccion() {
+    document.getElementById('seleccion-container').style.display = 'none';
 }
 
 function mostrarMensaje(texto, tipo) {
-    const mensajeDiv = document.getElementById('mensaje');
+    const area = document.getElementById('mensaje-area');
     let color = '#333';
-    let icon = '';
     
     switch(tipo) {
-        case 'success': color = '#28a745'; icon = '✅'; break;
-        case 'error': color = '#dc3545'; icon = '❌'; break;
-        case 'warning': color = '#ffc107'; icon = '⚠️'; break;
-        case 'info': color = '#17a2b8'; icon = 'ℹ️'; break;
+        case 'success': color = '#28a745'; break;
+        case 'error': color = '#dc3545'; break;
+        case 'warning': color = '#ffc107'; break;
+        case 'info': color = '#17a2b8'; break;
     }
     
-    mensajeDiv.innerHTML = `<div style="padding: 10px; background: ${color}15; border-left: 4px solid ${color}; color: ${color};">
-        ${icon} ${texto}
-    </div>`;
+    area.innerHTML = `
+        <div style="padding: 10px; background: ${color}15; border-left: 4px solid ${color}; color: ${color};">
+            ${texto}
+        </div>
+    `;
     
-    // Auto-ocultar después de 5 segundos
     setTimeout(() => {
-        if (mensajeDiv.innerHTML.includes(texto)) {
-            mensajeDiv.innerHTML = '';
+        if (area.innerHTML.includes(texto)) {
+            area.innerHTML = '';
         }
-    }, 5000);
+    }, 4000);
 }
+
+// Exportar
+window.registrarMateria = registrarMateria;
