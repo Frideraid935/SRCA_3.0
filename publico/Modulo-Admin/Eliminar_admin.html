@@ -8,41 +8,40 @@
     <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body>
-    <div class="contenedor-principal">
-        <div class="contenedor-formulario">
-            <h2>Eliminar Administrador</h2>
-            <form id="form-buscar-admin">
-                <div class="campo">
-                    <label for="usuario">
-                        <i class="fas fa-user"></i> Nombre de usuario:
-                    </label>
-                    <input type="text" id="usuario" placeholder="Ej: admin2023" required>
-                </div>
-                
-                <div class="botones">
-                    <button type="submit" class="btn btn-buscar">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                </div>
-            </form>
 
-            <div id="info-admin" class="info-admin" style="display: none;">
-                <h3>Información del Administrador</h3>
-                <div class="info-detalle">
-                    <p><strong>Usuario:</strong> <span id="info-usuario"></span></p>
-                </div>
-                
-                <div class="botones">
-                    <button id="btn-confirmar-eliminar" class="btn btn-eliminar">
-                        <i class="fas fa-trash-alt"></i> Confirmar Eliminación
-                    </button>
-                </div>
+<div class="contenedor-principal">
+    <div class="contenedor-formulario">
+        <h2>Eliminar Administrador</h2>
+
+        <!-- FORMULARIO ÚNICO -->
+        <form id="form-eliminar-admin">
+            <div class="campo">
+                <label for="usuario">
+                    <i class="fas fa-user"></i> Nombre de usuario:
+                </label>
+                <input
+                    type="text"
+                    id="usuario"
+                    placeholder="Ej: admin2023"
+                    required
+                >
             </div>
-            
-            <div id="mensaje" class="mensaje"></div>
-        </div>
-    </div>
 
-    <script src="../JS/admin.js"></script>
+            <div class="botones">
+                <button
+                    type="submit"
+                    id="btn-confirmar-eliminar"
+                    class="btn btn-eliminar"
+                >
+                    <i class="fas fa-trash-alt"></i> Eliminar
+                </button>
+            </div>
+        </form>
+
+        <div id="mensaje" class="mensaje"></div>
+    </div>
+</div>
+
+<script src="../JS/admin.js"></script>
 </body>
 </html>

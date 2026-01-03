@@ -1,15 +1,12 @@
-// publico/JS/admin.js
 const API_BASE = '/api/admin';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================
-       REGISTRAR ADMIN
-    ========================= */
+    /* ===============================
+       REGISTRAR ADMINISTRADOR
+    ================================ */
     const formRegistrar = document.getElementById('form-registrar-admin');
-
     if (formRegistrar) {
-        const btnRegistrar = formRegistrar.querySelector('button[type="submit"]');
         const mensaje = document.getElementById('mensaje');
 
         formRegistrar.addEventListener('submit', async (e) => {
@@ -24,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            btnRegistrar.disabled = true;
-            btnRegistrar.textContent = 'REGISTRANDO...';
+            mensaje.textContent = 'Registrando...';
+            mensaje.style.display = 'block';
 
             try {
                 const res = await fetch(`${API_BASE}/registrar`, {
@@ -35,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await res.json();
+
                 mensaje.textContent = data.message;
-                mensaje.style.display = 'block';
 
                 if (data.success) {
                     formRegistrar.reset();
@@ -44,36 +41,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 mensaje.textContent = 'Error de conexión';
-                mensaje.style.display = 'block';
                 console.error(error);
-            } finally {
-                btnRegistrar.disabled = false;
-                btnRegistrar.textContent = 'Registrar';
             }
         });
     }
 
-    /* =========================
-       ELIMINAR ADMIN (DIRECTO)
-    ========================= */
-    const btnEliminar = document.getElementById('btn-confirmar-eliminar');
-
-    if (btnEliminar) {
+    /* ===============================
+       ELIMINAR ADMINISTRADOR
+    ================================ */
+    const formEliminar = document.getElementById('form-eliminar-admin');
+    if (formEliminar) {
         const mensaje = document.getElementById('mensaje');
+        const btnEliminar = document.getElementById('btn-confirmar-eliminar');
 
-        btnEliminar.addEventListener('click', async () => {
+        formEliminar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
             const usuario = document.getElementById('usuario').value.trim();
 
             if (!usuario) {
-                mensaje.textContent = 'Escriba el usuario a eliminar';
+                mensaje.textContent = 'Ingresa el usuario';
                 mensaje.style.display = 'block';
                 return;
             }
 
-            if (!confirm(`¿Eliminar al administrador ${usuario}?`)) return;
+            if (!confirm(`¿Seguro que deseas eliminar al administrador "${usuario}"?`)) {
+                return;
+            }
 
             btnEliminar.disabled = true;
-            btnEliminar.textContent = 'ELIMINANDO...';
+            btnEliminar.textContent = 'Eliminando...';
 
             try {
                 const res = await fetch(`${API_BASE}/eliminar`, {
@@ -83,11 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await res.json();
+
                 mensaje.textContent = data.message;
                 mensaje.style.display = 'block';
 
                 if (data.success) {
-                    document.getElementById('usuario').value = '';
+                    formEliminar.reset();
                 }
 
             } catch (error) {
@@ -96,8 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(error);
             } finally {
                 btnEliminar.disabled = false;
-                btnEliminar.textContent = 'Confirmar Eliminación';
+                btnEliminar.innerHTML = '<i class="fas fa-trash-alt"></i> Eliminar';
             }
         });
     }
+
 });
