@@ -31,6 +31,9 @@ app.use('/api/materias', materiasAPI);
 const adminApi = require("./APIS/admin.api");
 app.use("/api/admin", adminApi);
 
+const calificacionesAPI = require('./APIS/calificaciones.api');
+app.use('/api/calificaciones', calificacionesAPI);
+
 /* ===============================
    RUTAS DE VISTAS
 ================================ */

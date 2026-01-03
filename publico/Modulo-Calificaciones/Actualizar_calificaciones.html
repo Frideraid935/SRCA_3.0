@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Actualizar Calificación</title>
+    <link rel="stylesheet" href="../css/estilo-calificaciones.css">
+</head>
+<body>
+
+<div class="contenedor-formulario">
+    <h2>Actualizar Calificación</h2>
+
+    <input type="number" id="id_calificacion" placeholder="ID de la calificación">
+    <button id="btn-buscar">Buscar</button>
+
+    <form id="form-actualizar-calificacion" style="display:none;">
+        <input type="text" id="alumno">
+        <input type="text" id="control">
+        <input type="number" id="materia">
+        <input type="number" id="calificacion" min="0" max="10" step="0.1">
+        <input type="text" id="profesor">
+
+        <button type="submit">Actualizar</button>
+        <div id="mensaje" class="mensaje"></div>
+    </form>
+</div>
+
+<script src="../JS/calificaciones.js"></script>
+</body>
+</html>
