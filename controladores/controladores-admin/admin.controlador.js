@@ -2,49 +2,28 @@
 const db = require("../../BD/BD.js");
 
 const adminController = {
-    // REGISTRAR administrador
     registrarAdmin: function(req, res) {
         try {
             const { usuario, contrasena } = req.body;
             
-            console.log('Registrando admin:', usuario);
-            
-            if (!usuario || usuario.trim() === '') {
+            if (!usuario || !contrasena) {
                 return res.json({ 
                     success: false, 
-                    message: "El nombre de usuario es requerido" 
-                });
-            }
-            
-            if (!contrasena || contrasena.trim() === '') {
-                return res.json({ 
-                    success: false, 
-                    message: "La contraseña es requerida" 
+                    message: "Usuario y contraseña son requeridos" 
                 });
             }
             
             const query = "INSERT INTO administradores (usuario, contrasena) VALUES (?, ?)";
-            const usuarioLimpio = usuario.trim();
-            const contrasenaLimpia = contrasena.trim(); // En producción usa bcrypt
             
-            db.query(query, [usuarioLimpio, contrasenaLimpia], (err, result) => {
+            db.query(query, [usuario.trim(), contrasena.trim()], (err, result) => {
                 if (err) {
-                    console.error("Error SQL:", err);
-                    
-                    if (err.code === 'ER_DUP_ENTRY') {
-                        return res.json({ 
-                            success: false, 
-                            message: "Este nombre de usuario ya existe" 
-                        });
-                    }
-                    
+                    console.error("Error:", err);
                     return res.json({ 
                         success: false, 
-                        message: "Error al registrar en la base de datos" 
+                        message: "Error al registrar" 
                     });
                 }
                 
-                console.log('Admin registrado:', usuarioLimpio);
                 res.json({
                     success: true,
                     message: "Administrador registrado exitosamente"
@@ -55,22 +34,19 @@ const adminController = {
             console.error("Error:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     },
 
-    // BUSCAR administrador por usuario
     buscarAdmin: function(req, res) {
         try {
             const usuario = req.query.usuario || '';
             
-            console.log('Buscando admin:', usuario);
-            
-            if (!usuario || usuario.trim() === '') {
+            if (!usuario) {
                 return res.json({ 
                     success: false, 
-                    message: "Escriba un nombre de usuario" 
+                    message: "Usuario requerido" 
                 });
             }
             
@@ -78,7 +54,7 @@ const adminController = {
             
             db.query(query, [usuario.trim()], (err, results) => {
                 if (err) {
-                    console.error("Error SQL:", err);
+                    console.error("Error:", err);
                     return res.status(500).json({ 
                         success: false, 
                         message: "Error en la base de datos" 
@@ -103,70 +79,43 @@ const adminController = {
             console.error("Error:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     },
 
-    // ELIMINAR administrador por usuario
     eliminarAdmin: function(req, res) {
         try {
             const { usuario } = req.body;
             
-            console.log('Eliminando admin:', usuario);
-            
-            if (!usuario || usuario.trim() === '') {
+            if (!usuario) {
                 return res.json({ 
                     success: false, 
                     message: "Usuario requerido" 
                 });
             }
             
-            // Verificar que no sea el último administrador
-            const countQuery = "SELECT COUNT(*) as total FROM administradores";
+            const query = "DELETE FROM administradores WHERE usuario = ?";
             
-            db.query(countQuery, (err, countResults) => {
+            db.query(query, [usuario.trim()], (err, result) => {
                 if (err) {
-                    console.error("Error SQL:", err);
+                    console.error("Error:", err);
                     return res.json({ 
                         success: false, 
-                        message: "Error en la base de datos" 
+                        message: "Error al eliminar" 
                     });
                 }
                 
-                const totalAdmins = countResults[0].total;
-                
-                if (totalAdmins <= 1) {
+                if (result.affectedRows === 0) {
                     return res.json({ 
                         success: false, 
-                        message: "No se puede eliminar el único administrador" 
+                        message: "Administrador no encontrado" 
                     });
                 }
                 
-                // Eliminar el administrador
-                const deleteQuery = "DELETE FROM administradores WHERE usuario = ?";
-                
-                db.query(deleteQuery, [usuario.trim()], (err, result) => {
-                    if (err) {
-                        console.error("Error SQL:", err);
-                        return res.json({ 
-                            success: false, 
-                            message: "Error al eliminar" 
-                        });
-                    }
-                    
-                    if (result.affectedRows === 0) {
-                        return res.json({ 
-                            success: false, 
-                            message: "Administrador no encontrado" 
-                        });
-                    }
-                    
-                    console.log('Admin eliminado:', usuario);
-                    res.json({
-                        success: true,
-                        message: "Administrador eliminado exitosamente"
-                    });
+                res.json({
+                    success: true,
+                    message: "Administrador eliminado exitosamente"
                 });
             });
             
@@ -174,7 +123,7 @@ const adminController = {
             console.error("Error:", error);
             res.status(500).json({ 
                 success: false, 
-                message: "Error interno del servidor" 
+                message: "Error interno" 
             });
         }
     }
