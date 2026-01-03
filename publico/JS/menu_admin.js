@@ -20,6 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Regresar al menú principal
     btnInicio.addEventListener('click', () => {
-        window.location.href = '../Menu_inicio/inicio_Admin.html';
+        window.location.href = '../menu_inicio/menu_inicio_admin.html';
     });
 });
