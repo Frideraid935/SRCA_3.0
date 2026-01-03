@@ -62,19 +62,26 @@ body {
 /* Contenido principal */
 .contenido-principal {
     flex-grow: 1;
-    padding: 30px;
     margin-left: 250px;
     width: calc(100% - 250px);
     min-height: 100vh;
+
+    /* Fondo */
     background-color: #ffffff;
-    background-image: url('../Logins/fondo3.jpeg');
+    background-image: url('../imagenes/fondo3.jpeg');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
+
+    /* Centrado REAL del contenido */
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: center;   /* horizontal */
+    align-items: center;       /* vertical */
+
+    padding: 40px;
+    box-sizing: border-box;
 }
+
 
 .contenedor-formulario {
     background-color: rgba(255, 255, 255, 0.95);
