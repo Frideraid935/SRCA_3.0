@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Administradores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../Estilos/estilo-alumnos.css">
+    <style>
+        /* Estilos generales */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(to right, #f4f6f9, #dde6f0);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Menú lateral */
+        .menu-lateral {
+            width: 280px;
+            background: linear-gradient(to bottom, #2c3e50, #34495e);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .logo {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+        }
+        
+        .logo h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+        
+        .logo h2 i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        
+        .menu-item {
+            padding: 16px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            color: #ecf0f1;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left-color: #3498db;
+            color: #3498db;
+        }
+        
+        .menu-item.active {
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .menu-item i {
+            width: 25px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        /* Contenido principal */
+        .contenido-principal {
+            flex: 1;
+            margin-left: 280px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: transparent;
+        }
+        
+        /* Contenedor del iframe */
+        .contenedor-iframe {
+            width: 100%;
+            max-width: 1000px;
+            min-height: 100vh;
+            background-color: transparent;
+        }
+        
+        /* Iframe */
+        #contenido-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: transparent;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-lateral {
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                justify-content: space-around;
+                flex-wrap: wrap;
+            }
+            
+            .logo {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            .menu-item {
+                padding: 12px 15px;
+                flex: 1;
+                min-width: 150px;
+                justify-content: center;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .menu-item:hover,
+            .menu-item.active {
+                border-left: none;
+                border-bottom-color: #3498db;
+            }
+            
+            .contenido-principal {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+        }
+        
+        /* Estilos para el contenido dentro del iframe */
+        .iframe-content {
+            background-color: white;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div class="menu-lateral">
+        <div class="logo">
+            <h2><i class="fas fa-users-cog"></i> Administradores</h2>
+        </div>
+
+        <div class="menu-item active" data-url="Admin_registrar.html">
+            <i class="fas fa-user-plus"></i> Registrar Admin
+        </div>
+
+        <div class="menu-item" data-url="Admin_eliminar.html">
+            <i class="fas fa-trash-alt"></i> Eliminar Admin
+        </div>
+
+        <div class="menu-item" data-url="../Menu_inicio/inicio_Admin.html">
+            <i class="fas fa-home"></i> Menú Principal
+        </div>
+        
+        <div class="menu-item" onclick="window.location.href='../Menu_inicio/inicio_Admin.html'" style="margin-top: auto; background-color: rgba(231, 76, 60, 0.1);">
+            <i class="fas fa-sign-out-alt"></i> Salir
+        </div>
+    </div>
+
+    <!-- Contenido principal con iframe -->
+    <div class="contenido-principal">
+        <div class="contenedor-iframe">
+            <iframe id="contenido-iframe" class="iframe-content" scrolling="no"></iframe>
+        </div>
+    </div>
+
+    <!-- Cargar el JavaScript del menú -->
+    <script src="../JS/menu-admin.js"></script>
+    
+    <!-- Script adicional para ajustes específicos -->
+    <script>
+        // Función para ajustar la altura del iframe desde dentro del iframe
+        function ajustarAlturaDesdeIframe() {
+            if (window.parent && window.parent.ajustarAlturaIframe) {
+                window.parent.ajustarAlturaIframe();
+            }
+        }
+        
+        // Ejecutar cuando hay cambios en el contenido
+        if (window !== window.parent) {
+            // Estamos dentro de un iframe
+            document.addEventListener('DOMContentLoaded', ajustarAlturaDesdeIframe);
+            window.addEventListener('resize', ajustarAlturaDesdeIframe);
+            
+            // Para formularios que cambian dinámicamente
+            const observer = new MutationObserver(ajustarAlturaDesdeIframe);
+            observer.observe(document.body, { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                characterData: true
+            });
+        }
+    </script>
+</body>
+</html>
