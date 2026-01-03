@@ -28,6 +28,9 @@ app.use("/api/alumnos", alumnosApi);
 const materiasAPI = require('./APIS/materias.api.js');
 app.use('/api/materias', materiasAPI);
 
+const adminApi = require("./APIS/admin.api");
+app.use("/api/admin", adminApi);
+
 /* ===============================
    RUTAS DE VISTAS
 ================================ */
