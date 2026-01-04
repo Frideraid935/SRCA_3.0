@@ -1,4 +1,4 @@
-const db = require('../../BD/BD');
+const db = require('../../BD/BD.js');
 
 const calificacionesController = {
 
