@@ -2,7 +2,6 @@ const db = require('../../BD/BD.js');
 
 const calificacionesController = {
 
-    // ===== REGISTRAR CALIFICACIÓN =====
     async registrar(req, res) {
         try {
             const { alumno_nombre, numero_de_control, materia, calificacion, profesor } = req.body;
@@ -25,7 +24,6 @@ const calificacionesController = {
         }
     },
 
-    // ===== BUSCAR CALIFICACIÓN POR ALUMNO + MATERIA =====
     async buscar(req, res) {
         try {
             const { alumno_nombre, materia } = req.query;
@@ -34,10 +32,7 @@ const calificacionesController = {
                 return res.status(400).json({ message: 'Alumno y Materia son requeridos' });
             }
 
-            const sql = `
-                SELECT * FROM calificaciones
-                WHERE alumno_nombre = ? AND materia = ?
-            `;
+            const sql = `SELECT * FROM calificaciones WHERE alumno_nombre = ? AND materia = ?`;
             const [rows] = await db.query(sql, [alumno_nombre, materia]);
 
             if (rows.length === 0) return res.status(404).json({ message: 'Calificación no encontrada' });
@@ -48,7 +43,6 @@ const calificacionesController = {
         }
     },
 
-    // ===== ACTUALIZAR CALIFICACIÓN =====
     async actualizar(req, res) {
         try {
             const { alumno_nombre, materia, calificacion, profesor } = req.body;

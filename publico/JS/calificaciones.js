@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===== INGRESAR CALIFICACIÓN =====
-    const formIngresar = document.getElementById('formulario-ingresar');
-    const mensajeIngresar = document.getElementById('mensaje-ingresar');
+    // ===== REGISTRAR =====
+    const formRegistrar = document.getElementById('formulario-registrar');
+    const mensajeRegistrar = document.getElementById('mensaje-registrar');
 
-    formIngresar.addEventListener('submit', async (e) => {
+    formRegistrar.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const data = {
-            alumno_nombre: document.getElementById('alumno_nombre_ingresar').value.trim(),
-            numero_de_control: document.getElementById('numero_de_control_ingresar').value.trim(),
-            materia: document.getElementById('materia_ingresar').value.trim(),
-            calificacion: document.getElementById('calificacion_ingresar').value.trim(),
-            profesor: document.getElementById('profesor_ingresar').value.trim()
+            alumno_nombre: document.getElementById('alumno_nombre_registrar').value.trim(),
+            numero_de_control: document.getElementById('numero_de_control_registrar').value.trim(),
+            materia: document.getElementById('materia_registrar').value.trim(),
+            calificacion: document.getElementById('calificacion_registrar').value.trim(),
+            profesor: document.getElementById('profesor_registrar').value.trim()
         };
 
         try {
@@ -21,18 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+
             const result = await resp.json();
-            mensajeIngresar.textContent = result.message;
-            mensajeIngresar.style.color = resp.ok ? 'green' : 'red';
-            if (resp.ok) formIngresar.reset();
+            mensajeRegistrar.textContent = result.message;
+            mensajeRegistrar.style.color = resp.ok ? 'green' : 'red';
+
+            if (resp.ok) formRegistrar.reset();
         } catch (err) {
             console.error(err);
-            mensajeIngresar.textContent = 'Error de conexión con el servidor';
-            mensajeIngresar.style.color = 'red';
+            mensajeRegistrar.textContent = 'Error de conexión con el servidor';
+            mensajeRegistrar.style.color = 'red';
         }
     });
 
-    // ===== ACTUALIZAR CALIFICACIÓN =====
+    // ===== ACTUALIZAR =====
     const formBuscar = document.getElementById('formulario-buscar');
     const formActualizar = document.getElementById('formulario-actualizar');
     const mensajeBuscar = document.getElementById('mensaje-buscar');
@@ -81,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+
             const result = await resp.json();
             mensajeActualizar.textContent = result.message;
             mensajeActualizar.style.color = resp.ok ? 'green' : 'red';
@@ -90,5 +93,4 @@ document.addEventListener('DOMContentLoaded', () => {
             mensajeActualizar.style.color = 'red';
         }
     });
-
 });
