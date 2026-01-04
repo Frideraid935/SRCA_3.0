@@ -7,7 +7,7 @@ const calificacionesController = require('../controladores/controladores-calific
 router.post('/registrar', calificacionesController.registrar);
 
 // Buscar calificación por Alumno + Materia
-router.get('/buscar', calificacionesController.buscarPorAlumnoMateria);
+router.get('/buscar', calificacionesController.buscar);
 
 // Actualizar calificación por ID
 router.put('/actualizar/:id', calificacionesController.actualizar);
