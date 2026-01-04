@@ -11,25 +11,27 @@
 <div class="contenedor-formulario active">
     <h2>Actualizar Calificación</h2>
 
-    <div class="grupo-campos">
-        <div class="campo">
-            <label for="buscar_alumno">Nombre del Alumno:</label>
-            <input type="text" id="buscar_alumno" placeholder="Ingrese nombre del alumno">
+    <form id="formulario-buscar-actualizar" class="form">
+        <div class="grupo-campos">
+            <div class="campo">
+                <label for="alumno_nombre_buscar">Alumno:</label>
+                <input type="text" id="alumno_nombre_buscar" placeholder="Nombre del Alumno" required>
+            </div>
+
+            <div class="campo">
+                <label for="materia_id_buscar">Materia:</label>
+                <input type="text" id="materia_id_buscar" placeholder="Nombre de la Materia" required>
+            </div>
         </div>
 
-        <div class="campo">
-            <label for="buscar_materia">Nombre de la Materia:</label>
-            <input type="text" id="buscar_materia" placeholder="Ingrese nombre de la materia">
+        <div class="botones">
+            <button type="submit" class="btn btn-primary">Buscar</button>
         </div>
-    </div>
 
-    <div class="botones">
-        <button class="btn btn-primary" id="btn-buscar-actualizar">Buscar</button>
-    </div>
+        <div id="mensaje-buscar" class="mensaje"></div>
+    </form>
 
-    <form id="formulario-actualizar" style="display:none;">
-        <input type="hidden" id="id_actualizar">
-
+    <form id="formulario-actualizar" class="form" style="display:none;">
         <div class="grupo-campos">
             <div class="campo">
                 <label for="alumno_nombre_actualizar">Alumno:</label>
@@ -37,24 +39,15 @@
             </div>
 
             <div class="campo">
-                <label for="numero_de_control_actualizar">Número de Control:</label>
-                <input type="text" id="numero_de_control_actualizar" readonly required>
-            </div>
-        </div>
-
-        <div class="grupo-campos">
-            <div class="campo">
-                <label for="materia_nombre_actualizar">Materia:</label>
-                <input type="text" id="materia_nombre_actualizar" required>
+                <label for="materia_id_actualizar">Materia:</label>
+                <input type="text" id="materia_id_actualizar" required>
             </div>
 
             <div class="campo">
                 <label for="calificacion_actualizar">Calificación (0-10):</label>
                 <input type="number" id="calificacion_actualizar" min="0" max="10" step="0.1" required>
             </div>
-        </div>
 
-        <div class="grupo-campos">
             <div class="campo">
                 <label for="profesor_nombre_actualizar">Profesor:</label>
                 <input type="text" id="profesor_nombre_actualizar" required>
@@ -62,7 +55,7 @@
         </div>
 
         <div class="botones">
-            <button type="button" id="btn-actualizar" class="btn btn-success">Actualizar</button>
+            <button type="submit" class="btn btn-success">Actualizar</button>
             <button type="reset" class="btn btn-primary">Limpiar</button>
         </div>
 
