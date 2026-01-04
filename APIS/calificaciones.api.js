@@ -3,7 +3,6 @@ const router = express.Router();
 
 const calificacionesController = require('../controladores/controladores-calificaciones/calificaciones.controlador');
 
-// Rutas
 router.post('/registrar', calificacionesController.registrar);
 router.get('/buscar', calificacionesController.buscar);
 router.put('/actualizar', calificacionesController.actualizar);
