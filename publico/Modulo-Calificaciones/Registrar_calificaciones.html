@@ -51,6 +51,67 @@
         <div id="mensaje-ingresar" class="mensaje"></div>
     </form>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const alumnoSelect = document.getElementById("alumno");
+  const numeroControlInput = document.getElementById("numero_control");
+  const materiaSelect = document.getElementById("materia");
+  const profesorSelect = document.getElementById("profesor");
+
+  // 1. Cargar alumnos
+  const alumnos = await fetch("/api/alumnos/listar").then(res => res.json());
+  alumnos.forEach(a => {
+    const option = document.createElement("option");
+    option.value = a.numero_de_control;
+    option.textContent = a.nombre;
+    alumnoSelect.appendChild(option);
+  });
+
+  // Actualizar número de control al cambiar alumno
+  alumnoSelect.addEventListener("change", () => {
+    numeroControlInput.value = alumnoSelect.value;
+  });
+
+  // 2. Cargar materias
+  const materias = await fetch("/api/materias/listar").then(res => res.json());
+  materias.forEach(m => {
+    const option = document.createElement("option");
+    option.value = m.id;
+    option.textContent = m.nombre;
+    materiaSelect.appendChild(option);
+  });
+
+  // 3. Cargar profesores
+  const profesores = await fetch("/api/profesores/listar").then(res => res.json());
+  profesores.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.numero_de_control;
+    option.textContent = p.nombre;
+    profesorSelect.appendChild(option);
+  });
+
+  // 4. Registrar calificación
+  document.getElementById("formulario-calificaciones").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {
+      alumno_nombre: alumnoSelect.selectedOptions[0].textContent,
+      numero_de_control: numeroControlInput.value,
+      materia_id: materiaSelect.value,
+      calificacion: document.getElementById("calificacion").value,
+      profesor_id: profesorSelect.value
+    };
+
+    const resp = await fetch("/api/calificaciones/registrar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    }).then(r => r.json());
+
+    if (resp.success) alert("Calificación registrada");
+    else alert("Error: " + resp.message);
+  });
+});
+</script>
 
 </body>
 </html>
