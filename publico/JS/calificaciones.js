@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await res.json();
             mensaje.textContent = result.message;
             mensaje.style.color = res.ok ? 'green' : 'red';
+            if (res.ok) document.getElementById('formulario-ingresarP').reset();
         } catch (err) {
             mensaje.textContent = 'Error al conectar con el servidor';
             mensaje.style.color = 'red';
@@ -114,14 +115,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = document.getElementById('id_actualizar').value;
         const data = {
             alumno_nombre: document.getElementById('alumno_nombre_actualizar').value,
+            numero_de_control: document.getElementById('numero_de_control_actualizar').value,
             materia_nombre: document.getElementById('materia_id_actualizar').value,
             calificacion: document.getElementById('calificacion_actualizar').value,
             profesor_nombre: document.getElementById('profesor_nombre_actualizar').value
         };
         const mensaje = document.getElementById('mensaje-actualizar');
 
+        if (!id) {
+            mensaje.textContent = 'Primero busque una calificación para actualizar';
+            mensaje.style.color = 'red';
+            return;
+        }
+
         try {
-            const res = await fetch(`${API_CALIFICACIONES}/actualizar`, {
+            const res = await fetch(`${API_CALIFICACIONES}/actualizar/${id}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data)
@@ -135,4 +143,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error(err);
         }
     });
+
 });

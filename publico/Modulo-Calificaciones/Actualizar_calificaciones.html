@@ -13,13 +13,13 @@
 
     <div class="grupo-campos">
         <div class="campo">
-            <label for="alumno_nombre_actualizar">Nombre del Alumno:</label>
-            <input type="text" id="alumno_nombre_actualizar" required>
+            <label for="alumno_nombre_actualizar">Alumno:</label>
+            <input type="text" id="alumno_nombre_actualizar" placeholder="Nombre del Alumno">
         </div>
 
         <div class="campo">
-            <label for="materia_id_actualizar">Nombre de la Materia:</label>
-            <input type="text" id="materia_id_actualizar" required>
+            <label for="materia_id_actualizar">Materia:</label>
+            <input type="text" id="materia_id_actualizar" placeholder="Nombre de la Materia">
         </div>
     </div>
 
@@ -28,10 +28,24 @@
     </div>
 
     <form id="formulario-actualizar" style="display:none;">
+        <input type="hidden" id="id_actualizar">
+
         <div class="grupo-campos">
+            <div class="campo">
+                <label for="alumno_nombre_actualizar_form">Alumno:</label>
+                <input type="text" id="alumno_nombre_actualizar_form" required>
+            </div>
+
             <div class="campo">
                 <label for="numero_de_control_actualizar">Número de Control:</label>
                 <input type="text" id="numero_de_control_actualizar" readonly required>
+            </div>
+        </div>
+
+        <div class="grupo-campos">
+            <div class="campo">
+                <label for="materia_id_actualizar_form">Materia:</label>
+                <input type="text" id="materia_id_actualizar_form" required>
             </div>
 
             <div class="campo">
@@ -42,7 +56,7 @@
 
         <div class="grupo-campos">
             <div class="campo">
-                <label for="profesor_nombre_actualizar">Nombre del Profesor:</label>
+                <label for="profesor_nombre_actualizar">Profesor:</label>
                 <input type="text" id="profesor_nombre_actualizar" required>
             </div>
         </div>
@@ -58,4 +72,3 @@
 
 </body>
 </html>
-
