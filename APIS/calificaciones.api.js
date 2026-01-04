@@ -6,7 +6,7 @@ const calificacionesController = require('../controladores/controladores-calific
 
 /* Rutas */
 router.post('/registrar', calificacionesController.registrar);
-router.get('/:id', calificacionesController.buscar);
+router.get('/:id', calificacionesController.buscarPorId);
 router.put('/actualizar/:id', calificacionesController.actualizar);
 
 module.exports = router;
