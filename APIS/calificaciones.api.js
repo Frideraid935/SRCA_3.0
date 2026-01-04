@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
+
+/* Import correcto */
 const calificacionesController = require('../controladores/controladores-calificaciones/calificaciones.controlador');
 
-router.post('/registrar', calificaciones.registrar);
-router.get('/:id', calificaciones.buscarPorId);
-router.put('/actualizar/:id', calificaciones.actualizar);
+/* Rutas */
+router.post('/registrar', calificacionesController.registrar);
+router.get('/:id', calificacionesController.buscar);
+router.put('/actualizar/:id', calificacionesController.actualizar);
 
 module.exports = router;
-
