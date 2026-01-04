@@ -2,44 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Calificación</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Calificación</title>
 
-    <link rel="stylesheet" href="../css/estilo-alumnos.css">
+    <link rel="stylesheet" href="../css/estilo-calificaciones.css">
+    <script src="../JS/calificaciones.js"></script>
 </head>
 <body>
 
 <div class="contenedor-formulario active">
     <h2>Ingresar Calificación</h2>
 
-    <form id="form-registrar-calificacion">
+    <form id="formulario-ingresarP" class="form">
         <div class="grupo-campos">
             <div class="campo">
-                <label>Nombre del Alumno</label>
-                <input type="text" id="alumno_nombre" required>
+                <label for="alumno_nombre_ingresar">Nombre del Alumno:</label>
+                <input type="text" id="alumno_nombre_ingresar" required>
             </div>
 
             <div class="campo">
-                <label>Número de Control</label>
-                <input type="text" id="numero_control" required>
+                <label for="numero_de_control_ingresar">Número de Control:</label>
+                <input type="text" id="numero_de_control_ingresar" required>
             </div>
         </div>
 
         <div class="grupo-campos">
             <div class="campo">
-                <label>ID Materia</label>
-                <input type="number" id="materia_id" required>
+                <label for="materia_id_ingresar">ID de Materia:</label>
+                <input type="number" id="materia_id_ingresar" required>
             </div>
 
             <div class="campo">
-                <label>Calificación</label>
-                <input type="number" step="0.1" min="0" max="10" id="calificacion" required>
+                <label for="calificacion_ingresar">Calificación (0-10):</label>
+                <input type="number" id="calificacion_ingresar" min="0" max="10" step="0.1" required>
             </div>
         </div>
 
-        <div class="campo">
-            <label>ID Profesor</label>
-            <input type="text" id="profesor_id" required>
+        <div class="grupo-campos">
+            <div class="campo">
+                <label for="profesor_nombre_ingresar">Nombre del Profesor:</label>
+                <input type="text" id="profesor_nombre_ingresar" required>
+            </div>
         </div>
 
         <div class="botones">
@@ -47,10 +49,9 @@
             <button type="reset" class="btn btn-primary">Limpiar</button>
         </div>
 
-        <div id="mensaje" class="mensaje"></div>
+        <div id="mensaje-ingresar" class="mensaje"></div>
     </form>
 </div>
 
-<script src="../JS/calificaciones.js"></script>
 </body>
 </html>

@@ -2,6 +2,9 @@ const db = require('../../BD/BD');
 
 const calificacionesController = {
 
+    /* =========================
+       REGISTRAR CALIFICACIÓN
+    ========================== */
     registrar(req, res) {
         const {
             alumno_nombre,
@@ -12,7 +15,7 @@ const calificacionesController = {
         } = req.body;
 
         if (!alumno_nombre || !numero_de_control || !materia_id || !calificacion || !profesor_id) {
-            return res.json({ success: false, message: 'Todos los campos son obligatorios' });
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
         const sql = `
@@ -27,47 +30,68 @@ const calificacionesController = {
             materia_id,
             calificacion,
             profesor_id
-        ], err => {
+        ], (err) => {
             if (err) {
                 console.error(err);
-                return res.json({ success: false, message: 'Error al registrar calificación' });
+                return res.status(500).json({
+                    message: 'Error al registrar calificación (verifica alumno, materia o profesor)'
+                });
             }
 
-            res.json({ success: true, message: 'Calificación registrada correctamente' });
+            res.status(201).json({ message: 'Calificación registrada correctamente' });
         });
     },
 
-    buscar(req, res) {
-        const { id } = req.query;
+    /* =========================
+       BUSCAR POR ID
+       GET /api/calificaciones/:id
+    ========================== */
+    buscarPorId(req, res) {
+        const { id } = req.params;
 
-        const sql = 'SELECT * FROM calificaciones WHERE id = ?';
+        const sql = `
+            SELECT c.*
+            FROM calificaciones c
+            WHERE c.id = ?
+        `;
+
         db.query(sql, [id], (err, rows) => {
-            if (err) return res.json({ success: false, message: 'Error al buscar' });
-            if (rows.length === 0) {
-                return res.json({ success: false, message: 'Calificación no encontrada' });
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al buscar la calificación' });
             }
 
-            res.json({ success: true, calificacion: rows[0] });
+            if (rows.length === 0) {
+                return res.status(404).json({ message: 'Calificación no encontrada' });
+            }
+
+            res.json(rows[0]);
         });
     },
 
+    /* =========================
+       ACTUALIZAR CALIFICACIÓN
+       PUT /api/calificaciones/actualizar/:id
+    ========================== */
     actualizar(req, res) {
+        const { id } = req.params;
         const {
-            id,
             alumno_nombre,
             numero_de_control,
             materia_id,
-            calificacion,
-            profesor_id
+            calificacion
         } = req.body;
+
+        if (!alumno_nombre || !numero_de_control || !materia_id || !calificacion) {
+            return res.status(400).json({ message: 'Datos incompletos' });
+        }
 
         const sql = `
             UPDATE calificaciones SET
                 alumno_nombre = ?,
                 numero_de_control = ?,
                 materia_id = ?,
-                calificacion = ?,
-                profesor_id = ?
+                calificacion = ?
             WHERE id = ?
         `;
 
@@ -76,15 +100,18 @@ const calificacionesController = {
             numero_de_control,
             materia_id,
             calificacion,
-            profesor_id,
             id
-        ], err => {
+        ], (err, result) => {
             if (err) {
                 console.error(err);
-                return res.json({ success: false, message: 'Error al actualizar' });
+                return res.status(500).json({ message: 'Error al actualizar la calificación' });
             }
 
-            res.json({ success: true, message: 'Calificación actualizada correctamente' });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Calificación no encontrada' });
+            }
+
+            res.json({ message: 'Calificación actualizada correctamente' });
         });
     }
 };
