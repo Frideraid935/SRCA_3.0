@@ -7,18 +7,31 @@ const calificacionesController = {
     ========================== */
     async registrar(req, res) {
         try {
-            const { alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id } = req.body;
+            let { alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id } = req.body;
 
+            // Validar campos obligatorios
             if (!alumno_nombre || !numero_de_control || !materia_id || !calificacion || !profesor_id) {
                 return res.status(400).json({ message: 'Todos los campos son obligatorios' });
             }
 
+            // Verificar que la materia exista
+            const [materiaRows] = await db.query('SELECT id FROM materias WHERE id = ?', [materia_id]);
+            if (materiaRows.length === 0) {
+                return res.status(400).json({ message: `Materia con ID ${materia_id} no existe` });
+            }
+
+            // Verificar que el profesor exista
+            const [profesorRows] = await db.query('SELECT numero_de_control FROM profesores WHERE numero_de_control = ?', [profesor_id]);
+            if (profesorRows.length === 0) {
+                return res.status(400).json({ message: `Profesor con número de control ${profesor_id} no existe` });
+            }
+
+            // Insertar calificación
             const sql = `
                 INSERT INTO calificaciones
                 (alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id)
                 VALUES (?, ?, ?, ?, ?)
             `;
-
             await db.query(sql, [alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id]);
 
             res.status(201).json({ message: 'Calificación registrada correctamente' });
@@ -63,10 +76,22 @@ const calificacionesController = {
     async actualizar(req, res) {
         try {
             const { id } = req.params;
-            const { alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id } = req.body;
+            let { alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id } = req.body;
 
             if (!alumno_nombre || !numero_de_control || !materia_id || !calificacion || !profesor_id) {
                 return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+            }
+
+            // Verificar materia
+            const [materiaRows] = await db.query('SELECT id FROM materias WHERE id = ?', [materia_id]);
+            if (materiaRows.length === 0) {
+                return res.status(400).json({ message: `Materia con ID ${materia_id} no existe` });
+            }
+
+            // Verificar profesor
+            const [profesorRows] = await db.query('SELECT numero_de_control FROM profesores WHERE numero_de_control = ?', [profesor_id]);
+            if (profesorRows.length === 0) {
+                return res.status(400).json({ message: `Profesor con número de control ${profesor_id} no existe` });
             }
 
             const sql = `
