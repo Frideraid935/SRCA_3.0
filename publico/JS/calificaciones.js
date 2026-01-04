@@ -1,85 +1,92 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
 
-    const API_ALUMNOS = '/api/alumnos/listar';
-    const API_MATERIAS = '/api/materias/listar';
-    const API_PROFESORES = '/api/profesores/listar';
-
-    // Cargar selects
-    try {
-        const [alumnos, materias, profesores] = await Promise.all([
-            fetch(API_ALUMNOS).then(res => res.json()),
-            fetch(API_MATERIAS).then(res => res.json()),
-            fetch(API_PROFESORES).then(res => res.json())
-        ]);
-
-        llenarSelect('alumno_nombre_ingresar', alumnos, 'numero_de_control', 'nombre');
-        llenarSelect('materia_id_ingresar', materias, 'id', 'nombre');
-        llenarSelect('profesor_nombre_ingresar', profesores, 'numero_de_control', 'nombre');
-
-    } catch (err) {
-        console.error('Error al cargar datos para selects:', err);
-    }
-
-    function llenarSelect(idSelect, datos, valor, texto) {
-        const select = document.getElementById(idSelect);
-        select.innerHTML = '<option value="">--Seleccione--</option>';
-        datos.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item[valor];
-            opt.textContent = item[texto];
-            select.appendChild(opt);
-        });
-    }
-
-    // Enviar formulario
-    const form = document.getElementById('formulario-ingresar');
-    form.addEventListener('submit', async (e) => {
+    // ==========================
+    // INGRESAR CALIFICACIÓN
+    // ==========================
+    const formIngresar = document.getElementById('formulario-ingresar');
+    formIngresar?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Alumno: si no hay selección, usar manual
-        const alumnoSelect = document.getElementById('alumno_nombre_ingresar');
-        const alumnoManual = document.getElementById('alumno_nombre_manual').value.trim();
-        const alumno_nombre = alumnoSelect.value ? alumnoSelect.selectedOptions[0].textContent : alumnoManual;
-
-        const numero_de_control = document.getElementById('numero_de_control_ingresar').value.trim();
-
-        // Materia: si no hay selección, usar manual
-        const materiaSelect = document.getElementById('materia_id_ingresar');
-        const materiaManual = document.getElementById('materia_manual').value.trim();
-        const materia_id = materiaSelect.value || materiaManual;
-
-        // Profesor: si no hay selección, usar manual
-        const profesorSelect = document.getElementById('profesor_nombre_ingresar');
-        const profesorManual = document.getElementById('profesor_manual').value.trim();
-        const profesor_id = profesorSelect.value || profesorManual;
-
-        const calificacion = document.getElementById('calificacion_ingresar').value;
-
-        if (!alumno_nombre || !numero_de_control || !materia_id || !calificacion || !profesor_id) {
-            return alert('Todos los campos son obligatorios');
-        }
+        const data = {
+            alumno_nombre: document.getElementById('alumno_nombre_ingresar').value,
+            numero_de_control: document.getElementById('numero_de_control_ingresar').value,
+            materia_nombre: document.getElementById('materia_nombre_ingresar').value,
+            calificacion: document.getElementById('calificacion_ingresar').value,
+            profesor_nombre: document.getElementById('profesor_nombre_ingresar').value
+        };
 
         try {
             const resp = await fetch('/api/calificaciones/registrar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    alumno_nombre,
-                    numero_de_control,
-                    materia_id,
-                    calificacion,
-                    profesor_id
-                })
+                body: JSON.stringify(data)
             }).then(r => r.json());
 
-            if (resp.message) alert(resp.message);
-            else alert('Calificación registrada');
+            document.getElementById('mensaje-ingresar').textContent = resp.message;
+            if(resp.message.includes('correctamente')) formIngresar.reset();
 
-            form.reset();
         } catch (err) {
             console.error(err);
-            alert('Error al registrar calificación');
+            document.getElementById('mensaje-ingresar').textContent = 'Error al registrar calificación';
+        }
+    });
+
+    // ==========================
+    // ACTUALIZAR CALIFICACIÓN
+    // ==========================
+    const btnBuscar = document.getElementById('btn-buscar-actualizar');
+    const formActualizar = document.getElementById('formulario-actualizar');
+
+    btnBuscar?.addEventListener('click', async () => {
+        const nombreAlumno = document.getElementById('alumno_nombre_buscar').value.trim();
+        if(!nombreAlumno) return alert('Ingrese un nombre de alumno para buscar');
+
+        try {
+            const calificaciones = await fetch(`/api/calificaciones/buscar?nombre=${encodeURIComponent(nombreAlumno)}`)
+                .then(r => r.json());
+
+            if(calificaciones.length === 0) return alert('No se encontraron calificaciones para este alumno');
+
+            const cal = calificaciones[0];
+            formActualizar.style.display = 'block';
+            document.getElementById('id_actualizar').value = cal.id;
+            document.getElementById('alumno_nombre_actualizar').value = cal.alumno_nombre;
+            document.getElementById('numero_de_control_actualizar').value = cal.numero_de_control;
+            document.getElementById('materia_nombre_actualizar').value = cal.nombre_materia || '';
+            document.getElementById('calificacion_actualizar').value = cal.calificacion;
+            document.getElementById('profesor_nombre_actualizar').value = cal.nombre_profesor || '';
+
+        } catch(err) {
+            console.error(err);
+            alert('Error al buscar calificación');
+        }
+    });
+
+    const btnActualizar = document.getElementById('btn-actualizar');
+    btnActualizar?.addEventListener('click', async () => {
+        const id = document.getElementById('id_actualizar').value;
+        const data = {
+            alumno_nombre: document.getElementById('alumno_nombre_actualizar').value,
+            numero_de_control: document.getElementById('numero_de_control_actualizar').value,
+            materia_nombre: document.getElementById('materia_nombre_actualizar').value,
+            calificacion: document.getElementById('calificacion_actualizar').value,
+            profesor_nombre: document.getElementById('profesor_nombre_actualizar').value
+        };
+
+        try {
+            const resp = await fetch(`/api/calificaciones/actualizar/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(r => r.json());
+
+            document.getElementById('mensaje-actualizar').textContent = resp.message;
+
+        } catch(err) {
+            console.error(err);
+            document.getElementById('mensaje-actualizar').textContent = 'Error al actualizar calificación';
         }
     });
 
 });
+
