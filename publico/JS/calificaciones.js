@@ -5,7 +5,6 @@ const API_CALIFICACIONES = '/api/calificaciones';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // ====================== Cargar selects ======================
     async function cargarSelects() {
         try {
             const [alumnos, materias, profesores] = await Promise.all([
@@ -93,15 +92,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Mostrar formulario con datos
+            // Llenar formulario con los datos encontrados
             form.style.display = 'block';
             mensaje.textContent = '';
             document.getElementById('id_actualizar').value = result.id;
-            document.getElementById('alumno_nombre_actualizar_form').value = result.alumno_nombre;
+            document.getElementById('alumno_nombre_actualizar').value = result.alumno_nombre;
             document.getElementById('numero_de_control_actualizar').value = result.numero_de_control;
-            document.getElementById('materia_id_actualizar_form').value = result.nombre_materia;
+            document.getElementById('materia_id_actualizar').value = result.nombre_materia;
             document.getElementById('calificacion_actualizar').value = result.calificacion;
             document.getElementById('profesor_nombre_actualizar').value = result.nombre_profesor;
+
+            // Guardar el id de la materia en un input oculto para actualizar correctamente
+            let inputMateriaId = document.getElementById('materia_id_hidden');
+            if (!inputMateriaId) {
+                inputMateriaId = document.createElement('input');
+                inputMateriaId.type = 'hidden';
+                inputMateriaId.id = 'materia_id_hidden';
+                form.appendChild(inputMateriaId);
+            }
+            inputMateriaId.value = result.materia_id;
 
         } catch (err) {
             mensaje.textContent = 'Error al conectar con el servidor';
@@ -114,20 +123,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ====================== Actualizar ======================
     document.getElementById('btn-actualizar')?.addEventListener('click', async () => {
         const id = document.getElementById('id_actualizar').value;
+        const materia_id = document.getElementById('materia_id_hidden').value; // <-- Usar materia_id real
         const data = {
-            alumno_nombre: document.getElementById('alumno_nombre_actualizar_form').value,
+            alumno_nombre: document.getElementById('alumno_nombre_actualizar').value,
             numero_de_control: document.getElementById('numero_de_control_actualizar').value,
-            materia_nombre: document.getElementById('materia_id_actualizar_form').value,
+            materia_id: materia_id,
             calificacion: document.getElementById('calificacion_actualizar').value,
             profesor_nombre: document.getElementById('profesor_nombre_actualizar').value
         };
         const mensaje = document.getElementById('mensaje-actualizar');
-
-        if (!id) {
-            mensaje.textContent = 'No se encontró la calificación a actualizar';
-            mensaje.style.color = 'red';
-            return;
-        }
 
         try {
             const res = await fetch(`${API_CALIFICACIONES}/actualizar/${id}`, {
