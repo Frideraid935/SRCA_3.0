@@ -5,32 +5,34 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================
        REGISTRAR CALIFICACIÓN
     ========================== */
-    const formRegistrar = document.getElementById('form-registrar-calificacion');
+    const formRegistrar = document.getElementById('formulario-ingresarP');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const datos = {
-                alumno_nombre: document.getElementById('alumno').value.trim(),
-                numero_de_control: document.getElementById('control').value.trim(),
-                materia_id: document.getElementById('materia').value,
-                calificacion: document.getElementById('calificacion').value,
-                profesor_id: document.getElementById('profesor').value.trim()
+                alumno_nombre: document.getElementById('alumno_nombre_ingresar').value.trim(),
+                numero_de_control: document.getElementById('numero_de_control_ingresar').value.trim(),
+                materia_id: document.getElementById('materia_id_ingresar').value,
+                calificacion: document.getElementById('calificacion_ingresar').value,
+                profesor_id: document.getElementById('profesor_nombre_ingresar').value.trim()
             };
 
-            enviar(`${API_BASE}/registrar`, 'POST', datos);
+            await enviar(`${API_BASE}/registrar`, 'POST', datos, 'mensaje-ingresar');
         });
     }
 
     /* =========================
-       BUSCAR POR ID
+       BUSCAR POR ID PARA ACTUALIZAR
     ========================== */
-    const btnBuscar = document.getElementById('btn-buscar');
+    const btnBuscar = document.getElementById('btn-buscar-actualizar');
     if (btnBuscar) {
-        btnBuscar.addEventListener('click', async () => {
-            const id = document.getElementById('id_calificacion').value;
+        btnBuscar.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('id_actualizar').value.trim();
             if (!id) {
-                alert('Ingrese el ID de la calificación');
+                mostrarMensaje('Ingrese el ID de la calificación', false, 'mensaje-actualizar');
                 return;
             }
 
@@ -39,20 +41,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (!res.ok) {
-                    mostrarMensaje(data.message || 'No encontrado', false);
+                    mostrarMensaje(data.message || 'No encontrado', false, 'mensaje-actualizar');
                     return;
                 }
 
-                document.getElementById('form-actualizar-calificacion').style.display = 'block';
+                // Mostrar el formulario de actualización
+                const formActualizar = document.getElementById('formulario-actualizar');
+                formActualizar.style.display = 'block';
 
-                document.getElementById('alumno').value = data.alumno_nombre;
-                document.getElementById('control').value = data.numero_de_control;
-                document.getElementById('materia').value = data.materia_id;
-                document.getElementById('calificacion').value = data.calificacion;
-                document.getElementById('profesor').value = data.profesor_nombre || '';
+                // Rellenar campos con los datos obtenidos
+                document.getElementById('alumno_nombre_actualizar').value = data.alumno_nombre;
+                document.getElementById('numero_de_control_actualizar').value = data.numero_de_control;
+                document.getElementById('materia_id_actualizar').value = data.materia_id;
+                document.getElementById('calificacion_actualizar').value = data.calificacion;
+                document.getElementById('profesor_nombre_actualizar').value = data.profesor_id; // profesor_id de tu tabla
 
             } catch (error) {
-                mostrarMensaje('Error de conexión', false);
+                mostrarMensaje('Error de conexión con el servidor', false, 'mensaje-actualizar');
             }
         });
     }
@@ -60,21 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================
        ACTUALIZAR CALIFICACIÓN
     ========================== */
-    const formActualizar = document.getElementById('form-actualizar-calificacion');
-    if (formActualizar) {
-        formActualizar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById('id_calificacion').value;
+    const btnActualizar = document.getElementById('btn-actualizar');
+    if (btnActualizar) {
+        btnActualizar.addEventListener('click', async () => {
+            const id = document.getElementById('id_actualizar').value.trim();
+            if (!id) {
+                mostrarMensaje('Ingrese el ID de la calificación', false, 'mensaje-actualizar');
+                return;
+            }
 
             const datos = {
-                alumno_nombre: document.getElementById('alumno').value.trim(),
-                numero_de_control: document.getElementById('control').value.trim(),
-                materia_id: document.getElementById('materia').value,
-                calificacion: document.getElementById('calificacion').value
+                alumno_nombre: document.getElementById('alumno_nombre_actualizar').value.trim(),
+                numero_de_control: document.getElementById('numero_de_control_actualizar').value.trim(),
+                materia_id: document.getElementById('materia_id_actualizar').value,
+                calificacion: document.getElementById('calificacion_actualizar').value
             };
 
-            enviar(`${API_BASE}/actualizar/${id}`, 'PUT', datos);
+            await enviar(`${API_BASE}/actualizar/${id}`, 'PUT', datos, 'mensaje-actualizar');
         });
     }
 });
@@ -82,8 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
 /* =========================
    FUNCIÓN FETCH GENERAL
 ========================= */
-async function enviar(url, metodo, datos) {
-    const mensaje = document.getElementById('mensaje');
+async function enviar(url, metodo, datos, idMensaje) {
+    const mensaje = document.getElementById(idMensaje);
 
     try {
         const res = await fetch(url, {
@@ -93,18 +100,18 @@ async function enviar(url, metodo, datos) {
         });
 
         const data = await res.json();
-        mostrarMensaje(data.message, res.ok);
+        mostrarMensaje(data.message, res.ok, idMensaje);
 
     } catch (error) {
-        mostrarMensaje('Error de conexión con el servidor', false);
+        mostrarMensaje('Error de conexión con el servidor', false, idMensaje);
     }
 }
 
 /* =========================
    MENSAJES
 ========================= */
-function mostrarMensaje(texto, exito) {
-    const mensaje = document.getElementById('mensaje');
+function mostrarMensaje(texto, exito, idMensaje) {
+    const mensaje = document.getElementById(idMensaje);
     mensaje.textContent = texto;
     mensaje.className = `mensaje ${exito ? 'mensaje-exito' : 'mensaje-error'}`;
     mensaje.style.display = 'block';
