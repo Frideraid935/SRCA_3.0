@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const { pool, testDatabaseConnection } = require("./BD/BD");
+const pool = require("./BD/BD");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,47 +15,37 @@ app.use(express.static(path.join(__dirname, "publico")));
    RUTAS API
 ================================ */
 
-// Login
+//  Login
 const loginApi = require("./APIS/login.api");
 app.use("/api", loginApi);
 
-// Alumnos (CRUD + listar)
+//  Alumnos (CRUD + listar)
 const alumnosApi = require("./APIS/alumnos.api");
 app.use("/api/alumnos", alumnosApi);
 
-// Materias
+
+// Importar rutas de materias
 const materiasAPI = require('./APIS/materias.api.js');
 app.use('/api/materias', materiasAPI);
 
-// Admin
 const adminApi = require("./APIS/admin.api");
 app.use("/api/admin", adminApi);
 
-// Calificaciones
 const calificacionesAPI = require('./APIS/calificaciones.api');
 app.use('/api/calificaciones', calificacionesAPI);
 
 /* ===============================
    RUTAS DE VISTAS
 ================================ */
+
+// Login principal
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "publico/Login/login.html"));
 });
 
 /* ===============================
-   LEVANTAR SERVIDOR SOLO SI DB FUNCIONA
+   SERVIDOR
 ================================ */
-async function startServer() {
-  const dbOk = await testDatabaseConnection();
-  if (!dbOk) {
-    console.error(" No se puede iniciar el servidor: falla la conexión a MySQL");
-    process.exit(1); // Salir si DB falla
-  }
-
-  app.listen(PORT, () => {
-    console.log(` Servidor activo en puerto ${PORT}`);
-  });
-}
-
-// Iniciar servidor
-startServer();
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor activo en puerto ${PORT}`);
+});

@@ -1,17 +1,23 @@
+// ================================
+// Archivo JS para manejar calificaciones
+// Funciona para registrar y actualizar calificaciones
+// Compatible con backend en Railway
+// ================================
+
 // URL base de la API de calificaciones
 const API_BASE = '/api/calificaciones';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================
+    /* ================================
        REGISTRAR CALIFICACIÓN
-    ========================== */
+    ================================= */
     const formRegistrar = document.getElementById('formulario-ingresarP');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que el formulario recargue la página
+            e.preventDefault(); // Evita recargar la página al enviar
 
-            // Tomar los valores de los inputs
+            // Tomamos los valores de los inputs
             const datos = {
                 alumno_nombre: document.getElementById('alumno_nombre_ingresar').value.trim(),
                 numero_de_control: document.getElementById('numero_de_control_ingresar').value.trim(),
@@ -20,14 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 profesor_id: document.getElementById('profesor_nombre_ingresar').value.trim()
             };
 
-            // Llamada a la función general que hace fetch al servidor
+            // Llamada a la función general para enviar los datos
             await enviar(`${API_BASE}/registrar`, 'POST', datos, 'mensaje-ingresar');
         });
     }
 
-    /* =========================
-       BUSCAR POR ID PARA ACTUALIZAR
-    ========================== */
+    /* ================================
+       BUSCAR CALIFICACIÓN POR ID (para actualizar)
+    ================================= */
     const btnBuscar = document.getElementById('btn-buscar-actualizar');
     if (btnBuscar) {
         btnBuscar.addEventListener('click', async (e) => {
@@ -40,19 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const res = await fetch(`${API_BASE}/${id}`); // GET al servidor
+                // Hacemos la solicitud GET al servidor
+                const res = await fetch(`${API_BASE}/${id}`);
                 const data = await res.json();
 
                 if (!res.ok) {
-                    mostrarMensaje(data.message || 'No encontrado', false, 'mensaje-actualizar');
+                    mostrarMensaje(data.message || 'Calificación no encontrada', false, 'mensaje-actualizar');
                     return;
                 }
 
-                // Mostrar el formulario de actualización
+                // Mostramos el formulario de actualización
                 const formActualizar = document.getElementById('formulario-actualizar');
                 formActualizar.style.display = 'block';
 
-                // Rellenar campos con los datos obtenidos
+                // Llenamos los campos con los datos obtenidos
                 document.getElementById('alumno_nombre_actualizar').value = data.alumno_nombre;
                 document.getElementById('numero_de_control_actualizar').value = data.numero_de_control;
                 document.getElementById('materia_id_actualizar').value = data.materia_id;
@@ -65,9 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* =========================
+    /* ================================
        ACTUALIZAR CALIFICACIÓN
-    ========================== */
+    ================================= */
     const btnActualizar = document.getElementById('btn-actualizar');
     if (btnActualizar) {
         btnActualizar.addEventListener('click', async () => {
@@ -77,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Tomar los valores del formulario de actualización
+            // Tomamos los valores del formulario de actualización
             const datos = {
                 alumno_nombre: document.getElementById('alumno_nombre_actualizar').value.trim(),
                 numero_de_control: document.getElementById('numero_de_control_actualizar').value.trim(),
@@ -85,14 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 calificacion: document.getElementById('calificacion_actualizar').value
             };
 
+            // Enviamos datos al servidor usando PUT
             await enviar(`${API_BASE}/actualizar/${id}`, 'PUT', datos, 'mensaje-actualizar');
         });
     }
 });
 
-/* =========================
+/* ================================
    FUNCIÓN GENERAL PARA HACER FETCH
-========================= */
+   Recibe: url, método, datos y id del div de mensaje
+================================ */
 async function enviar(url, metodo, datos, idMensaje) {
     const mensaje = document.getElementById(idMensaje);
 
@@ -111,9 +120,10 @@ async function enviar(url, metodo, datos, idMensaje) {
     }
 }
 
-/* =========================
+/* ================================
    FUNCIÓN PARA MOSTRAR MENSAJES
-========================= */
+   Recibe: texto, exito (true/false), id del div de mensaje
+================================ */
 function mostrarMensaje(texto, exito, idMensaje) {
     const mensaje = document.getElementById(idMensaje);
     mensaje.textContent = texto;
