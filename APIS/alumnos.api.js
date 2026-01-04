@@ -17,4 +17,6 @@ router.put("/actualizar", alumnosController.actualizarAlumno);
 // Eliminar alumno
 router.delete("/eliminar", alumnosController.eliminarAlumno);
 
+
+
 module.exports = router;
