@@ -1,4 +1,3 @@
-// controladores/controladores-materias/materias.controlador.js
 const db = require("../../BD/BD.js");
 
 const materiasController = {
@@ -41,7 +40,7 @@ const materiasController = {
         }
     },
 
-    // 2. ELIMINAR materia por NOMBRE (directo)
+    // 2. ELIMINAR materia por NOMBRE
     eliminarMateriaPorNombre: function(req, res) {
         try {
             const { nombre } = req.body;
@@ -78,6 +77,29 @@ const materiasController = {
                 });
             });
             
+        } catch (error) {
+            console.error("Error:", error);
+            res.status(500).json({ 
+                success: false, 
+                message: "Error interno" 
+            });
+        }
+    },
+
+    // 3. LISTAR todas las materias (NECESARIO para tu formulario)
+    listarMaterias: function(req, res) {
+        try {
+            const query = "SELECT id, nombre FROM materias ORDER BY nombre ASC";
+            db.query(query, (err, rows) => {
+                if (err) {
+                    console.error("Error SQL:", err);
+                    return res.status(500).json({ 
+                        success: false, 
+                        message: "Error al obtener materias" 
+                    });
+                }
+                res.json(rows);
+            });
         } catch (error) {
             console.error("Error:", error);
             res.status(500).json({ 
