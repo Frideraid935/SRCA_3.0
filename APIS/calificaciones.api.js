@@ -3,13 +3,13 @@ const router = express.Router();
 
 const calificacionesController = require('../controladores/controladores-calificaciones/calificaciones.controlador');
 
-// Registrar calificación
+// Registrar calificación manual
 router.post('/registrar', calificacionesController.registrar);
 
-// Buscar calificación por alumno + materia
-router.get('/buscar', calificacionesController.buscar);
+// Buscar calificación por Alumno + Materia
+router.get('/buscar', calificacionesController.buscarPorAlumnoMateria);
 
-// Actualizar calificación por id
+// Actualizar calificación por ID
 router.put('/actualizar/:id', calificacionesController.actualizar);
 
 module.exports = router;
