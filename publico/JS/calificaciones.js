@@ -1,65 +1,54 @@
-// ================================
-// Archivo JS para manejar calificaciones
-// Funciona para registrar y actualizar calificaciones
-// Compatible con backend en Railway
-// ================================
+// calificaciones.js
 
-// URL base de la API de calificaciones
 const API_BASE = '/api/calificaciones';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* ================================
+    /* =========================
        REGISTRAR CALIFICACIÓN
-    ================================= */
+    ========================== */
     const formRegistrar = document.getElementById('formulario-ingresarP');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita recargar la página al enviar
+            e.preventDefault();
 
-            // Tomamos los valores de los inputs
+            // Obtenemos datos del formulario
             const datos = {
                 alumno_nombre: document.getElementById('alumno_nombre_ingresar').value.trim(),
                 numero_de_control: document.getElementById('numero_de_control_ingresar').value.trim(),
-                materia_id: document.getElementById('materia_id_ingresar').value,
-                calificacion: document.getElementById('calificacion_ingresar').value,
-                profesor_id: document.getElementById('profesor_nombre_ingresar').value.trim()
+                materia_id: Number(document.getElementById('materia_id_ingresar').value),
+                calificacion: Number(document.getElementById('calificacion_ingresar').value),
+                profesor_id: document.getElementById('profesor_nombre_ingresar').value.trim() // Debe ser numero de control del profesor
             };
 
-            // Llamada a la función general para enviar los datos
-            await enviar(`${API_BASE}/registrar`, 'POST', datos, 'mensaje-ingresar');
+            // Enviamos al backend
+            enviar(`${API_BASE}/registrar`, 'POST', datos, 'mensaje-ingresar');
         });
     }
 
-    /* ================================
-       BUSCAR CALIFICACIÓN POR ID (para actualizar)
-    ================================= */
-    const btnBuscar = document.getElementById('btn-buscar-actualizar');
-    if (btnBuscar) {
-        btnBuscar.addEventListener('click', async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById('id_actualizar').value.trim();
+    /* =========================
+       ACTUALIZAR CALIFICACIÓN
+    ========================== */
+    const btnBuscarActualizar = document.getElementById('btn-buscar-actualizar');
+    if (btnBuscarActualizar) {
+        btnBuscarActualizar.addEventListener('click', async () => {
+            const id = document.getElementById('id_actualizar').value;
             if (!id) {
-                mostrarMensaje('Ingrese el ID de la calificación', false, 'mensaje-actualizar');
+                alert('Ingrese el ID de la calificación');
                 return;
             }
 
             try {
-                // Hacemos la solicitud GET al servidor
                 const res = await fetch(`${API_BASE}/${id}`);
                 const data = await res.json();
 
                 if (!res.ok) {
-                    mostrarMensaje(data.message || 'Calificación no encontrada', false, 'mensaje-actualizar');
+                    mostrarMensaje('Calificación no encontrada', 'mensaje-actualizar', false);
                     return;
                 }
 
-                // Mostramos el formulario de actualización
-                const formActualizar = document.getElementById('formulario-actualizar');
-                formActualizar.style.display = 'block';
-
-                // Llenamos los campos con los datos obtenidos
+                // Mostrar formulario con los datos
+                document.getElementById('formulario-actualizar').style.display = 'block';
                 document.getElementById('alumno_nombre_actualizar').value = data.alumno_nombre;
                 document.getElementById('numero_de_control_actualizar').value = data.numero_de_control;
                 document.getElementById('materia_id_actualizar').value = data.materia_id;
@@ -67,41 +56,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('profesor_nombre_actualizar').value = data.profesor_id;
 
             } catch (error) {
-                mostrarMensaje('Error de conexión con el servidor', false, 'mensaje-actualizar');
+                mostrarMensaje('Error de conexión', 'mensaje-actualizar', false);
             }
         });
     }
 
-    /* ================================
-       ACTUALIZAR CALIFICACIÓN
-    ================================= */
     const btnActualizar = document.getElementById('btn-actualizar');
     if (btnActualizar) {
         btnActualizar.addEventListener('click', async () => {
-            const id = document.getElementById('id_actualizar').value.trim();
-            if (!id) {
-                mostrarMensaje('Ingrese el ID de la calificación', false, 'mensaje-actualizar');
-                return;
-            }
-
-            // Tomamos los valores del formulario de actualización
+            const id = document.getElementById('id_actualizar').value;
             const datos = {
                 alumno_nombre: document.getElementById('alumno_nombre_actualizar').value.trim(),
                 numero_de_control: document.getElementById('numero_de_control_actualizar').value.trim(),
-                materia_id: document.getElementById('materia_id_actualizar').value,
-                calificacion: document.getElementById('calificacion_actualizar').value
+                materia_id: Number(document.getElementById('materia_id_actualizar').value),
+                calificacion: Number(document.getElementById('calificacion_actualizar').value),
+                profesor_id: document.getElementById('profesor_nombre_actualizar').value.trim()
             };
 
-            // Enviamos datos al servidor usando PUT
-            await enviar(`${API_BASE}/actualizar/${id}`, 'PUT', datos, 'mensaje-actualizar');
+            enviar(`${API_BASE}/actualizar/${id}`, 'PUT', datos, 'mensaje-actualizar');
         });
     }
 });
 
-/* ================================
-   FUNCIÓN GENERAL PARA HACER FETCH
-   Recibe: url, método, datos y id del div de mensaje
-================================ */
+/* =========================
+   FUNCION GENERAL FETCH
+========================= */
 async function enviar(url, metodo, datos, idMensaje) {
     const mensaje = document.getElementById(idMensaje);
 
@@ -113,18 +92,17 @@ async function enviar(url, metodo, datos, idMensaje) {
         });
 
         const data = await res.json();
-        mostrarMensaje(data.message, res.ok, idMensaje);
+        mostrarMensaje(data.message, idMensaje, res.ok);
 
     } catch (error) {
-        mostrarMensaje('Error de conexión con el servidor', false, idMensaje);
+        mostrarMensaje('Error de conexión con el servidor', idMensaje, false);
     }
 }
 
-/* ================================
-   FUNCIÓN PARA MOSTRAR MENSAJES
-   Recibe: texto, exito (true/false), id del div de mensaje
-================================ */
-function mostrarMensaje(texto, exito, idMensaje) {
+/* =========================
+   FUNCION PARA MOSTRAR MENSAJES
+========================= */
+function mostrarMensaje(texto, idMensaje, exito) {
     const mensaje = document.getElementById(idMensaje);
     mensaje.textContent = texto;
     mensaje.className = `mensaje ${exito ? 'mensaje-exito' : 'mensaje-error'}`;
