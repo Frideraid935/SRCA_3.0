@@ -2,9 +2,9 @@ const db = require('../../BD/BD.js');
 
 const calificacionesController = {
 
-    // =========================
-    // REGISTRAR CALIFICACIÓN
-    // =========================
+    /* =========================
+       REGISTRAR CALIFICACIÓN
+    ========================== */
     async registrar(req, res) {
         try {
             const { alumno_nombre, numero_de_control, materia_nombre, calificacion, profesor_nombre } = req.body;
@@ -13,56 +13,75 @@ const calificacionesController = {
                 return res.status(400).json({ message: 'Todos los campos son obligatorios' });
             }
 
+            // Insertar en la tabla de calificaciones
             const sql = `
                 INSERT INTO calificaciones
-                (alumno_nombre, numero_de_control, materia_id, calificacion, profesor_id)
-                VALUES (?, ?, 
-                    (SELECT id FROM materias WHERE nombre = ? LIMIT 1),
-                    ?, 
-                    (SELECT numero_de_control FROM profesores WHERE nombre = ? LIMIT 1)
-                )
+                (alumno_nombre, numero_de_control, materia_nombre, calificacion, profesor_nombre)
+                VALUES (?, ?, ?, ?, ?)
             `;
-
             await db.query(sql, [alumno_nombre, numero_de_control, materia_nombre, calificacion, profesor_nombre]);
 
             res.status(201).json({ message: 'Calificación registrada correctamente' });
 
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Error al registrar calificación (verifica alumno, materia o profesor)' });
+            res.status(500).json({ message: 'Error al registrar calificación' });
         }
     },
 
-    // =========================
-    // BUSCAR CALIFICACIÓN POR NOMBRE DEL ALUMNO
-    // =========================
-    async buscarPorNombre(req, res) {
+    /* =========================
+       BUSCAR CALIFICACIÓN POR ID
+    ========================== */
+    async buscarPorId(req, res) {
         try {
-            const { nombre } = req.query;
-            if(!nombre) return res.status(400).json({ message: 'Se requiere nombre de alumno' });
+            const { id } = req.params;
 
             const sql = `
-                SELECT c.id, c.alumno_nombre, c.numero_de_control,
-                       c.materia_id, m.nombre AS nombre_materia,
-                       c.calificacion, c.profesor_id, p.nombre AS nombre_profesor
-                FROM calificaciones c
-                LEFT JOIN materias m ON c.materia_id = m.id
-                LEFT JOIN profesores p ON c.profesor_id = p.numero_de_control
-                WHERE c.alumno_nombre LIKE ?
+                SELECT *
+                FROM calificaciones
+                WHERE id = ?
             `;
+            const [rows] = await db.query(sql, [id]);
 
-            const [rows] = await db.query(sql, [`%${nombre}%`]);
+            if (rows.length === 0) return res.status(404).json({ message: 'Calificación no encontrada' });
+
+            res.json(rows[0]);
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Error al buscar la calificación' });
+        }
+    },
+
+    /* =========================
+       BUSCAR POR ALUMNO Y MATERIA
+    ========================== */
+    async buscarPorAlumnoMateria(req, res) {
+        try {
+            const { alumno, materia } = req.query;
+
+            if (!alumno || !materia) {
+                return res.status(400).json({ message: 'Alumno y materia son requeridos' });
+            }
+
+            const sql = `
+                SELECT *
+                FROM calificaciones
+                WHERE alumno_nombre = ? AND materia_nombre = ?
+            `;
+            const [rows] = await db.query(sql, [alumno, materia]);
+
             res.json(rows);
 
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Error al buscar calificaciones' });
+            res.status(500).json({ message: 'Error al buscar calificación por alumno y materia' });
         }
     },
 
-    // =========================
-    // ACTUALIZAR CALIFICACIÓN
-    // =========================
+    /* =========================
+       ACTUALIZAR CALIFICACIÓN
+    ========================== */
     async actualizar(req, res) {
         try {
             const { id } = req.params;
@@ -74,23 +93,21 @@ const calificacionesController = {
 
             const sql = `
                 UPDATE calificaciones SET
-                    alumno_nombre = ?, 
-                    numero_de_control = ?, 
-                    materia_id = (SELECT id FROM materias WHERE nombre = ? LIMIT 1),
-                    calificacion = ?, 
-                    profesor_id = (SELECT numero_de_control FROM profesores WHERE nombre = ? LIMIT 1)
+                    alumno_nombre = ?, numero_de_control = ?, materia_nombre = ?,
+                    calificacion = ?, profesor_nombre = ?
                 WHERE id = ?
             `;
-
             const [result] = await db.query(sql, [alumno_nombre, numero_de_control, materia_nombre, calificacion, profesor_nombre, id]);
 
-            if(result.affectedRows === 0) return res.status(404).json({ message: 'Calificación no encontrada' });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Calificación no encontrada para actualizar' });
+            }
 
             res.json({ message: 'Calificación actualizada correctamente' });
 
-        } catch(err) {
+        } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Error al actualizar calificación' });
+            res.status(500).json({ message: 'Error al actualizar la calificación' });
         }
     }
 
