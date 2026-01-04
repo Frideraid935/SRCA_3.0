@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // INGRESAR CALIFICACIÓN
     // ==========================
     const formIngresar = document.getElementById('formulario-ingresar');
+    const mensajeIngresar = document.getElementById('mensaje-ingresar');
+
     formIngresar?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -22,12 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(data)
             }).then(r => r.json());
 
-            document.getElementById('mensaje-ingresar').textContent = resp.message;
+            mensajeIngresar.textContent = resp.message;
+            mensajeIngresar.style.color = resp.message.includes('correctamente') ? 'green' : 'red';
+
             if(resp.message.includes('correctamente')) formIngresar.reset();
 
         } catch (err) {
             console.error(err);
-            document.getElementById('mensaje-ingresar').textContent = 'Error al registrar calificación';
+            mensajeIngresar.textContent = 'Error al registrar calificación';
+            mensajeIngresar.style.color = 'red';
         }
     });
 
@@ -36,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================
     const btnBuscar = document.getElementById('btn-buscar-actualizar');
     const formActualizar = document.getElementById('formulario-actualizar');
+    const mensajeActualizar = document.getElementById('mensaje-actualizar');
 
     btnBuscar?.addEventListener('click', async () => {
         const nombreAlumno = document.getElementById('alumno_nombre_buscar').value.trim();
@@ -45,10 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const calificaciones = await fetch(`/api/calificaciones/buscar?nombre=${encodeURIComponent(nombreAlumno)}`)
                 .then(r => r.json());
 
-            if(calificaciones.length === 0) return alert('No se encontraron calificaciones para este alumno');
+            if(calificaciones.length === 0) {
+                mensajeActualizar.textContent = 'No se encontraron calificaciones para este alumno';
+                mensajeActualizar.style.color = 'red';
+                formActualizar.style.display = 'none';
+                return;
+            }
 
             const cal = calificaciones[0];
             formActualizar.style.display = 'block';
+            mensajeActualizar.textContent = '';
             document.getElementById('id_actualizar').value = cal.id;
             document.getElementById('alumno_nombre_actualizar').value = cal.alumno_nombre;
             document.getElementById('numero_de_control_actualizar').value = cal.numero_de_control;
@@ -58,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch(err) {
             console.error(err);
-            alert('Error al buscar calificación');
+            mensajeActualizar.textContent = 'Error al buscar calificación';
+            mensajeActualizar.style.color = 'red';
         }
     });
 
@@ -80,11 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(data)
             }).then(r => r.json());
 
-            document.getElementById('mensaje-actualizar').textContent = resp.message;
+            mensajeActualizar.textContent = resp.message;
+            mensajeActualizar.style.color = resp.message.includes('correctamente') ? 'green' : 'red';
 
         } catch(err) {
             console.error(err);
-            document.getElementById('mensaje-actualizar').textContent = 'Error al actualizar calificación';
+            mensajeActualizar.textContent = 'Error al actualizar calificación';
+            mensajeActualizar.style.color = 'red';
         }
     });
 
