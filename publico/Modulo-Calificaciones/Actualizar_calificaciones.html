@@ -14,12 +14,12 @@
     <div class="grupo-campos">
         <div class="campo">
             <label for="alumno_nombre_actualizar">Alumno:</label>
-            <select id="alumno_nombre_actualizar" required></select>
+            <input type="text" id="alumno_nombre_actualizar">
         </div>
 
         <div class="campo">
             <label for="materia_id_actualizar">Materia:</label>
-            <select id="materia_id_actualizar" required></select>
+            <input type="text" id="materia_id_actualizar">
         </div>
     </div>
 
@@ -28,32 +28,33 @@
     </div>
 
     <form id="formulario-actualizar" style="display:none;">
+        <input type="hidden" id="id_actualizar">
+
         <div class="grupo-campos">
             <div class="campo">
-                <label for="id_actualizar">ID Calificación:</label>
-                <input type="text" id="id_actualizar" readonly>
-            </div>
-
-            <div class="campo">
-                <label for="alumno_nombre_actualizar">Alumno:</label>
-                <input type="text" id="alumno_nombre_actualizar" required>
+                <label for="alumno_nombre_actualizar_form">Alumno:</label>
+                <input type="text" id="alumno_nombre_actualizar_form" required>
             </div>
 
             <div class="campo">
                 <label for="numero_de_control_actualizar">Número de Control:</label>
                 <input type="text" id="numero_de_control_actualizar" required>
             </div>
+        </div>
 
+        <div class="grupo-campos">
             <div class="campo">
-                <label for="materia_id_actualizar">Materia:</label>
-                <input type="text" id="materia_id_actualizar" required>
+                <label for="materia_id_actualizar_form">Materia:</label>
+                <input type="text" id="materia_id_actualizar_form" required>
             </div>
 
             <div class="campo">
                 <label for="calificacion_actualizar">Calificación (0-10):</label>
                 <input type="number" id="calificacion_actualizar" min="0" max="10" step="0.1" required>
             </div>
+        </div>
 
+        <div class="grupo-campos">
             <div class="campo">
                 <label for="profesor_nombre_actualizar">Profesor:</label>
                 <input type="text" id="profesor_nombre_actualizar" required>
