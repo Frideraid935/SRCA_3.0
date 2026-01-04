@@ -5,7 +5,6 @@ const API_CALIFICACIONES = '/api/calificaciones';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // ====================== Cargar selects ======================
     async function cargarSelects() {
         try {
             const [alumnos, materias, profesores] = await Promise.all([
@@ -18,8 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             llenarSelect('materia_id_ingresar', materias, 'nombre');
             llenarSelect('profesor_nombre_ingresar', profesores, 'nombre');
 
-            llenarSelect('alumno_nombre_actualizar', alumnos, 'nombre');
-            llenarSelect('materia_id_actualizar', materias, 'nombre');
+            llenarSelect('alumno_nombre_actualizar_form', alumnos, 'nombre');
+            llenarSelect('materia_id_actualizar_form', materias, 'nombre');
             llenarSelect('profesor_nombre_actualizar', profesores, 'nombre');
         } catch (err) {
             console.error('Error al cargar selects:', err);
@@ -70,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ====================== Buscar para actualizar ======================
     document.getElementById('btn-buscar-actualizar')?.addEventListener('click', async () => {
-        const alumno = document.getElementById('alumno_nombre_actualizar').value;
-        const materia = document.getElementById('materia_id_actualizar').value;
+        const alumno = document.getElementById('alumno_nombre_actualizar_form').value;
+        const materia = document.getElementById('materia_id_actualizar_form').value;
         const mensaje = document.getElementById('mensaje-actualizar');
         const form = document.getElementById('formulario-actualizar');
 
@@ -93,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Mostrar formulario con datos
             form.style.display = 'block';
             mensaje.textContent = '';
             document.getElementById('id_actualizar').value = result.id;
@@ -124,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const mensaje = document.getElementById('mensaje-actualizar');
 
         if (!id) {
-            mensaje.textContent = 'No se encontró la calificación a actualizar';
+            mensaje.textContent = 'Primero busca la calificación a actualizar';
             mensaje.style.color = 'red';
             return;
         }
