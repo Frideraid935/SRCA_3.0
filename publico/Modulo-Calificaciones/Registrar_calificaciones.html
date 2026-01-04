@@ -2,52 +2,52 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ingresar Calificación</title>
-    <link rel="stylesheet" href="../css/estilo-calificaciones.css">
+    <title>Registrar Calificación</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../css/estilo-alumnos.css">
 </head>
 <body>
 
-<div class="contenedor-formulario">
-    <div class="form-header">
-        <h2>Ingresar Calificación</h2>
-    </div>
+<div class="contenedor-formulario active">
+    <h2>Ingresar Calificación</h2>
 
-    <form id="formulario-ingresar">
+    <form id="form-registrar-calificacion">
         <div class="grupo-campos">
             <div class="campo">
                 <label>Nombre del Alumno</label>
-                <input type="text" id="alumno_nombre_ingresar" required>
+                <input type="text" id="alumno_nombre" required>
             </div>
 
             <div class="campo">
                 <label>Número de Control</label>
-                <input type="text" id="numero_de_control_ingresar" required>
+                <input type="text" id="numero_control" required>
             </div>
         </div>
 
         <div class="grupo-campos">
             <div class="campo">
                 <label>ID Materia</label>
-                <input type="number" id="materia_id_ingresar" required>
+                <input type="number" id="materia_id" required>
             </div>
 
             <div class="campo">
                 <label>Calificación</label>
-                <input type="number" step="0.1" min="0" max="10" id="calificacion_ingresar" required>
+                <input type="number" step="0.1" min="0" max="10" id="calificacion" required>
             </div>
         </div>
 
         <div class="campo">
             <label>ID Profesor</label>
-            <input type="text" id="profesor_id_ingresar" required>
+            <input type="text" id="profesor_id" required>
         </div>
 
         <div class="botones">
-            <button type="button" class="btn btn-success" onclick="guardarCalificacion()">Guardar</button>
+            <button type="submit" class="btn btn-success">Guardar</button>
             <button type="reset" class="btn btn-primary">Limpiar</button>
         </div>
 
-        <div id="mensaje-ingresar" class="mensaje"></div>
+        <div id="mensaje" class="mensaje"></div>
     </form>
 </div>
 

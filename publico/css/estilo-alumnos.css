@@ -59,7 +59,7 @@ body {
     flex-grow: 1;
     padding: 30px;
     overflow-y: auto;
-    background-image: url('../Logins/fondo3.jpeg');
+    background-image: url('../imagenes/fondo3.jpeg');
    background: linear-gradient(to right, #f4f6f9, #dde6f0);
     background-repeat: no-repeat;
     background-position: center center;
