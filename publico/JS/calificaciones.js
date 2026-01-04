@@ -5,6 +5,7 @@ const API_CALIFICACIONES = '/api/calificaciones';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
+    // ====================== Cargar selects ======================
     async function cargarSelects() {
         try {
             const [alumnos, materias, profesores] = await Promise.all([
@@ -60,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await res.json();
             mensaje.textContent = result.message;
             mensaje.style.color = res.ok ? 'green' : 'red';
-            if (res.ok) document.getElementById('formulario-ingresarP').reset();
         } catch (err) {
             mensaje.textContent = 'Error al conectar con el servidor';
             mensaje.style.color = 'red';
@@ -93,12 +93,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            // Mostrar formulario con datos
             form.style.display = 'block';
             mensaje.textContent = '';
             document.getElementById('id_actualizar').value = result.id;
-            document.getElementById('alumno_nombre_actualizar').value = result.alumno_nombre;
+            document.getElementById('alumno_nombre_actualizar_form').value = result.alumno_nombre;
             document.getElementById('numero_de_control_actualizar').value = result.numero_de_control;
-            document.getElementById('materia_id_actualizar').value = result.nombre_materia;
+            document.getElementById('materia_id_actualizar_form').value = result.nombre_materia;
             document.getElementById('calificacion_actualizar').value = result.calificacion;
             document.getElementById('profesor_nombre_actualizar').value = result.nombre_profesor;
 
@@ -114,16 +115,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-actualizar')?.addEventListener('click', async () => {
         const id = document.getElementById('id_actualizar').value;
         const data = {
-            alumno_nombre: document.getElementById('alumno_nombre_actualizar').value,
+            alumno_nombre: document.getElementById('alumno_nombre_actualizar_form').value,
             numero_de_control: document.getElementById('numero_de_control_actualizar').value,
-            materia_nombre: document.getElementById('materia_id_actualizar').value,
+            materia_nombre: document.getElementById('materia_id_actualizar_form').value,
             calificacion: document.getElementById('calificacion_actualizar').value,
             profesor_nombre: document.getElementById('profesor_nombre_actualizar').value
         };
         const mensaje = document.getElementById('mensaje-actualizar');
 
         if (!id) {
-            mensaje.textContent = 'Primero busque una calificación para actualizar';
+            mensaje.textContent = 'No se encontró la calificación a actualizar';
             mensaje.style.color = 'red';
             return;
         }
