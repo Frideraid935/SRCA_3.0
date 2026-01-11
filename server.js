@@ -55,8 +55,7 @@ app.use('/api/calificaciones', calificacionesAPI);
 const profesoresAPI = require('./APIS/profesores.api');
 app.use('/api/profesores', profesoresAPI);
 
-const profesoresAPI = require('./APIS/profesores.api');
-app.use('/api/profesores', profesoresAPI);
+
 
 // ===== SALONES API =====
 console.log('Registrando API de salones...');
