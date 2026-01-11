@@ -1,7 +1,7 @@
 // JS/profesores.js
 const API_BASE = '/api/profesores';
 
-// Función para mostrar mensajes
+// Función para mostrar mensajes (ya existía)
 function mostrarMensaje(elementId, mensaje, tipo = 'success') {
     const elemento = document.getElementById(elementId);
     if (elemento) {
@@ -23,6 +23,11 @@ window.guardarProfesor = async function() {
     
     if (!numeroControl || !nombre || !especialidad) {
         mostrarMensaje('mensaje-ingresar', 'Todos los campos son obligatorios', 'error');
+        return;
+    }
+    
+    if (numeroControl.length !== 8) {
+        mostrarMensaje('mensaje-ingresar', 'El número de control debe tener 8 caracteres', 'error');
         return;
     }
     
@@ -51,14 +56,19 @@ window.guardarProfesor = async function() {
     }
 };
 
-// ========== BUSCAR PROFESOR ==========
+// ========== BUSCAR PROFESOR INDIVIDUAL ==========
 window.buscarProfesor = async function() {
     const numeroControl = document.getElementById('busqueda-numero').value.trim();
     const resultadosDiv = document.getElementById('resultados-busqueda');
     const datosDiv = document.getElementById('datos-profesor');
+    const listaDiv = document.getElementById('lista-profesores');
+    
+    // Ocultar lista si está visible
+    listaDiv.style.display = 'none';
     
     if (!numeroControl) {
         mostrarMensaje('mensaje-busqueda', 'Ingrese un número de control', 'error');
+        resultadosDiv.style.display = 'none';
         return;
     }
     
@@ -90,6 +100,59 @@ window.buscarProfesor = async function() {
             datosDiv.innerHTML = '';
             resultadosDiv.style.display = 'none';
             mostrarMensaje('mensaje-busqueda', result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('mensaje-busqueda', 'Error de conexión', 'error');
+    }
+};
+
+// ========== LISTAR TODOS LOS PROFESORES ==========
+window.listarTodosProfesores = async function() {
+    const listaDiv = document.getElementById('lista-profesores');
+    const resultadosDiv = document.getElementById('resultados-busqueda');
+    const contadorDiv = document.getElementById('contador-profesores');
+    const tablaContenedor = document.getElementById('tabla-profesores-contenedor');
+    
+    // Ocultar búsqueda individual si está visible
+    resultadosDiv.style.display = 'none';
+    
+    try {
+        const response = await fetch(`${API_BASE}/listar`);
+        const result = await response.json();
+        
+        if (result.success && result.profesores.length > 0) {
+            let tablaHTML = `
+                <table class="tabla-profesor" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Número de Control</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            result.profesores.forEach(profesor => {
+                tablaHTML += `
+                    <tr>
+                        <td>${profesor.numero_de_control}</td>
+                        <td>${profesor.nombre}</td>
+                        <td>${profesor.especialidad}</td>
+                    </tr>`;
+            });
+            
+            tablaHTML += `</tbody></table>`;
+            
+            tablaContenedor.innerHTML = tablaHTML;
+            contadorDiv.innerHTML = `<p>Total de profesores: ${result.total}</p>`;
+            listaDiv.style.display = 'block';
+            mostrarMensaje('mensaje-busqueda', `Se encontraron ${result.total} profesores`, 'success');
+        } else {
+            tablaContenedor.innerHTML = '';
+            contadorDiv.innerHTML = '<p>No hay profesores registrados</p>';
+            listaDiv.style.display = 'block';
+            mostrarMensaje('mensaje-busqueda', 'No hay profesores registrados', 'info');
         }
     } catch (error) {
         console.error('Error:', error);

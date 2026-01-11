@@ -15,4 +15,7 @@ router.put('/actualizar', profesoresController.actualizar);
 // Ruta para eliminar profesor
 router.delete('/eliminar', profesoresController.eliminar);
 
+// Ruta para listar todos los profesores
+router.get('/listar', profesoresController.listar);
+
 module.exports = router;

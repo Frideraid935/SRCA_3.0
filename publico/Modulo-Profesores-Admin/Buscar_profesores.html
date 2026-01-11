@@ -8,20 +8,31 @@
 </head>
 <body>
     <div class="contenedor-formulario">
-        <h2>Buscar Profesor</h2>
+        <h2>Buscar/Listar Profesores</h2>
+        
+        <!-- Buscar por número de control -->
         <div class="grupo-campos">
             <div class="campo">
-                <label for="busqueda-numero">Número de Control:</label>
+                <label for="busqueda-numero">Buscar por Número de Control:</label>
                 <input type="text" id="busqueda-numero" placeholder="Ingrese número de control">
             </div>
         </div>
         <div class="botones">
             <button class="btn btn-primary" onclick="buscarProfesor()">Buscar</button>
+            <button class="btn btn-secondary" onclick="listarTodosProfesores()">Listar Todos</button>
         </div>
         
+        <!-- Resultados de búsqueda individual -->
         <div id="resultados-busqueda" style="margin-top: 20px; display: none;">
             <h3>Datos del Profesor</h3>
             <div id="datos-profesor"></div>
+        </div>
+        
+        <!-- Tabla para listar todos -->
+        <div id="lista-profesores" style="margin-top: 20px; display: none;">
+            <h3>Lista de Profesores</h3>
+            <div id="contador-profesores"></div>
+            <div id="tabla-profesores-contenedor"></div>
         </div>
         
         <div id="mensaje-busqueda" class="mensaje"></div>
