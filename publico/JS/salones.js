@@ -67,49 +67,54 @@ function registrarSalon() {
 document.addEventListener('DOMContentLoaded', () => {
     const formBuscar = document.getElementById('formulario-buscar-salon');
 
-    if (formBuscar) {
-        console.log('Formulario buscar salón detectado');
+    if (!formBuscar) return;
 
-        formBuscar.addEventListener('submit', function (e) {
-            e.preventDefault();
-            buscarSalon();
-        });
-    }
+    formBuscar.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const nombreInput = document.getElementById('nombre');
+        const mensaje = document.getElementById('mensaje-busqueda-salon');
+        const datos = document.getElementById('datos-salon');
+
+        const nombre = nombreInput.value.trim();
+
+        mensaje.style.display = 'none';
+        datos.style.display = 'none';
+
+        if (!nombre) {
+            mensaje.textContent = 'Ingrese el nombre del salón';
+            mensaje.className = 'mensaje mensaje-error';
+            mensaje.style.display = 'block';
+            return;
+        }
+
+        fetch('/api/salones/buscar/' + encodeURIComponent(nombre))
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    mensaje.textContent = data.message;
+                    mensaje.className = 'mensaje mensaje-error';
+                    mensaje.style.display = 'block';
+                    return;
+                }
+
+                const s = data.salon;
+
+                datos.innerHTML = `
+                    <p><strong>ID:</strong> ${s.id}</p>
+                    <p><strong>Nombre:</strong> ${s.nombre}</p>
+                    <p><strong>Capacidad:</strong> ${s.capacidad}</p>
+                    <p><strong>Profesor:</strong> ${s.profesor_id}</p>
+                `;
+                datos.style.display = 'block';
+            })
+            .catch(() => {
+                mensaje.textContent = 'Error de conexión con el servidor';
+                mensaje.className = 'mensaje mensaje-error';
+                mensaje.style.display = 'block';
+            });
+    });
 });
-
-function buscarSalon() {
-    const nombre = document.getElementById('nombre').value.trim();
-    const mensaje = document.getElementById('mensaje-busqueda-salon');
-    const datos = document.getElementById('datos-salon');
-
-    if (!nombre) {
-        mostrarMensaje(mensaje, 'Ingrese el nombre del salón', 'warning');
-        return;
-    }
-
-    fetch(API_BASE + '/buscar/' + encodeURIComponent(nombre))
-        .then(r => r.json())
-        .then(data => {
-            if (!data.success) {
-                datos.style.display = 'none';
-                mostrarMensaje(mensaje, data.message, 'error');
-                return;
-            }
-
-            const s = data.salon;
-            datos.innerHTML = `
-                <p><strong>ID:</strong> ${s.id}</p>
-                <p><strong>Nombre:</strong> ${s.nombre}</p>
-                <p><strong>Capacidad:</strong> ${s.capacidad}</p>
-                <p><strong>Profesor:</strong> ${s.profesor_id}</p>
-            `;
-            datos.style.display = 'block';
-            mensaje.style.display = 'none';
-        })
-        .catch(() => {
-            mostrarMensaje(mensaje, 'Error de conexión', 'error');
-        });
-}
 
 /* ================= ELIMINAR ================= */
 function eliminarSalon() {

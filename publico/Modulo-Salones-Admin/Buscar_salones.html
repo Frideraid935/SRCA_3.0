@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Buscar Salón</title>
-  <link rel="stylesheet" href="../css/estilo.css">
+    <meta charset="UTF-8">
+    <title>Buscar Salón</title>
+    <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body>
 
 <div class="contenedor-formulario">
-  <h2>Buscar Salón</h2>
+    <h2>Buscar Salón</h2>
 
-  <form id="formulario-buscar-salon" class="grupo-campos">
+    <form id="formulario-buscar-salon" class="grupo-campos">
 
-    <div class="campo">
-    <label>Nombre del Salón</label>
-    <input type="text" id="nombre" required>
-  </div>
+        <div class="campo">
+            <label>Nombre del Salón</label>
+            <input type="text" id="nombre" required>
+        </div>
 
+        <div class="botones">
+            <button type="submit" class="btn">Buscar</button>
+        </div>
 
-    <div class="botones">
-      <button type="submit" class="btn">Buscar</button>
-    </div>
+    </form>
 
-  </form>
-
-  <div id="mensaje-busqueda-salon" class="mensaje"></div>
-  <div id="datos-salon" style="display:none; margin-top:15px;"></div>
+    <div id="mensaje-busqueda-salon" class="mensaje"></div>
+    <div id="datos-salon" style="display:none; margin-top:15px;"></div>
 </div>
 
 <script src="../JS/salones.js"></script>
