@@ -36,17 +36,17 @@ const salonesController = {
     },
 
     
-    // BUSCAR POR NOMBRE
+    // BUSCAR 
 buscar: (req, res) => {
-    const { nombre } = req.params;
+    const { id } = req.params;
 
     const sql = `
         SELECT id, nombre, capacidad, profesor_id
         FROM salones
-        WHERE nombre = ?
+        WHERE id = ?
     `;
 
-    db.query(sql, [nombre], (err, rows) => {
+    db.query(sql, [id], (err, rows) => {
         if (err) {
             console.error(err);
             return res.json({
@@ -68,6 +68,7 @@ buscar: (req, res) => {
         });
     });
 },
+
 
 
     // ELIMINAR

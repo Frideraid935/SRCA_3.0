@@ -63,10 +63,10 @@ function registrarSalon() {
 /* ================= BUSCAR ================= */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===== BUSCAR SALÓN =====
+    // ===== BUSCAR SALÓN POR ID =====
     const btnBuscar = document.getElementById('btn-buscar-salon');
     btnBuscar?.addEventListener('click', async () => {
-        const nombre = document.getElementById('salon_nombre').value.trim();
+        const id = document.getElementById('salon_id').value.trim();
         const mensaje = document.getElementById('mensaje-busqueda-salon');
         const datos = document.getElementById('datos-salon');
 
@@ -75,16 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
         datos.style.display = 'none';
         datos.innerHTML = '';
 
-        if (!nombre) {
-            mensaje.textContent = 'Debe escribir el nombre del salón';
+        if (!id) {
+            mensaje.textContent = 'Debe escribir el ID del salón';
             mensaje.className = 'mensaje mensaje-error';
             mensaje.style.display = 'block';
             return;
         }
 
         try {
-            // fetch usando parámetro en la URL
-            const res = await fetch(`${API_BASE}/buscar/${encodeURIComponent(nombre)}`);
+            const res = await fetch(`${API_BASE}/buscar/${encodeURIComponent(id)}`);
             const result = await res.json();
 
             if (!res.ok || !result.success) {
@@ -103,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Profesor (No. Control):</strong> ${salon.profesor_id}</p>
             `;
             datos.style.display = 'block';
-            mensaje.textContent = '';
             mensaje.style.display = 'none';
 
         } catch (err) {
@@ -114,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   
+    
 });
 
 /* ================= ELIMINAR ================= */
