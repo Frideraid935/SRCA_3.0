@@ -61,48 +61,60 @@ function registrarSalon() {
 }
 
 /* ================= BUSCAR ================= */
-// ===============================
-// BUSCAR SALÓN POR NOMBRE
-// ===============================
-const btnBuscar = document.getElementById("btn-buscar-salon");
+document.addEventListener('DOMContentLoaded', () => {
 
-if (btnBuscar) {
-  btnBuscar.addEventListener("click", async () => {
-    const nombre = document.getElementById("buscar-nombre").value.trim();
-    const resultado = document.getElementById("resultado-buscar");
+    // ===== BUSCAR SALÓN =====
+    const btnBuscar = document.getElementById('btn-buscar-salon');
+    if (btnBuscar) {
+        btnBuscar.addEventListener('click', async () => {
+            const nombre = document.getElementById('buscar-nombre').value.trim();
+            const mensaje = document.getElementById('mensaje-busqueda-salon');
+            const datos = document.getElementById('datos-salon');
 
-    // Limpiar resultado previo
-    resultado.innerHTML = "";
+            // Limpiar mensajes previos
+            mensaje.style.display = 'none';
+            datos.style.display = 'none';
+            datos.innerHTML = '';
 
-    if (!nombre) {
-      resultado.innerHTML = "<p style='color:red'>Ingresa el nombre del salón</p>";
-      return;
+            if (!nombre) {
+                mensaje.textContent = 'Debe escribir el nombre del salón';
+                mensaje.className = 'mensaje mensaje-error';
+                mensaje.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/buscar/${encodeURIComponent(nombre)}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    mensaje.textContent = data.message;
+                    mensaje.className = 'mensaje mensaje-error';
+                    mensaje.style.display = 'block';
+                    return;
+                }
+
+                const salon = data.salon;
+
+                datos.innerHTML = `
+                    <p><strong>ID:</strong> ${salon.id}</p>
+                    <p><strong>Nombre:</strong> ${salon.nombre}</p>
+                    <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
+                    <p><strong>Profesor (No. Control):</strong> ${salon.profesor_id}</p>
+                `;
+                datos.style.display = 'block';
+
+            } catch (err) {
+                mensaje.textContent = 'Error de conexión con el servidor';
+                mensaje.className = 'mensaje mensaje-error';
+                mensaje.style.display = 'block';
+                console.error(err);
+            }
+        });
     }
 
-    try {
-      const response = await fetch(`/api/salones/buscar/${encodeURIComponent(nombre)}`);
-      const data = await response.json();
-
-      if (!data.success) {
-        resultado.innerHTML = `<p style="color:red">${data.message}</p>`;
-        return;
-      }
-
-      // MOSTRAR INFORMACIÓN
-      const salon = data.salon;
-
-      resultado.innerHTML = `
-        <p><strong>ID:</strong> ${salon.id}</p>
-        <p><strong>Nombre:</strong> ${salon.nombre}</p>
-        <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
-        <p><strong>Profesor ID:</strong> ${salon.profesor_id}</p>
-      `;
-    } catch (error) {
-      console.error(error);
-      resultado.innerHTML = "<p style='color:red'>Error al conectar con el servidor</p>";
-    }
-  });
-}
+    // Registrar y eliminar siguen intactos
+});
 
 
 /* ================= ELIMINAR ================= */
