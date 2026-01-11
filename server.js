@@ -37,6 +37,9 @@ app.use('/api/calificaciones', calificacionesAPI);
 const profesoresAPI = require('./APIS/profesores.api');
 app.use('/api/profesores', profesoresAPI);
 
+const salonesAPI = require('./APIS/salones.api');
+app.use('/api/salones', salonesAPI);
+
 /* ===============================
    RUTAS DE VISTAS
 ================================ */
