@@ -24,52 +24,44 @@ module.exports = {
     },
 
     // ================= BUSCAR POR ID ================= (MEJORADO)
-    buscar: (req, res) => {
-        const { id } = req.params;
-
-        console.log(`[API] Buscando salón con ID: ${id}`);
-
-        if (!id || isNaN(id)) {
-            return res.json({
-                success: false,
-                message: 'Debes proporcionar un ID de salón válido'
+    // En tu archivo salones.controlador.js, la función buscar debe verse así:
+buscar: (req, res) => {
+    const { id } = req.params;
+    
+    console.log(`[API] Buscando salón con ID: ${id}`);
+    
+    if (!id || isNaN(id)) {
+        return res.json({
+            success: false,
+            message: 'Debe proporcionar un ID de salón válido'
+        });
+    }
+    
+    const sql = 'SELECT id, nombre, capacidad, profesor_id FROM salones WHERE id = ?';
+    
+    db.query(sql, [parseInt(id)], (err, rows) => {
+        if (err) {
+            console.error('[API] Error en consulta:', err);
+            return res.json({ 
+                success: false, 
+                message: 'Error en la base de datos' 
             });
         }
-
-        const sql = 'SELECT id, nombre, capacidad, profesor_id FROM salones WHERE id = ?';
-        db.query(sql, [parseInt(id)], (err, rows) => {
-            if (err) {
-                console.error('[API] Error en consulta SQL:', err);
-                return res.json({ 
-                    success: false, 
-                    message: 'Error al buscar el salón en la base de datos' 
-                });
-            }
-
-            console.log(`[API] Resultados encontrados: ${rows.length}`);
-
-            if (rows.length === 0) {
-                return res.json({ 
-                    success: false, 
-                    message: `No se encontró ningún salón con ID: ${id}` 
-                });
-            }
-
-            const salon = rows[0];
-            console.log('[API] Datos encontrados:', salon);
-            
-            res.json({ 
-                success: true, 
-                salon: {
-                    id: salon.id,
-                    nombre: salon.nombre,
-                    capacidad: salon.capacidad,
-                    profesor_id: salon.profesor_id
-                }
+        
+        if (rows.length === 0) {
+            return res.json({ 
+                success: false, 
+                message: `No se encontró ningún salón con ID: ${id}` 
             });
+        }
+        
+        // DEVOLVER EXACTAMENTE ESTE FORMATO:
+        res.json({ 
+            success: true, 
+            salon: rows[0]  // ← Esto es CRITICO
         });
-    },
-
+    });
+},
     // ================= ELIMINAR ================= (NO MODIFICAR)
     eliminar: (req, res) => {
         const { id } = req.params;
