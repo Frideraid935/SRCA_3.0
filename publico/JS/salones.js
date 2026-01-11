@@ -3,7 +3,7 @@ const API_BASE = '/api/salones';
 document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================
-       REGISTRAR SALÓN
+       REGISTRAR (SE DEJA IGUAL)
     ========================= */
     const formRegistrar = document.getElementById('formulario-salon');
     if (formRegistrar) {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) formRegistrar.reset();
 
             } catch {
-                mensaje.textContent = 'Error al conectar con el servidor';
+                mensaje.textContent = 'Error de conexión con el servidor';
                 mensaje.className = 'mensaje-error';
                 mensaje.style.display = 'block';
             }
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================
-       BUSCAR SALÓN
+       BUSCAR SALÓN (FIX TOTAL)
     ========================= */
     const formBuscar = document.getElementById('formulario-buscar-salon');
     if (formBuscar) {
@@ -50,31 +50,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formBuscar.addEventListener('submit', async (e) => {
             e.preventDefault();
+            mensaje.style.display = 'none';
+            datos.style.display = 'none';
+
             const id = document.getElementById('id_salon').value.trim();
 
             try {
                 const res = await fetch(`${API_BASE}/buscar/${id}`);
-                const salon = await res.json();
+                const result = await res.json();
 
                 if (!res.ok) {
-                    mensaje.textContent = salon.message;
+                    mensaje.textContent = result.message;
                     mensaje.className = 'mensaje-error';
                     mensaje.style.display = 'block';
-                    datos.style.display = 'none';
                     return;
                 }
 
+                const salon = result.salon;
+
+                mensaje.textContent = result.message;
+                mensaje.className = 'mensaje-exito';
+                mensaje.style.display = 'block';
+
                 datos.innerHTML = `
                     <p><strong>ID:</strong> ${salon.id}</p>
-                    <p><strong>Salón:</strong> ${salon.nombre}</p>
+                    <p><strong>Nombre:</strong> ${salon.nombre}</p>
                     <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
                     <p><strong>Profesor:</strong> ${salon.profesor_id}</p>
                 `;
                 datos.style.display = 'block';
-                mensaje.style.display = 'none';
 
             } catch {
-                mensaje.textContent = 'Error de conexión';
+                mensaje.textContent = 'Error de conexión con el servidor';
                 mensaje.className = 'mensaje-error';
                 mensaje.style.display = 'block';
             }
@@ -82,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================
-       ELIMINAR SALÓN
+       ELIMINAR SALÓN (FIX)
     ========================= */
     const formEliminar = document.getElementById('formulario-eliminar-salon');
     if (formEliminar) {
@@ -91,18 +98,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formEliminar.addEventListener('submit', async (e) => {
             e.preventDefault();
+            mensaje.style.display = 'none';
+            datos.style.display = 'none';
+
             const id = document.getElementById('id_salon').value.trim();
 
             try {
+                // Buscar primero
                 const resBuscar = await fetch(`${API_BASE}/buscar/${id}`);
-                const salon = await resBuscar.json();
+                const resultBuscar = await resBuscar.json();
 
                 if (!resBuscar.ok) {
-                    mensaje.textContent = salon.message;
+                    mensaje.textContent = resultBuscar.message;
                     mensaje.className = 'mensaje-error';
                     mensaje.style.display = 'block';
                     return;
                 }
+
+                const salon = resultBuscar.salon;
 
                 datos.innerHTML = `
                     <p><strong>Salón:</strong> ${salon.nombre}</p>
@@ -112,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!confirm('¿Desea eliminar este salón?')) return;
 
+                // Eliminar
                 const res = await fetch(`${API_BASE}/eliminar/${id}`, { method: 'DELETE' });
                 const result = await res.json();
 
@@ -125,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch {
-                mensaje.textContent = 'Error de conexión';
+                mensaje.textContent = 'Error de conexión con el servidor';
                 mensaje.className = 'mensaje-error';
                 mensaje.style.display = 'block';
             }

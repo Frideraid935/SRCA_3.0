@@ -2,6 +2,9 @@ const db = require('../../BD/BD');
 
 const salonesController = {
 
+    // =====================
+    // REGISTRAR (NO SE TOCA)
+    // =====================
     registrar: (req, res) => {
         const { nombre, capacidad, profesor_id } = req.body;
 
@@ -19,29 +22,48 @@ const salonesController = {
         });
     },
 
+    // =====================
+    // BUSCAR
+    // =====================
     buscar: (req, res) => {
         const { id } = req.params;
 
         const sql = 'SELECT * FROM salones WHERE id = ?';
 
         db.query(sql, [id], (err, rows) => {
-            if (err) return res.status(500).json({ message: 'Error al buscar salón' });
-            if (rows.length === 0)
-                return res.status(404).json({ message: 'Salón no encontrado' });
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al buscar salón' });
+            }
 
-            res.json(rows[0]);
+            if (rows.length === 0) {
+                return res.status(404).json({ message: 'Salón no encontrado' });
+            }
+
+            res.json({
+                message: 'Salón encontrado',
+                salon: rows[0]
+            });
         });
     },
 
+    // =====================
+    // ELIMINAR
+    // =====================
     eliminar: (req, res) => {
         const { id } = req.params;
 
         const sql = 'DELETE FROM salones WHERE id = ?';
 
         db.query(sql, [id], (err, result) => {
-            if (err) return res.status(500).json({ message: 'Error al eliminar salón' });
-            if (result.affectedRows === 0)
-                return res.status(404).json({ message: 'Salón no encontrado' });
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al eliminar salón' });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Salón no encontrado para eliminar' });
+            }
 
             res.json({ message: 'Salón eliminado correctamente' });
         });
