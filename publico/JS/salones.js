@@ -1,147 +1,107 @@
-const API_BASE = '/api/salones';
+const API = '/api/salones';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================
-       REGISTRAR (SE DEJA IGUAL)
-    ========================= */
-    const formRegistrar = document.getElementById('formulario-salon');
-    if (formRegistrar) {
-        const mensaje = document.getElementById('mensaje');
+    /* ================= REGISTRAR ================= */
+    const fReg = document.getElementById('formulario-salon');
+    if (fReg) {
+        const msg = document.getElementById('mensaje');
 
-        formRegistrar.addEventListener('submit', async (e) => {
+        fReg.addEventListener('submit', async e => {
             e.preventDefault();
 
             const data = {
                 nombre: document.getElementById('nombre_salon').value.trim(),
                 capacidad: document.getElementById('capacidad').value.trim(),
-                profesor_id: document.getElementById('profesor_id').value.trim()
+                profesor_id: document.getElementById('numero_de_control').value.trim()
             };
 
             try {
-                const res = await fetch(`${API_BASE}/registrar`, {
+                const res = await fetch(`${API}/registrar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
 
-                const result = await res.json();
-                mensaje.textContent = result.message;
-                mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
-                mensaje.style.display = 'block';
+                const r = await res.json();
+                msg.textContent = r.message;
+                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
+                msg.style.display = 'block';
 
-                if (res.ok) formRegistrar.reset();
-
+                if (res.ok) fReg.reset();
             } catch {
-                mensaje.textContent = 'Error de conexión con el servidor';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
+                msg.textContent = 'Error de conexión';
+                msg.className = 'mensaje mensaje-error';
+                msg.style.display = 'block';
             }
         });
     }
 
-    /* =========================
-       BUSCAR SALÓN (FIX TOTAL)
-    ========================= */
-    const formBuscar = document.getElementById('formulario-buscar-salon');
-    if (formBuscar) {
-        const mensaje = document.getElementById('mensaje-busqueda-salon');
+    /* ================= BUSCAR ================= */
+    const fBus = document.getElementById('formulario-buscar-salon');
+    if (fBus) {
+        const msg = document.getElementById('mensaje-busqueda-salon');
         const datos = document.getElementById('datos-salon');
 
-        formBuscar.addEventListener('submit', async (e) => {
+        fBus.addEventListener('submit', async e => {
             e.preventDefault();
-            mensaje.style.display = 'none';
+            msg.style.display = 'none';
             datos.style.display = 'none';
 
-            const id = document.getElementById('id_salon').value.trim();
+            const id = document.getElementById('id').value.trim();
 
             try {
-                const res = await fetch(`${API_BASE}/buscar/${id}`);
-                const result = await res.json();
+                const res = await fetch(`${API}/buscar/${id}`);
+                const r = await res.json();
 
-                if (!res.ok) {
-                    mensaje.textContent = result.message;
-                    mensaje.className = 'mensaje-error';
-                    mensaje.style.display = 'block';
-                    return;
-                }
+                msg.textContent = r.message;
+                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
+                msg.style.display = 'block';
 
-                const salon = result.salon;
+                if (!res.ok) return;
 
-                mensaje.textContent = result.message;
-                mensaje.className = 'mensaje-exito';
-                mensaje.style.display = 'block';
-
+                const s = r.salon;
                 datos.innerHTML = `
-                    <p><strong>ID:</strong> ${salon.id}</p>
-                    <p><strong>Nombre:</strong> ${salon.nombre}</p>
-                    <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
-                    <p><strong>Profesor:</strong> ${salon.profesor_id}</p>
+                    <p><b>ID:</b> ${s.id}</p>
+                    <p><b>Nombre:</b> ${s.nombre}</p>
+                    <p><b>Capacidad:</b> ${s.capacidad}</p>
+                    <p><b>Profesor:</b> ${s.profesor_id}</p>
                 `;
                 datos.style.display = 'block';
-
             } catch {
-                mensaje.textContent = 'Error de conexión con el servidor';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
+                msg.textContent = 'Error de conexión';
+                msg.className = 'mensaje mensaje-error';
+                msg.style.display = 'block';
             }
         });
     }
 
-    /* =========================
-       ELIMINAR SALÓN (FIX)
-    ========================= */
-    const formEliminar = document.getElementById('formulario-eliminar-salon');
-    if (formEliminar) {
-        const mensaje = document.getElementById('mensaje-eliminar-salon');
+    /* ================= ELIMINAR ================= */
+    const fDel = document.getElementById('formulario-eliminar-salon');
+    if (fDel) {
+        const msg = document.getElementById('mensaje-eliminar-salon');
         const datos = document.getElementById('datos-salon');
 
-        formEliminar.addEventListener('submit', async (e) => {
+        fDel.addEventListener('submit', async e => {
             e.preventDefault();
-            mensaje.style.display = 'none';
+            msg.style.display = 'none';
             datos.style.display = 'none';
 
-            const id = document.getElementById('id_salon').value.trim();
+            const id = document.getElementById('id').value.trim();
 
             try {
-                // Buscar primero
-                const resBuscar = await fetch(`${API_BASE}/buscar/${id}`);
-                const resultBuscar = await resBuscar.json();
+                const res = await fetch(`${API}/eliminar/${id}`, { method: 'DELETE' });
+                const r = await res.json();
 
-                if (!resBuscar.ok) {
-                    mensaje.textContent = resultBuscar.message;
-                    mensaje.className = 'mensaje-error';
-                    mensaje.style.display = 'block';
-                    return;
-                }
+                msg.textContent = r.message;
+                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
+                msg.style.display = 'block';
 
-                const salon = resultBuscar.salon;
-
-                datos.innerHTML = `
-                    <p><strong>Salón:</strong> ${salon.nombre}</p>
-                    <p><strong>Profesor:</strong> ${salon.profesor_id}</p>
-                `;
-                datos.style.display = 'block';
-
-                if (!confirm('¿Desea eliminar este salón?')) return;
-
-                // Eliminar
-                const res = await fetch(`${API_BASE}/eliminar/${id}`, { method: 'DELETE' });
-                const result = await res.json();
-
-                mensaje.textContent = result.message;
-                mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
-                mensaje.style.display = 'block';
-
-                if (res.ok) {
-                    datos.style.display = 'none';
-                    formEliminar.reset();
-                }
-
+                if (res.ok) fDel.reset();
             } catch {
-                mensaje.textContent = 'Error de conexión con el servidor';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
+                msg.textContent = 'Error de conexión';
+                msg.className = 'mensaje mensaje-error';
+                msg.style.display = 'block';
             }
         });
     }

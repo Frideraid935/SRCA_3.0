@@ -10,7 +10,12 @@
 <div class="contenedor-formulario">
     <h2>Registrar Salón</h2>
 
-    <form id="formulario-salon" class="grupo-campos">
+    <form id="formulario-registrar-salon" class="grupo-campos">
+
+        <div class="campo">
+            <label>ID del Salón</label>
+            <input type="number" id="id_salon" required>
+        </div>
 
         <div class="campo">
             <label>Nombre del salón</label>
@@ -24,7 +29,7 @@
 
         <div class="campo">
             <label>No. Control del Profesor</label>
-            <input type="text" id="profesor_id" required>
+            <input type="text" id="numero_de_control" required>
         </div>
 
         <div class="botones">
@@ -33,7 +38,7 @@
 
     </form>
 
-    <div id="mensaje" class="mensaje"></div>
+    <div id="mensaje-registrar-salon" class="mensaje"></div>
 </div>
 
 <script src="../JS/salones.js"></script>

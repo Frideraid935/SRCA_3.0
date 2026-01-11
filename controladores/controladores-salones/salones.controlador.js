@@ -1,12 +1,14 @@
 const db = require('../../BD/BD');
 
-const salonesController = {
+module.exports = {
 
-    // =====================
-    // REGISTRAR (NO SE TOCA)
-    // =====================
-    registrar: (req, res) => {
+    // REGISTRAR
+    registrar(req, res) {
         const { nombre, capacidad, profesor_id } = req.body;
+
+        if (!nombre || !capacidad || !profesor_id) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+        }
 
         const sql = `
             INSERT INTO salones (nombre, capacidad, profesor_id)
@@ -22,10 +24,8 @@ const salonesController = {
         });
     },
 
-    // =====================
     // BUSCAR
-    // =====================
-    buscar: (req, res) => {
+    buscar(req, res) {
         const { id } = req.params;
 
         const sql = 'SELECT * FROM salones WHERE id = ?';
@@ -47,10 +47,8 @@ const salonesController = {
         });
     },
 
-    // =====================
     // ELIMINAR
-    // =====================
-    eliminar: (req, res) => {
+    eliminar(req, res) {
         const { id } = req.params;
 
         const sql = 'DELETE FROM salones WHERE id = ?';
@@ -62,12 +60,10 @@ const salonesController = {
             }
 
             if (result.affectedRows === 0) {
-                return res.status(404).json({ message: 'Salón no encontrado para eliminar' });
+                return res.status(404).json({ message: 'Salón no encontrado' });
             }
 
             res.json({ message: 'Salón eliminado correctamente' });
         });
     }
 };
-
-module.exports = salonesController;
