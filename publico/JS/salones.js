@@ -61,6 +61,22 @@ function registrarSalon() {
 }
 
 /* ================= BUSCAR ================= */
+// ===============================
+// BUSCAR SALÓN
+// ===============================
+document.addEventListener('DOMContentLoaded', () => {
+    const formBuscar = document.getElementById('formulario-buscar-salon');
+
+    if (formBuscar) {
+        console.log('Formulario buscar salón detectado');
+
+        formBuscar.addEventListener('submit', function (e) {
+            e.preventDefault();
+            buscarSalon();
+        });
+    }
+});
+
 function buscarSalon() {
     const nombre = document.getElementById('nombre').value.trim();
     const mensaje = document.getElementById('mensaje-busqueda-salon');
