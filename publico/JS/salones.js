@@ -66,58 +66,100 @@ function registrarSalon() {
 }
 
 // ===== BUSCAR ===== (CORREGIDA)
-function buscarSalon() {
+async function buscarSalon() {
+    console.log('=== INICIANDO BÚSQUEDA ===');
+    
     const id = document.getElementById('id_salon').value.trim();
     const mensajeDiv = document.getElementById('mensaje-busqueda-salon');
     const contenedorDatos = document.getElementById('contenedor-datos-salon');
     const datosDiv = document.getElementById('datos-salon');
+    
+    console.log('ID ingresado:', id);
+    console.log('Elemento mensajeDiv:', mensajeDiv);
+    console.log('Elemento contenedorDatos:', contenedorDatos);
+    console.log('Elemento datosDiv:', datosDiv);
 
     // Limpiar resultados anteriores
-    mensajeDiv.style.display = 'none';
-    contenedorDatos.style.display = 'none';
-    datosDiv.innerHTML = '';
+    if (mensajeDiv) mensajeDiv.style.display = 'none';
+    if (contenedorDatos) contenedorDatos.style.display = 'none';
+    if (datosDiv) datosDiv.innerHTML = '';
 
     if (!id) {
+        console.log('Error: No se ingresó ID');
         mostrarMensaje(mensajeDiv, 'Debes ingresar un ID de salón', 'error');
         return;
     }
 
     // Mostrar cargando
-    mensajeDiv.innerHTML = 'Buscando salón...';
-    mensajeDiv.className = 'mensaje mensaje-info';
-    mensajeDiv.style.display = 'block';
+    if (mensajeDiv) {
+        mensajeDiv.innerHTML = ' Buscando salón...';
+        mensajeDiv.className = 'mensaje mensaje-info';
+        mensajeDiv.style.display = 'block';
+    }
 
-    fetch(`${API_BASE}/buscar/${id}`)
-    .then(response => {
+    try {
+        console.log(`Haciendo fetch a: ${API_BASE}/buscar/${id}`);
+        
+        const response = await fetch(`${API_BASE}/buscar/${id}`);
+        
+        console.log('Respuesta recibida:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            url: response.url
+        });
+        
         if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
+            throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
         }
-        return response.json();
-    })
-    .then(result => {
+        
+        const result = await response.json();
+        console.log('Datos JSON recibidos:', result);
+        
         if (!result.success) {
+            console.log('API devolvió success: false');
             mostrarMensaje(mensajeDiv, result.message || 'Salón no encontrado', 'error');
             return;
         }
 
-        // Mostrar los datos en un formato más legible
-        datosDiv.innerHTML = `
-            <div class="dato-salon">
-                <p><strong>ID:</strong> ${result.salon.id}</p>
-                <p><strong>Nombre del Salón:</strong> ${result.salon.nombre}</p>
-                <p><strong>Capacidad:</strong> ${result.salon.capacidad} personas</p>
-                <p><strong>Número de Control del Profesor:</strong> ${result.salon.profesor_id}</p>
-            </div>
-        `;
+        console.log('Datos del salón encontrado:', result.salon);
+        
+        // Mostrar los datos
+        if (datosDiv && result.salon) {
+            datosDiv.innerHTML = `
+                <div class="dato-salon">
+                    <p><strong>ID:</strong> ${result.salon.id || 'N/A'}</p>
+                    <p><strong>Nombre del Salón:</strong> ${result.salon.nombre || 'N/A'}</p>
+                    <p><strong>Capacidad:</strong> ${result.salon.capacidad || 'N/A'} personas</p>
+                    <p><strong>Número de Control del Profesor:</strong> ${result.salon.profesor_id || 'N/A'}</p>
+                </div>
+            `;
+        }
         
         // Mostrar contenedor de datos
-        contenedorDatos.style.display = 'block';
-        mostrarMensaje(mensajeDiv, '✅ Salón encontrado correctamente', 'success');
-    })
-    .catch(error => {
-        console.error('Error en búsqueda:', error);
-        mostrarMensaje(mensajeDiv, '❌ Error de conexión con el servidor', 'error');
-    });
+        if (contenedorDatos) {
+            contenedorDatos.style.display = 'block';
+        }
+        
+        mostrarMensaje(mensajeDiv, 'Salón encontrado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error completo en búsqueda:', error);
+        
+        let mensajeError = 'Error de conexión con el servidor';
+        if (error.message.includes('Failed to fetch')) {
+            mensajeError = 'No se puede conectar al servidor. Verifica que el servidor esté corriendo.';
+        } else if (error.message.includes('HTTP')) {
+            mensajeError = `Error del servidor: ${error.message}`;
+        }
+        
+        mostrarMensaje(mensajeDiv, mensajeError, 'error');
+        
+        // Mostrar más detalles en consola
+        console.log('=== DETALLES DEL ERROR ===');
+        console.log('URL intentada:', `${API_BASE}/buscar/${id}`);
+        console.log('Error completo:', error);
+    }
 }
 
 // ===== ELIMINAR ===== (MANTENIDO IGUAL - NO MODIFICAR)

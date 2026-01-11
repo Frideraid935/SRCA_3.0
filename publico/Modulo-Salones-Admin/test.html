@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Buscar Salón</title>
+</head>
+<body>
+    <h2>Test de Búsqueda de Salón</h2>
+    <input type="number" id="test_id" placeholder="ID del salón">
+    <button onclick="testBusqueda()">Probar API</button>
+    
+    <div id="test_result" style="margin-top:20px; padding:10px; border:1px solid #ccc;"></div>
+    
+    <script>
+    async function testBusqueda() {
+        const id = document.getElementById('test_id').value;
+        const resultDiv = document.getElementById('test_result');
+        
+        if (!id) {
+            resultDiv.innerHTML = '⚠️ Ingresa un ID';
+            return;
+        }
+        
+        resultDiv.innerHTML = '⏳ Probando conexión...';
+        
+        try {
+            const response = await fetch(`/api/salones/buscar/${id}`);
+            
+            resultDiv.innerHTML = `
+                <strong>Status:</strong> ${response.status}<br>
+                <strong>Status Text:</strong> ${response.statusText}<br>
+                <strong>URL:</strong> ${response.url}<br>
+            `;
+            
+            if (response.ok) {
+                const data = await response.json();
+                resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                resultDiv.innerHTML += `❌ Error en la respuesta del servidor`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+        }
+    }
+    
+    // Probar directamente con un ID conocido
+    setTimeout(() => {
+        document.getElementById('test_id').value = 1;
+        testBusqueda();
+    }, 1000);
+    </script>
+</body>
+</html>
