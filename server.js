@@ -5,16 +5,9 @@ const pool = require("./BD/BD");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ===== SOLO ESTO FALTA - MIDDLEWARE PARA RAILWAY =====
+// ===== MIDDLEWARE DE LOGGING =====
 app.use((req, res, next) => {
-    // Headers CORS mínimos
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
     next();
 });
 
@@ -23,30 +16,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Archivos públicos (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, "publico")));
-
-// ===== RUTA DE PRUEBA SIMPLE - Para diagnosticar =====
-app.get('/api/test', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        message: 'API funcionando',
-        timestamp: new Date().toISOString()
-    });
-});
-
-app.get('/api/salones/test/:id', (req, res) => {
-    const { id } = req.params;
-    res.json({
-        success: true,
-        message: 'Ruta de prueba salones',
-        id: id,
-        salon: {
-            id: parseInt(id),
-            nombre: `Salón Test ${id}`,
-            capacidad: 30,
-            profesor_id: 'TEST001'
-        }
-    });
-});
 
 /* ===============================
    RUTAS API
@@ -73,20 +42,21 @@ app.use('/api/calificaciones', calificacionesAPI);
 const profesoresAPI = require('./APIS/profesores.api');
 app.use('/api/profesores', profesoresAPI);
 
-// ===== IMPORTANTE: SALONES API =====
+// ===== SALONES API =====
+console.log('Registrando API de salones...');
 try {
     const salonesAPI = require('./APIS/salones.api');
     app.use('/api/salones', salonesAPI);
-    console.log('✅ API de salones registrada: /api/salones/*');
+    console.log('API de salones registrada exitosamente');
 } catch (error) {
-    console.error('❌ Error cargando salones.api:', error.message);
+    console.error('Error cargando salones.api:', error.message);
     
-    // Rutas de emergencia si falla
+    // Ruta de emergencia
     app.get('/api/salones/buscar/:id', (req, res) => {
+        console.log('Ruta de emergencia ejecutada para:', req.params.id);
         res.status(503).json({
             success: false,
-            message: 'Módulo salones no disponible',
-            error: error.message
+            message: 'Modulo salones temporalmente no disponible'
         });
     });
 }
@@ -100,21 +70,11 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "publico/Login/login.html"));
 });
 
-// Ruta 404 para API
-app.use('/api/*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: `Ruta API no encontrada: ${req.method} ${req.originalUrl}`
-    });
-});
-
 /* ===============================
    SERVIDOR
 ================================ */
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`✅ Servidor activo en puerto ${PORT}`);
-    console.log(`🔗 Endpoints disponibles:`);
-    console.log(`   http://localhost:${PORT}/api/test`);
-    console.log(`   http://localhost:${PORT}/api/salones/test/1`);
-    console.log(`   http://localhost:${PORT}/api/salones/buscar/1`);
+    console.log(`Servidor activo en puerto ${PORT}`);
+    console.log('Rutas disponibles:');
+    console.log(`  http://localhost:${PORT}/api/salones/buscar/1`);
 });

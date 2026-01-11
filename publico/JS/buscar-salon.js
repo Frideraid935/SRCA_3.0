@@ -1,20 +1,20 @@
-// buscar-salon.js - VERSIÓN DEFINITIVA
-console.log('🎯 buscar-salon.js - VERSIÓN FINAL');
+// buscar-salon.js - VERSION CORREGIDA
+console.log('buscar-salon.js cargado');
 
 // Configuración para Railway
 const API_BASE = window.location.origin + '/api/salones';
-console.log('🌐 API Base:', API_BASE);
-console.log('📍 URL completa:', window.location.href);
+console.log('API Base:', API_BASE);
+console.log('URL completa:', window.location.href);
 
-// Función SIMPLE y DIRECTA
+// Función principal
 async function buscarSalon() {
-    console.log('=== INICIANDO BÚSQUEDA ===');
+    console.log('=== INICIANDO BUSQUEDA ===');
     
     try {
         // 1. Obtener ID
         const idInput = document.getElementById('id_salon_buscar');
         if (!idInput) {
-            console.error('❌ Input no encontrado');
+            console.error('Input no encontrado');
             return;
         }
         
@@ -22,24 +22,24 @@ async function buscarSalon() {
         console.log('ID ingresado:', id);
         
         if (!id) {
-            mostrarMensaje('Ingrese un ID de salón', 'error');
+            mostrarMensaje('Ingrese un ID de salon', 'error');
             return;
         }
         
         // 2. Mostrar "buscando"
-        mostrarMensaje(`Buscando salón ID: ${id}...`, 'info');
+        mostrarMensaje(`Buscando salon ID: ${id}...`, 'info');
         document.getElementById('resultado-salon').style.display = 'none';
         document.getElementById('datos-salon').innerHTML = '';
         
-        // 3. Hacer petición CON TIMEOUT
+        // 3. Hacer peticion CON TIMEOUT
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
             controller.abort();
-            console.error('⏰ TIMEOUT: 8 segundos sin respuesta');
+            console.error('TIMEOUT: 8 segundos sin respuesta');
         }, 8000);
         
         const url = `${API_BASE}/buscar/${id}`;
-        console.log('📡 Fetch URL:', url);
+        console.log('Fetch URL:', url);
         
         const response = await fetch(url, {
             signal: controller.signal,
@@ -51,44 +51,44 @@ async function buscarSalon() {
         
         clearTimeout(timeoutId);
         
-        console.log('✅ Response recibida:', response.status, response.statusText);
+        console.log('Response recibida:', response.status, response.statusText);
         
         // 4. Verificar respuesta
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Error HTTP:', response.status, errorText);
+            console.error('Error HTTP:', response.status, errorText);
             throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         // 5. Parsear JSON
         const result = await response.json();
-        console.log('📦 JSON recibido:', result);
+        console.log('JSON recibido:', result);
         
         // 6. Mostrar resultados
         if (result.success && result.salon) {
             mostrarResultado(result.salon);
-            mostrarMensaje('✅ Salón encontrado', 'success');
+            mostrarMensaje('Salon encontrado', 'success');
         } else {
-            mostrarMensaje(result.message || 'Salón no encontrado', 'error');
+            mostrarMensaje(result.message || 'Salon no encontrado', 'error');
         }
         
     } catch (error) {
-        console.error('🔥 ERROR COMPLETO:', error);
+        console.error('ERROR COMPLETO:', error);
         
         // Mensaje según tipo de error
-        let mensaje = 'Error al buscar salón';
+        let mensaje = 'Error al buscar salon';
         
         if (error.name === 'AbortError') {
-            mensaje = '⏰ Timeout: El servidor no respondió en 8 segundos.';
+            mensaje = 'Timeout: El servidor no respondio en 8 segundos.';
             mensaje += '\n\nPosibles causas:';
             mensaje += '\n1. La ruta /api/salones/buscar/ no existe';
             mensaje += '\n2. El controlador tiene un error';
             mensaje += '\n3. La base de datos no responde';
         } else if (error.message.includes('Failed to fetch')) {
-            mensaje = '🔌 Error de conexión: No se pudo conectar al servidor.';
+            mensaje = 'Error de conexion: No se pudo conectar al servidor.';
             mensaje += '\n\nVerifica:';
-            mensaje += '\n• Que el servidor esté corriendo';
-            mensaje += '\n• Que no haya problemas de red';
+            mensaje += '\n- Que el servidor este corriendo';
+            mensaje += '\n- Que no haya problemas de red';
         } else {
             mensaje = error.message;
         }
@@ -96,11 +96,11 @@ async function buscarSalon() {
         mostrarMensaje(mensaje, 'error');
         
         // Mostrar ayuda adicional
-        console.log('💡 PARA DIAGNOSTICAR:');
+        console.log('PARA DIAGNOSTICAR:');
         console.log('1. Abre esta URL directamente:');
         console.log('   ' + window.location.origin + '/api/salones/buscar/1');
         console.log('2. Revisa los logs del servidor en Railway');
-        console.log('3. Verifica que salones.api.js esté cargado');
+        console.log('3. Verifica que salones.api.js este cargado');
     }
 }
 
@@ -112,18 +112,12 @@ function mostrarResultado(salon) {
     if (!datosDiv || !resultadoDiv) return;
     
     datosDiv.innerHTML = `
-        <div style="
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #4caf50;
-            margin-top: 10px;
-        ">
-            <h4 style="color: #2e7d32; margin-top: 0;">✅ INFORMACIÓN DEL SALÓN</h4>
+        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50; margin-top: 10px;">
+            <h4 style="color: #2e7d32; margin-top: 0;">INFORMACION DEL SALON</h4>
             <p><strong>ID:</strong> ${salon.id}</p>
             <p><strong>Nombre:</strong> ${salon.nombre}</p>
             <p><strong>Capacidad:</strong> ${salon.capacidad} personas</p>
-            <p><strong>Número de Control del Profesor:</strong> ${salon.profesor_id}</p>
+            <p><strong>Numero de Control del Profesor:</strong> ${salon.profesor_id}</p>
             <p style="color: #666; font-size: 12px; margin-top: 15px;">
                 <em>Consultado: ${new Date().toLocaleTimeString()}</em>
             </p>
@@ -160,7 +154,7 @@ function mostrarMensaje(texto, tipo) {
 
 // Configurar evento
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('✅ DOM cargado - Buscador listo');
+    console.log('DOM cargado - Buscador listo');
     
     const form = document.getElementById('formulario-buscar-salon');
     if (form) {

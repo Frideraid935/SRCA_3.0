@@ -16,23 +16,27 @@ module.exports = {
         db.query(sql, [nombre, capacidad, profesor_id], (err, result) => {
             if (err) {
                 console.error('Error registrar:', err);
-                return res.json({ success: false, message: 'Error al registrar el salón' });
+                return res.json({ success: false, message: 'Error al registrar el salon' });
             }
-            res.json({ success: true, message: 'Salón registrado correctamente', id: result.insertId });
+            res.json({ success: true, message: 'Salon registrado correctamente', id: result.insertId });
         });
     },
 
-    // ================= BUSCAR ================= (CORREGIDA - UNA SOLA FUNCIÓN)
+    // ================= BUSCAR =================
     buscar: (req, res) => {
+        console.log('CONTROLADOR BUSCAR: Ejecutado');
+        console.log('Parametros:', req.params);
+        console.log('URL completa:', req.originalUrl);
+        
         const { id } = req.params;
         
-        console.log(`🔍 [CONTROLADOR] Buscando salón ID: ${id}`);
+        console.log(`Buscando salon ID: ${id}`);
         
         if (!id || isNaN(id)) {
-            console.log('ID inválido:', id);
+            console.log('ID invalido:', id);
             return res.json({
                 success: false,
-                message: 'Debe proporcionar un ID de salón válido'
+                message: 'Debe proporcionar un ID de salon valido'
             });
         }
         
@@ -41,7 +45,7 @@ module.exports = {
         
         db.query(sql, [parseInt(id)], (err, rows) => {
             if (err) {
-                console.error('❌ Error en consulta SQL:', err);
+                console.error('Error en consulta SQL:', err);
                 return res.json({ 
                     success: false, 
                     message: 'Error en la base de datos' 
@@ -53,11 +57,11 @@ module.exports = {
             if (rows.length === 0) {
                 return res.json({ 
                     success: false, 
-                    message: `No se encontró salón con ID: ${id}` 
+                    message: `No se encontro salon con ID: ${id}` 
                 });
             }
             
-            console.log('✅ Salón encontrado:', rows[0]);
+            console.log('Salon encontrado:', rows[0]);
             res.json({ 
                 success: true, 
                 salon: rows[0]
@@ -70,21 +74,21 @@ module.exports = {
         const { id } = req.params;
 
         if (!id) {
-            return res.json({ success: false, message: 'Debes proporcionar un ID de salón' });
+            return res.json({ success: false, message: 'Debes proporcionar un ID de salon' });
         }
 
         const sql = 'DELETE FROM salones WHERE id = ?';
         db.query(sql, [id], (err, result) => {
             if (err) {
                 console.error(err);
-                return res.json({ success: false, message: 'Error al eliminar el salón' });
+                return res.json({ success: false, message: 'Error al eliminar el salon' });
             }
 
             if (result.affectedRows === 0) {
-                return res.json({ success: false, message: 'Salón no encontrado' });
+                return res.json({ success: false, message: 'Salon no encontrado' });
             }
 
-            res.json({ success: true, message: 'Salón eliminado correctamente' });
+            res.json({ success: true, message: 'Salon eliminado correctamente' });
         });
     }
 };
