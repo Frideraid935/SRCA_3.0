@@ -1,4 +1,4 @@
-const pool = require('../BD/BD');
+const db = require("../../BD/BD.js");
 
 /* ===============================
    REGISTRAR SALÓN
