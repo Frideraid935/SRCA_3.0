@@ -1,4 +1,5 @@
 // profesores-menu.js - Solo para el menú lateral
+// profesores-menu.js - Solo para el menú lateral
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Menú de profesores cargado');
     
@@ -6,11 +7,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuItems = document.querySelectorAll('.menu-item[data-form]');
     const iframe = document.getElementById('iframe-contenido');
     
-    if (!iframe) return;
+    if (!iframe) {
+        console.error('No se encontró el iframe');
+        return;
+    }
     
     // Función para cargar contenido en el iframe
     function cargarContenido(formulario) {
-        iframe.src = formulario + '.html';
+        const url = `../Modulo-Profesores-Admin/${formulario}.html`;
+        console.log('Cargando:', url);
+        iframe.src = url;
     }
     
     // Configurar eventos para los items del menú

@@ -1,26 +1,31 @@
-// controladores/controladores-profesores/profesores.controlador.js
-// profesores.controlador.js - Controlador completo
+// profesores.controlador.js
 const db = require('../../BD/BD.js');
 
 const profesoresController = {
 
-    // Listar todos los profesores (YA EXISTE - FUNCIONAL)
+    // Listar todos los profesores
     listarProfesores: (req, res) => {
-        const sql = 'SELECT numero_de_control, nombre FROM profesores';
+        const sql = 'SELECT numero_de_control, nombre, especialidad FROM profesores ORDER BY nombre';
         db.query(sql, (err, rows) => {
             if (err) {
-                console.error(err);
-                return res.status(500).json({ message: 'Error al obtener profesores' });
+                console.error('Error listando profesores:', err);
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Error al obtener profesores' 
+                });
             }
-            res.json(rows);
+            res.json({
+                success: true,
+                profesores: rows
+            });
         });
     },
-
-    // ============ AÑADIR ESTAS FUNCIONES NUEVAS ============
 
     // Registrar nuevo profesor
     registrar: (req, res) => {
         const { numero_de_control, nombre, especialidad } = req.body;
+
+        console.log('Datos recibidos para registrar:', { numero_de_control, nombre, especialidad });
 
         if (!numero_de_control || !nombre || !especialidad) {
             return res.json({
@@ -29,6 +34,7 @@ const profesoresController = {
             });
         }
 
+        // Verificar si ya existe
         const checkSql = 'SELECT numero_de_control FROM profesores WHERE numero_de_control = ?';
         db.query(checkSql, [numero_de_control], (err, rows) => {
             if (err) {
@@ -46,13 +52,14 @@ const profesoresController = {
                 });
             }
 
+            // Insertar nuevo profesor
             const insertSql = 'INSERT INTO profesores (numero_de_control, nombre, especialidad) VALUES (?, ?, ?)';
             db.query(insertSql, [numero_de_control, nombre, especialidad], (err, result) => {
                 if (err) {
                     console.error('Error registrando profesor:', err);
                     return res.json({
                         success: false,
-                        message: 'Error al registrar profesor'
+                        message: 'Error al registrar profesor: ' + err.message
                     });
                 }
 
@@ -68,6 +75,8 @@ const profesoresController = {
     // Buscar profesor por número de control
     buscar: (req, res) => {
         const { id } = req.params;
+
+        console.log('Buscando profesor con ID:', id);
 
         if (!id) {
             return res.json({
@@ -105,6 +114,8 @@ const profesoresController = {
         const { id } = req.params;
         const { nombre, especialidad } = req.body;
 
+        console.log('Actualizando profesor:', { id, nombre, especialidad });
+
         if (!id || !nombre || !especialidad) {
             return res.json({
                 success: false,
@@ -140,6 +151,8 @@ const profesoresController = {
     eliminar: (req, res) => {
         const { id } = req.params;
 
+        console.log('Eliminando profesor ID:', id);
+
         if (!id) {
             return res.json({
                 success: false,
@@ -147,26 +160,60 @@ const profesoresController = {
             });
         }
 
-        const sql = 'DELETE FROM profesores WHERE numero_de_control = ?';
-        db.query(sql, [id], (err, result) => {
+        // Primero, verificar si existen salones asignados
+        const checkSalonesSql = 'SELECT id FROM salones WHERE profesor_id = ?';
+        db.query(checkSalonesSql, [id], (err, salones) => {
             if (err) {
-                console.error('Error eliminando profesor:', err);
+                console.error('Error verificando salones:', err);
                 return res.json({
                     success: false,
-                    message: 'Error al eliminar profesor'
+                    message: 'Error al verificar salones asignados'
                 });
             }
 
-            if (result.affectedRows === 0) {
+            if (salones.length > 0) {
                 return res.json({
                     success: false,
-                    message: 'Profesor no encontrado'
+                    message: 'No se puede eliminar el profesor porque tiene salones asignados'
                 });
             }
 
-            res.json({
-                success: true,
-                message: 'Profesor eliminado correctamente'
+            // Guardar en tabla de eliminados
+            const selectSql = 'SELECT * FROM profesores WHERE numero_de_control = ?';
+            db.query(selectSql, [id], (err, rows) => {
+                if (err) {
+                    console.error('Error seleccionando profesor:', err);
+                } else if (rows.length > 0) {
+                    const profesor = rows[0];
+                    const insertEliminadoSql = 'INSERT INTO profesores_eliminados (numero_de_control, nombre, especialidad) VALUES (?, ?, ?)';
+                    db.query(insertEliminadoSql, [profesor.numero_de_control, profesor.nombre, profesor.especialidad], (err) => {
+                        if (err) console.error('Error guardando en eliminados:', err);
+                    });
+                }
+
+                // Eliminar profesor
+                const deleteSql = 'DELETE FROM profesores WHERE numero_de_control = ?';
+                db.query(deleteSql, [id], (err, result) => {
+                    if (err) {
+                        console.error('Error eliminando profesor:', err);
+                        return res.json({
+                            success: false,
+                            message: 'Error al eliminar profesor'
+                        });
+                    }
+
+                    if (result.affectedRows === 0) {
+                        return res.json({
+                            success: false,
+                            message: 'Profesor no encontrado'
+                        });
+                    }
+
+                    res.json({
+                        success: true,
+                        message: 'Profesor eliminado correctamente'
+                    });
+                });
             });
         });
     }
