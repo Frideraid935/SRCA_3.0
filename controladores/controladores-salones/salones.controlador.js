@@ -2,57 +2,72 @@ const db = require('../../BD/BD.js');
 
 const salonesController = {
 
-    registrarSalon: (req, res) => {
-        const { id_salon, nombre_salon, capacidad, profesor_id } = req.body;
+    // REGISTRAR
+    registrarSalon: async (req, res) => {
+        try {
+            const { id_salon, nombre_salon, capacidad, profesor_id } = req.body;
 
-        if (!id_salon || !nombre_salon || !capacidad || !profesor_id) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
-        }
-
-        const sql = `
-            INSERT INTO salones (id_salon, nombre_salon, capacidad, profesor_id)
-            VALUES (?, ?, ?, ?)
-        `;
-
-        db.query(sql, [id_salon, nombre_salon, capacidad, profesor_id], (err) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ message: 'Error al registrar salón' });
+            if (!id_salon || !nombre_salon || !capacidad || !profesor_id) {
+                return res.status(400).json({ message: 'Todos los campos son obligatorios' });
             }
+
+            const sql = `
+                INSERT INTO salones (id_salon, nombre_salon, capacidad, profesor_id)
+                VALUES (?, ?, ?, ?)
+            `;
+
+            await db.execute(sql, [id_salon, nombre_salon, capacidad, profesor_id]);
+
             res.json({ message: 'Salón registrado correctamente' });
-        });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error al registrar salón' });
+        }
     },
 
-    buscarSalon: (req, res) => {
-        const { id } = req.params;
+    // BUSCAR
+    buscarSalon: async (req, res) => {
+        try {
+            const { id } = req.params;
 
-        const sql = 'SELECT * FROM salones WHERE id_salon = ?';
-        db.query(sql, [id], (err, rows) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ message: 'Error al buscar salón' });
-            }
+            const [rows] = await db.execute(
+                'SELECT * FROM salones WHERE id_salon = ?',
+                [id]
+            );
+
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'Salón no encontrado' });
             }
+
             res.json(rows[0]);
-        });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error al buscar salón' });
+        }
     },
 
-    eliminarSalon: (req, res) => {
-        const { id } = req.params;
+    // ELIMINAR
+    eliminarSalon: async (req, res) => {
+        try {
+            const { id } = req.params;
 
-        const sql = 'DELETE FROM salones WHERE id_salon = ?';
-        db.query(sql, [id], (err, result) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ message: 'Error al eliminar salón' });
-            }
+            const [result] = await db.execute(
+                'DELETE FROM salones WHERE id_salon = ?',
+                [id]
+            );
+
             if (result.affectedRows === 0) {
                 return res.status(404).json({ message: 'Salón no encontrado' });
             }
+
             res.json({ message: 'Salón eliminado correctamente' });
-        });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error al eliminar salón' });
+        }
     }
 };
 
