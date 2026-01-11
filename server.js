@@ -10,6 +10,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Archivos públicos (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, "publico")));
+// En server.js, después de app.use(express.json());
+app.use((req, res, next) => {
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+});
 
 /* ===============================
    RUTAS API
