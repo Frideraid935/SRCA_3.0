@@ -1,9 +1,8 @@
-// profesores.api.js
+// profesores.api.js - API completa para profesores
 const express = require('express');
 const router = express.Router();
 const profesoresController = require('../controladores/controladores-profesores/profesores.controlador');
 
-// ============ RUTA EXISTENTE ============
 // Ruta para listar profesores (YA EXISTE - FUNCIONAL)
 router.get('/listar', profesoresController.listarProfesores);
 

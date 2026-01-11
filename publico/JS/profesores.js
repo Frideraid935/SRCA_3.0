@@ -1,7 +1,7 @@
-// profesores-crud.js - CRUD completo para profesores
+// profesores-crud.js
 const API_PROFESORES = '/api/profesores';
 
-// ==================== FUNCIONES COMUNES ====================
+// Función para mostrar mensajes
 function mostrarMensaje(elementoId, texto, tipo) {
     const elemento = document.getElementById(elementoId);
     if (!elemento) return;
@@ -15,10 +15,10 @@ function mostrarMensaje(elementoId, texto, tipo) {
     }, 5000);
 }
 
-// ==================== REGISTRAR PROFESOR ====================
+// ===== REGISTRAR PROFESOR =====
 if (document.getElementById('numero_de_control_ingresar')) {
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página Registrar Profesor cargada');
+        console.log('Módulo registrar profesor cargado');
     });
 }
 
@@ -58,10 +58,10 @@ function guardarProfesor() {
     });
 }
 
-// ==================== BUSCAR PROFESOR ====================
+// ===== BUSCAR PROFESOR =====
 if (document.getElementById('btn-buscar')) {
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página Buscar Profesor cargada');
+        console.log('Módulo buscar profesor cargado');
         document.getElementById('btn-buscar').addEventListener('click', buscarProfesor);
     });
 }
@@ -101,10 +101,10 @@ function buscarProfesor() {
         });
 }
 
-// ==================== ACTUALIZAR PROFESOR ====================
+// ===== ACTUALIZAR PROFESOR =====
 if (document.getElementById('btn-buscar-actualizar')) {
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página Actualizar Profesor cargada');
+        console.log('Módulo actualizar profesor cargado');
         document.getElementById('btn-buscar-actualizar').addEventListener('click', buscarProfesorActualizar);
     });
 }
@@ -174,10 +174,10 @@ function actualizarProfesor() {
     });
 }
 
-// ==================== ELIMINAR PROFESOR ====================
+// ===== ELIMINAR PROFESOR =====
 if (document.getElementById('btn-buscar-eliminar')) {
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Página Eliminar Profesor cargada');
+        console.log('Módulo eliminar profesor cargado');
         document.getElementById('btn-buscar-eliminar').addEventListener('click', buscarProfesorEliminar);
         document.getElementById('btn-eliminar-confirmar').addEventListener('click', confirmarEliminacion);
     });

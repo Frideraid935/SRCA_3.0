@@ -1,4 +1,5 @@
 // controladores/controladores-profesores/profesores.controlador.js
+// profesores.controlador.js - Controlador completo
 const db = require('../../BD/BD.js');
 
 const profesoresController = {
@@ -21,7 +22,6 @@ const profesoresController = {
     registrar: (req, res) => {
         const { numero_de_control, nombre, especialidad } = req.body;
 
-        // Validar campos
         if (!numero_de_control || !nombre || !especialidad) {
             return res.json({
                 success: false,
@@ -29,7 +29,6 @@ const profesoresController = {
             });
         }
 
-        // Verificar si ya existe
         const checkSql = 'SELECT numero_de_control FROM profesores WHERE numero_de_control = ?';
         db.query(checkSql, [numero_de_control], (err, rows) => {
             if (err) {
@@ -47,7 +46,6 @@ const profesoresController = {
                 });
             }
 
-            // Insertar nuevo profesor
             const insertSql = 'INSERT INTO profesores (numero_de_control, nombre, especialidad) VALUES (?, ?, ?)';
             db.query(insertSql, [numero_de_control, nombre, especialidad], (err, result) => {
                 if (err) {
