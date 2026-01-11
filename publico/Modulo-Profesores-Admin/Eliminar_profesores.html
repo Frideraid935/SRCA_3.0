@@ -10,20 +10,25 @@
 <body>
     <div class="contenedor-formulario active">
         <h2>Eliminar Profesor</h2>
-        <div class="grupo-campos">
-            <div class="campo">
-                <label for="eliminar-numero">Número de Control:</label>
-                <input type="text" id="eliminar-numero" placeholder="Ingrese número de control">
+        
+        <form id="formulario-buscar-eliminar">
+            <div class="grupo-campos">
+                <div class="campo">
+                    <label for="eliminar-numero">Número de Control:</label>
+                    <input type="text" id="eliminar-numero" name="numero_de_control" placeholder="Ingrese número de control">
+                </div>
             </div>
-        </div>
-        <div class="botones">
-            <button class="btn btn-primary" onclick="buscarProfesorEliminar()">Buscar Profesor</button>
-        </div>
+            <div class="botones">
+                <button type="submit" class="btn btn-primary">Buscar Profesor</button>
+            </div>
+        </form>
         
         <div id="datos-profesor" style="margin-top: 20px; display: none;">
             <h3>Datos del Profesor a Eliminar</h3>
             <div id="info-profesor"></div>
-            <button class="btn btn-danger" id="btn-eliminar-confirmar" onclick="eliminarProfesorConfirmado()" style="display: none; margin-top: 20px;">Confirmar Eliminación</button>
+            <button type="button" class="btn btn-danger" id="btn-eliminar-confirmar" style="display: none; margin-top: 20px;">
+                Confirmar Eliminación
+            </button>
         </div>
         
         <div id="mensaje-eliminar" class="mensaje"></div>

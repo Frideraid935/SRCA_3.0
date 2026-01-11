@@ -10,19 +10,23 @@
 <body>
     <div class="contenedor-formulario active">
         <h2>Buscar Profesor</h2>
-        <div class="grupo-campos">
-            <div class="campo">
-                <label for="busqueda-numero">Número de Control:</label>
-                <input type="text" id="busqueda-numero" placeholder="Ingrese número de control">
+        <form id="formulario-buscar">
+            <div class="grupo-campos">
+                <div class="campo">
+                    <label for="busqueda-numero">Número de Control:</label>
+                    <input type="text" id="busqueda-numero" name="numero_de_control" placeholder="Ingrese número de control">
+                </div>
             </div>
-        </div>
-        <div class="botones">
-            <button class="btn btn-primary" onclick="buscarProfesor()">Buscar</button>
-        </div>
+            <div class="botones">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>
+        </form>
+        
         <div id="resultados-busqueda" style="margin-top: 20px; display: none;">
             <h3>Datos del Profesor</h3>
             <div id="datos-profesor"></div>
         </div>
+        
         <div id="mensaje-busqueda" class="mensaje"></div>
     </div>
 

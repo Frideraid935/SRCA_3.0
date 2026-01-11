@@ -1,355 +1,411 @@
-// profesores.js - Frontend JavaScript para profesores
+// profesores.js - Sistema completo de gestión de profesores
 
-const API_BASE_URL = window.location.origin + '/api/profesores';
-console.log('API URL:', API_BASE_URL);
-let profesorActual = null;
+const API_BASE = '/api/profesores';
 
-// ========== FUNCIONES GENERALES ==========
+// Inicializar cuando el DOM esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+    initPage();
+});
 
-function mostrarMensaje(elementId, mensaje, tipo = 'success') {
-    const elemento = document.getElementById(elementId);
-    if (elemento) {
-        elemento.textContent = mensaje;
-        elemento.className = `mensaje ${tipo}`;
-        elemento.style.display = 'block';
-        setTimeout(() => elemento.style.display = 'none', 5000);
+// Determinar qué página se está cargando
+function initPage() {
+    const path = window.location.pathname;
+    const page = path.split('/').pop();
+    
+    if (page === 'Registrar_profesores.html') {
+        initRegistro();
+    } else if (page === 'Buscar_profesores.html') {
+        initBusqueda();
+    } else if (page === 'Actualizar_profesores.html') {
+        initActualizacion();
+    } else if (page === 'Eliminar_profesores.html') {
+        initEliminacion();
     }
 }
 
-// ========== REGISTRAR PROFESOR ==========
-
-async function guardarProfesor() {
-    console.log('=== GUARDAR PROFESOR ===');
+// ===============================
+// 1. REGISTRAR PROFESOR
+// ===============================
+function initRegistro() {
+    const form = document.getElementById('formulario-ingresar');
+    if (!form) return;
     
-    const numeroControl = document.getElementById('numero_de_control_ingresar')?.value.trim();
-    const nombre = document.getElementById('nombre_ingresar')?.value.trim();
-    const especialidad = document.getElementById('especialidad_ingresar')?.value.trim();
+    const btnSubmit = form.querySelector('button[onclick="guardarProfesor()"]');
+    if (!btnSubmit) return;
     
-    console.log('Datos:', { numeroControl, nombre, especialidad });
-    
-    if (!numeroControl || !nombre || !especialidad) {
-        mostrarMensaje('mensaje-ingresar', 'Todos los campos son obligatorios', 'error');
-        return;
-    }
-    
-    try {
-        console.log('Enviando POST a:', `${API_BASE_URL}/registrar`);
+    btnSubmit.onclick = async function(e) {
+        e.preventDefault();
         
-        const response = await fetch(`${API_BASE_URL}/registrar`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                numero_de_control: numeroControl,
-                nombre: nombre,
-                especialidad: especialidad
-            })
-        });
+        const originalText = btnSubmit.textContent;
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Registrando...';
         
-        console.log('Respuesta status:', response.status);
+        const numeroControl = document.getElementById('numero_de_control_ingresar').value.trim();
+        const nombre = document.getElementById('nombre_ingresar').value.trim();
+        const especialidad = document.getElementById('especialidad_ingresar').value.trim();
         
-        const result = await response.json();
-        console.log('Resultado:', result);
-        
-        if (result.success) {
-            mostrarMensaje('mensaje-ingresar', '✅ ' + result.message, 'success');
-            document.getElementById('formulario-ingresar').reset();
-        } else {
-            mostrarMensaje('mensaje-ingresar', '❌ ' + result.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-ingresar', '❌ Error de conexión', 'error');
-    }
-}
-
-// ========== BUSCAR PROFESOR (para Buscar_profesores.html) ==========
-
-async function buscarProfesor() {
-    console.log('=== BUSCAR PROFESOR ===');
-    
-    const numeroControl = document.getElementById('busqueda-numero')?.value.trim();
-    console.log('Buscando número:', numeroControl);
-    
-    if (!numeroControl) {
-        mostrarMensaje('mensaje-busqueda', '❌ Ingrese un número de control', 'error');
-        return;
-    }
-    
-    try {
-        console.log('Llamando API:', `${API_BASE_URL}/buscar/${numeroControl}`);
-        
-        const response = await fetch(`${API_BASE_URL}/buscar/${numeroControl}`);
-        console.log('Respuesta status:', response.status);
-        
-        const result = await response.json();
-        console.log('Resultado búsqueda:', result);
-        
-        const resultadosDiv = document.getElementById('resultados-busqueda');
-        const datosDiv = document.getElementById('datos-profesor');
-        
-        if (!resultadosDiv || !datosDiv) {
-            console.error('Elementos HTML no encontrados');
+        if (!numeroControl || !nombre || !especialidad) {
+            showMessage('mensaje-ingresar', 'Todos los campos son obligatorios', 'error');
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = originalText;
             return;
         }
         
-        if (result.success) {
-            const profesor = result.profesor;
-            console.log('Profesor encontrado:', profesor);
+        const data = {
+            numero_de_control: numeroControl,
+            nombre: nombre,
+            especialidad: especialidad
+        };
+        
+        try {
+            const response = await fetch(`${API_BASE}/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
             
-            datosDiv.innerHTML = `
-                <table class="tabla-profesor" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Número de Control</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesor.numero_de_control}</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesor.nombre}</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Especialidad</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesor.especialidad}</td>
-                    </tr>
-                </table>
-            `;
-            resultadosDiv.style.display = 'block';
-            mostrarMensaje('mensaje-busqueda', '✅ Profesor encontrado', 'success');
-        } else {
-            datosDiv.innerHTML = '';
-            resultadosDiv.style.display = 'none';
-            mostrarMensaje('mensaje-busqueda', '❌ ' + result.message, 'error');
+            const result = await response.json();
+            showMessage('mensaje-ingresar', result.message, result.status);
+            
+            if (result.status === 'success') {
+                form.reset();
+            }
+        } catch (error) {
+            showMessage('mensaje-ingresar', 'Error de conexión', 'error');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = originalText;
         }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-busqueda', '❌ Error de conexión', 'error');
+    };
+}
+
+// ===============================
+// 2. BUSCAR PROFESOR
+// ===============================
+function initBusqueda() {
+    const btnBuscar = document.getElementById('btn-buscar') || document.querySelector('button[onclick*="buscar"]');
+    if (!btnBuscar) return;
+    
+    btnBuscar.onclick = async function(e) {
+        e.preventDefault();
+        
+        const numeroControl = document.getElementById('busqueda-numero').value.trim();
+        const resultadosDiv = document.getElementById('resultados-busqueda');
+        const datosDiv = document.getElementById('datos-profesor');
+        
+        if (!numeroControl) {
+            showMessage('mensaje-busqueda', 'Ingrese un número de control', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                showMessage('mensaje-busqueda', result.message, 'error');
+                if (resultadosDiv) resultadosDiv.style.display = 'none';
+                if (datosDiv) {
+                    datosDiv.innerHTML = '';
+                    datosDiv.style.display = 'none';
+                }
+            } else {
+                showMessage('mensaje-busqueda', 'Profesor encontrado', 'success');
+                displayProfesorData(datosDiv, result);
+                
+                if (resultadosDiv) resultadosDiv.style.display = 'block';
+                if (datosDiv) datosDiv.style.display = 'block';
+            }
+        } catch (error) {
+            showMessage('mensaje-busqueda', 'Error de conexión', 'error');
+        }
+    };
+}
+
+// ===============================
+// 3. ACTUALIZAR PROFESOR
+// ===============================
+function initActualizacion() {
+    const btnBuscar = document.getElementById('btn-buscar-actualizar') || document.querySelector('button[onclick*="buscar"]');
+    const formActualizar = document.getElementById('formulario-actualizar');
+    
+    if (!btnBuscar || !formActualizar) return;
+    
+    btnBuscar.onclick = async function(e) {
+        e.preventDefault();
+        
+        const numeroControl = document.getElementById('actualizar-numero').value.trim();
+        
+        if (!numeroControl) {
+            showMessage('mensaje-actualizar', 'Ingrese un número de control', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const result = await response.json();
+            
+            if (result.status === 'error') {
+                showMessage('mensaje-actualizar', result.message, 'error');
+                formActualizar.style.display = 'none';
+            } else {
+                showMessage('mensaje-actualizar', 'Profesor encontrado', 'success');
+                fillUpdateForm(result);
+                formActualizar.style.display = 'block';
+            }
+        } catch (error) {
+            showMessage('mensaje-actualizar', 'Error de conexión', 'error');
+        }
+    };
+    
+    const btnActualizar = formActualizar.querySelector('button[onclick="actualizarProfesor()"]');
+    if (btnActualizar) {
+        btnActualizar.onclick = async function(e) {
+            e.preventDefault();
+            
+            const originalText = btnActualizar.textContent;
+            btnActualizar.disabled = true;
+            btnActualizar.textContent = 'Actualizando...';
+            
+            const numeroOriginal = document.getElementById('numero_original').value;
+            const nombre = document.getElementById('nombre_actualizar').value.trim();
+            const especialidad = document.getElementById('especialidad_actualizar').value.trim();
+            
+            if (!numeroOriginal || !nombre || !especialidad) {
+                showMessage('mensaje-actualizar', 'Todos los campos son obligatorios', 'error');
+                btnActualizar.disabled = false;
+                btnActualizar.textContent = originalText;
+                return;
+            }
+            
+            const data = {
+                numero_de_control: numeroOriginal,
+                nombre: nombre,
+                especialidad: especialidad
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/actualizar`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showMessage('mensaje-actualizar', result.message, result.status);
+                
+                if (result.status === 'success') {
+                    setTimeout(() => {
+                        formActualizar.style.display = 'none';
+                        formActualizar.reset();
+                        document.getElementById('actualizar-numero').value = '';
+                    }, 2000);
+                }
+            } catch (error) {
+                showMessage('mensaje-actualizar', 'Error de conexión', 'error');
+            } finally {
+                btnActualizar.disabled = false;
+                btnActualizar.textContent = originalText;
+            }
+        };
     }
 }
 
-// ========== BUSCAR PARA ELIMINAR (para Eliminar_profesores.html) ==========
-
-async function buscarProfesorEliminar() {
-    console.log('=== BUSCAR PARA ELIMINAR ===');
+// ===============================
+// 4. ELIMINAR PROFESOR
+// ===============================
+function initEliminacion() {
+    const btnBuscar = document.getElementById('btn-buscar-eliminar') || document.querySelector('button[onclick*="buscar"]');
+    if (!btnBuscar) return;
     
-    const numeroControl = document.getElementById('eliminar-numero')?.value.trim();
-    console.log('Buscando para eliminar:', numeroControl);
-    
-    if (!numeroControl) {
-        mostrarMensaje('mensaje-eliminar', '❌ Ingrese un número de control', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/buscar/${numeroControl}`);
-        console.log('Respuesta status:', response.status);
+    btnBuscar.onclick = async function(e) {
+        e.preventDefault();
         
-        const result = await response.json();
-        console.log('Resultado:', result);
-        
+        const numeroControl = document.getElementById('eliminar-numero').value.trim();
         const datosDiv = document.getElementById('datos-profesor');
         const infoDiv = document.getElementById('info-profesor');
         const confirmarBtn = document.getElementById('btn-eliminar-confirmar');
         
-        if (!datosDiv || !infoDiv || !confirmarBtn) {
-            console.error('Elementos HTML no encontrados');
+        if (!numeroControl) {
+            showMessage('mensaje-eliminar', 'Ingrese un número de control', 'error');
             return;
         }
         
-        if (result.success) {
-            profesorActual = result.profesor;
-            console.log('Profesor para eliminar:', profesorActual);
+        try {
+            const searchResponse = await fetch(`${API_BASE}/buscar/${numeroControl}`);
+            const result = await searchResponse.json();
             
-            infoDiv.innerHTML = `
-                <table class="tabla-profesor" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Número de Control</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesorActual.numero_de_control}</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Nombre</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesorActual.nombre}</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">Especialidad</th>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${profesorActual.especialidad}</td>
-                    </tr>
-                </table>
-                <p style="color: red; margin-top: 10px; font-weight: bold;">
-                    ⚠️ ¿Está seguro que desea eliminar este profesor?
-                </p>
-            `;
-            datosDiv.style.display = 'block';
-            confirmarBtn.style.display = 'block';
-            mostrarMensaje('mensaje-eliminar', '✅ Profesor encontrado', 'success');
-        } else {
-            datosDiv.style.display = 'none';
-            confirmarBtn.style.display = 'none';
-            mostrarMensaje('mensaje-eliminar', '❌ ' + result.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-eliminar', '❌ Error de conexión', 'error');
-    }
-}
-
-// ========== ELIMINAR PROFESOR CONFIRMADO ==========
-
-async function eliminarProfesorConfirmado() {
-    console.log('=== ELIMINAR CONFIRMADO ===');
-    
-    if (!profesorActual) {
-        mostrarMensaje('mensaje-eliminar', '❌ No hay profesor seleccionado', 'error');
-        return;
-    }
-    
-    console.log('Eliminando profesor:', profesorActual.numero_de_control);
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/eliminar/${profesorActual.numero_de_control}`, {
-            method: 'DELETE'
-        });
-        
-        console.log('Respuesta status:', response.status);
-        
-        const result = await response.json();
-        console.log('Resultado eliminación:', result);
-        
-        if (result.success) {
-            mostrarMensaje('mensaje-eliminar', '✅ ' + result.message, 'success');
-            
-            // Limpiar formulario y ocultar sección
-            if (document.getElementById('eliminar-numero')) {
-                document.getElementById('eliminar-numero').value = '';
-            }
-            if (document.getElementById('datos-profesor')) {
-                document.getElementById('datos-profesor').style.display = 'none';
-            }
-            if (document.getElementById('btn-eliminar-confirmar')) {
-                document.getElementById('btn-eliminar-confirmar').style.display = 'none';
+            if (result.status === 'error') {
+                showMessage('mensaje-eliminar', result.message, 'error');
+                if (datosDiv) {
+                    datosDiv.style.display = 'none';
+                }
+                if (confirmarBtn) {
+                    confirmarBtn.style.display = 'none';
+                }
+                return;
             }
             
-            profesorActual = null;
-        } else {
-            mostrarMensaje('mensaje-eliminar', '❌ ' + result.message, 'error');
+            showMessage('mensaje-eliminar', 'Profesor encontrado', 'info');
+            displayProfesorDataWithDeleteButton(infoDiv, result, numeroControl);
+            
+            if (datosDiv) datosDiv.style.display = 'block';
+            if (confirmarBtn) confirmarBtn.style.display = 'block';
+            
+        } catch (error) {
+            showMessage('mensaje-eliminar', 'Error de conexión', 'error');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-eliminar', '❌ Error de conexión', 'error');
+    };
+    
+    const btnConfirmar = document.getElementById('btn-eliminar-confirmar');
+    if (btnConfirmar) {
+        btnConfirmar.onclick = async function(e) {
+            e.preventDefault();
+            
+            const numeroControl = document.getElementById('eliminar-numero').value.trim();
+            
+            if (!numeroControl) {
+                showMessage('mensaje-eliminar', 'Ingrese un número de control', 'error');
+                return;
+            }
+            
+            const originalText = btnConfirmar.textContent;
+            btnConfirmar.disabled = true;
+            btnConfirmar.textContent = 'Eliminando...';
+            
+            try {
+                const deleteResponse = await fetch(`${API_BASE}/eliminar`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numero_de_control: numeroControl })
+                });
+                
+                const result = await deleteResponse.json();
+                showMessage('mensaje-eliminar', result.message, result.status);
+                
+                if (result.status === 'success') {
+                    const form = document.getElementById('eliminar-numero');
+                    if (form) form.value = '';
+                    
+                    const datosDiv = document.getElementById('datos-profesor');
+                    if (datosDiv) {
+                        datosDiv.style.display = 'none';
+                    }
+                    
+                    if (btnConfirmar) {
+                        btnConfirmar.style.display = 'none';
+                    }
+                    
+                    const infoDiv = document.getElementById('info-profesor');
+                    if (infoDiv) {
+                        infoDiv.innerHTML = '';
+                    }
+                }
+            } catch (error) {
+                showMessage('mensaje-eliminar', 'Error al eliminar', 'error');
+            } finally {
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = originalText;
+            }
+        };
     }
 }
 
-// ========== BUSCAR PARA ACTUALIZAR (para Actualizar_profesores.html) ==========
+// ===============================
+// FUNCIONES AUXILIARES
+// ===============================
 
-async function buscarProfesorActualizar() {
-    console.log('=== BUSCAR PARA ACTUALIZAR ===');
+// Mostrar datos del profesor
+function displayProfesorData(container, profesor) {
+    if (!container) return;
     
-    const numeroControl = document.getElementById('actualizar-numero')?.value.trim();
-    console.log('Buscando para actualizar:', numeroControl);
+    let html = '<div><h4>Datos del Profesor:</h4>';
+    html += '<p><b>Número de Control:</b> ' + (profesor.numero_de_control || 'No especificado') + '</p>';
+    html += '<p><b>Nombre:</b> ' + (profesor.nombre || 'No especificado') + '</p>';
+    html += '<p><b>Especialidad:</b> ' + (profesor.especialidad || 'No especificado') + '</p>';
+    html += '</div>';
     
-    if (!numeroControl) {
-        mostrarMensaje('mensaje-actualizar', '❌ Ingrese un número de control', 'error');
-        return;
+    container.innerHTML = html;
+}
+
+// Mostrar datos con botón eliminar
+function displayProfesorDataWithDeleteButton(container, profesor, numeroControl) {
+    if (!container) return;
+    
+    let html = '<div><h4>Datos del Profesor a Eliminar:</h4>';
+    html += '<p><b>Número de Control:</b> ' + (profesor.numero_de_control || 'No especificado') + '</p>';
+    html += '<p><b>Nombre:</b> ' + (profesor.nombre || 'No especificado') + '</p>';
+    html += '<p><b>Especialidad:</b> ' + (profesor.especialidad || 'No especificado') + '</p>';
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// Llenar formulario de actualización
+function fillUpdateForm(profesor) {
+    const controlHidden = document.getElementById('numero_original');
+    if (controlHidden) {
+        controlHidden.value = profesor.numero_de_control || '';
     }
     
-    try {
-        const response = await fetch(`${API_BASE_URL}/buscar/${numeroControl}`);
-        console.log('Respuesta status:', response.status);
-        
-        const result = await response.json();
-        console.log('Resultado:', result);
-        
-        const formulario = document.getElementById('formulario-actualizar');
-        
-        if (!formulario) {
-            console.error('Formulario no encontrado');
-            return;
-        }
-        
-        if (result.success) {
-            profesorActual = result.profesor;
-            console.log('Profesor para actualizar:', profesorActual);
-            
-            // Llenar formulario con datos actuales
-            document.getElementById('numero_original').value = profesorActual.numero_de_control;
-            document.getElementById('nombre_actualizar').value = profesorActual.nombre;
-            document.getElementById('especialidad_actualizar').value = profesorActual.especialidad;
-            
-            // Mostrar formulario
-            formulario.style.display = 'block';
-            mostrarMensaje('mensaje-actualizar', '✅ Profesor encontrado. Puede modificar los datos.', 'success');
-        } else {
-            formulario.style.display = 'none';
-            mostrarMensaje('mensaje-actualizar', '❌ ' + result.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-actualizar', '❌ Error de conexión', 'error');
+    const nombreInput = document.getElementById('nombre_actualizar');
+    if (nombreInput) {
+        nombreInput.value = profesor.nombre || '';
+    }
+    
+    const especialidadInput = document.getElementById('especialidad_actualizar');
+    if (especialidadInput) {
+        especialidadInput.value = profesor.especialidad || '';
     }
 }
 
-// ========== ACTUALIZAR PROFESOR ==========
-
-async function actualizarProfesor() {
-    console.log('=== ACTUALIZAR PROFESOR ===');
+// Mostrar mensajes en pantalla
+function showMessage(elementId, text, type) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
     
-    const numeroOriginal = document.getElementById('numero_original')?.value;
-    const nombre = document.getElementById('nombre_actualizar')?.value.trim();
-    const especialidad = document.getElementById('especialidad_actualizar')?.value.trim();
+    element.textContent = text;
+    element.className = `mensaje mensaje-${type}`;
+    element.style.display = 'block';
     
-    console.log('Datos para actualizar:', { numeroOriginal, nombre, especialidad });
-    
-    if (!numeroOriginal || !nombre || !especialidad) {
-        mostrarMensaje('mensaje-actualizar', '❌ Todos los campos son obligatorios', 'error');
-        return;
-    }
-    
-    try {
-        console.log('Enviando PUT a:', `${API_BASE_URL}/actualizar/${numeroOriginal}`);
-        
-        const response = await fetch(`${API_BASE_URL}/actualizar/${numeroOriginal}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                nombre: nombre,
-                especialidad: especialidad
-            })
-        });
-        
-        console.log('Respuesta status:', response.status);
-        
-        const result = await response.json();
-        console.log('Resultado actualización:', result);
-        
-        if (result.success) {
-            mostrarMensaje('mensaje-actualizar', '✅ ' + result.message, 'success');
-            
-            // Limpiar y ocultar formulario después de actualizar
-            setTimeout(() => {
-                if (document.getElementById('actualizar-numero')) {
-                    document.getElementById('actualizar-numero').value = '';
-                }
-                if (document.getElementById('formulario-actualizar')) {
-                    document.getElementById('formulario-actualizar').style.display = 'none';
-                }
-                if (document.getElementById('formulario-actualizar')) {
-                    document.getElementById('formulario-actualizar').reset();
-                }
-                profesorActual = null;
-            }, 2000);
-        } else {
-            mostrarMensaje('mensaje-actualizar', '❌ ' + result.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-actualizar', '❌ Error de conexión', 'error');
+    // Auto-ocultar mensajes después de tiempo
+    if (type === 'success' || type === 'info') {
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, 5000);
     }
 }
 
-// ========== HACER FUNCIONES GLOBALES ==========
-window.guardarProfesor = guardarProfesor;
-window.buscarProfesor = buscarProfesor;
-window.buscarProfesorEliminar = buscarProfesorEliminar;
-window.eliminarProfesorConfirmado = eliminarProfesorConfirmado;
-window.buscarProfesorActualizar = buscarProfesorActualizar;
-window.actualizarProfesor = actualizarProfesor;
+// Hacer funciones globales para compatibilidad con onclick
+window.guardarProfesor = async function() {
+    const form = document.getElementById('formulario-ingresar');
+    if (!form) return;
+    
+    const btnSubmit = form.querySelector('button[onclick="guardarProfesor()"]');
+    if (btnSubmit) btnSubmit.click();
+};
 
-console.log('✅ profesores.js cargado correctamente');
+window.buscarProfesor = async function() {
+    const btnBuscar = document.getElementById('btn-buscar') || document.querySelector('button[onclick="buscarProfesor()"]');
+    if (btnBuscar) btnBuscar.click();
+};
+
+window.buscarProfesorEliminar = async function() {
+    const btnBuscar = document.getElementById('btn-buscar-eliminar') || document.querySelector('button[onclick="buscarProfesorEliminar()"]');
+    if (btnBuscar) btnBuscar.click();
+};
+
+window.eliminarProfesorConfirmado = async function() {
+    const btnConfirmar = document.getElementById('btn-eliminar-confirmar');
+    if (btnConfirmar) btnConfirmar.click();
+};
+
+window.buscarProfesorActualizar = async function() {
+    const btnBuscar = document.getElementById('btn-buscar-actualizar') || document.querySelector('button[onclick="buscarProfesorActualizar()"]');
+    if (btnBuscar) btnBuscar.click();
+};
+
+window.actualizarProfesor = async function() {
+    const btnActualizar = document.querySelector('button[onclick="actualizarProfesor()"]');
+    if (btnActualizar) btnActualizar.click();
+};
