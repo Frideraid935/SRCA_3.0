@@ -6,7 +6,18 @@ const profesoresController = {
     // Registrar profesor
     registrarProfesor: async (req, res) => {
         try {
+            console.log('====== REGISTRAR PROFESOR ======');
+            console.log('Datos recibidos:', req.body);
+            
             const { numero_de_control, nombre, especialidad } = req.body;
+
+            if (!numero_de_control || !nombre || !especialidad) {
+                console.log('Faltan campos');
+                return res.json({ 
+                    status: "error", 
+                    message: "Todos los campos son obligatorios." 
+                });
+            }
 
             // Verificar si el número de control ya existe
             const checkSql = 'SELECT numero_de_control FROM profesores WHERE numero_de_control = ?';
@@ -19,6 +30,8 @@ const profesoresController = {
                         message: "Error al registrar el profesor." 
                     });
                 }
+
+                console.log('Resultado verificación:', rows);
 
                 if (rows.length > 0) {
                     return res.json({ 
@@ -39,6 +52,8 @@ const profesoresController = {
                         });
                     }
 
+                    console.log('Profesor insertado, ID:', result.insertId);
+                    
                     res.json({ 
                         status: "success", 
                         message: "Profesor registrado exitosamente." 
@@ -55,30 +70,19 @@ const profesoresController = {
         }
     },
 
-    // Listar todos los profesores
-    listarProfesores: async (req, res) => {
-        try {
-            const sql = 'SELECT numero_de_control, nombre, especialidad FROM profesores ORDER BY nombre ASC';
-            
-            db.query(sql, (err, rows) => {
-                if (err) {
-                    console.error("Error en listarProfesores:", err);
-                    return res.json([]);
-                }
-                
-                res.json(rows);
-            });
-            
-        } catch (error) {
-            console.error("Error en listarProfesores:", error);
-            res.json([]);
-        }
-    },
-
     // Buscar profesor por número de control
     buscarProfesorPorNumero: async (req, res) => {
         try {
+            console.log('====== BUSCAR PROFESOR ======');
             const { numero } = req.params;
+            console.log('Buscando número:', numero);
+            
+            if (!numero) {
+                return res.json({ 
+                    status: "error", 
+                    message: "Debe proporcionar un número de control." 
+                });
+            }
             
             const sql = 'SELECT numero_de_control, nombre, especialidad FROM profesores WHERE numero_de_control = ?';
             
@@ -90,6 +94,8 @@ const profesoresController = {
                         message: "Error al buscar el profesor." 
                     });
                 }
+
+                console.log('Resultado búsqueda:', rows);
 
                 if (rows.length === 0) {
                     return res.json({ 
@@ -113,7 +119,17 @@ const profesoresController = {
     // Actualizar profesor
     actualizarProfesor: async (req, res) => {
         try {
+            console.log('====== ACTUALIZAR PROFESOR ======');
+            console.log('Datos recibidos:', req.body);
+            
             const { numero_de_control, nombre, especialidad } = req.body;
+
+            if (!numero_de_control || !nombre || !especialidad) {
+                return res.json({ 
+                    status: "error", 
+                    message: "Todos los campos son obligatorios." 
+                });
+            }
 
             const sql = 'UPDATE profesores SET nombre = ?, especialidad = ? WHERE numero_de_control = ?';
             
@@ -125,6 +141,8 @@ const profesoresController = {
                         message: "Error al actualizar el profesor." 
                     });
                 }
+
+                console.log('Resultado actualización:', result);
 
                 if (result.affectedRows === 0) {
                     return res.json({ 
@@ -151,7 +169,17 @@ const profesoresController = {
     // Eliminar profesor
     eliminarProfesor: async (req, res) => {
         try {
+            console.log('====== ELIMINAR PROFESOR ======');
+            console.log('Datos recibidos:', req.body);
+            
             const { numero_de_control } = req.body;
+
+            if (!numero_de_control) {
+                return res.json({ 
+                    status: "error", 
+                    message: "Debe proporcionar un número de control." 
+                });
+            }
 
             // Primero, verificar si existen salones asignados
             const checkSalonesSql = 'SELECT id FROM salones WHERE profesor_id = ?';
@@ -164,6 +192,8 @@ const profesoresController = {
                         message: "Error al eliminar el profesor." 
                     });
                 }
+
+                console.log('Salones asignados:', salones);
 
                 if (salones.length > 0) {
                     return res.json({ 
@@ -195,6 +225,8 @@ const profesoresController = {
                                 message: "Error al eliminar el profesor." 
                             });
                         }
+
+                        console.log('Resultado eliminación:', result);
 
                         if (result.affectedRows === 0) {
                             return res.json({ 
