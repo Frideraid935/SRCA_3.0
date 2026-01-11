@@ -11,6 +11,19 @@ app.use((req, res, next) => {
     next();
 });
 
+// ===== MIDDLEWARE PARA VER RESPUESTAS =====
+app.use((req, res, next) => {
+    const originalSend = res.send;
+    const originalJson = res.json;
+    
+    res.json = function(data) {
+        console.log(`Respuesta JSON para ${req.method} ${req.url}:`, JSON.stringify(data, null, 2));
+        originalJson.call(this, data);
+    };
+    
+    next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

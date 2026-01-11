@@ -46,15 +46,18 @@ module.exports = {
         db.query(sql, [parseInt(id)], (err, rows) => {
             if (err) {
                 console.error('Error en consulta SQL:', err);
+                console.error('Detalle del error:', err.sqlMessage || err.message);
                 return res.json({ 
                     success: false, 
-                    message: 'Error en la base de datos' 
+                    message: 'Error en la base de datos: ' + (err.sqlMessage || err.message)
                 });
             }
             
             console.log(`Filas encontradas: ${rows.length}`);
+            console.log('Resultados:', rows);
             
             if (rows.length === 0) {
+                console.log(`No se encontro salon con ID: ${id}`);
                 return res.json({ 
                     success: false, 
                     message: `No se encontro salon con ID: ${id}` 
