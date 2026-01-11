@@ -1,107 +1,110 @@
 const API = '/api/salones';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    /* ================= REGISTRAR ================= */
-    const fReg = document.getElementById('formulario-salon');
-    if (fReg) {
-        const msg = document.getElementById('mensaje');
-
-        fReg.addEventListener('submit', async e => {
+    /* =========================
+       REGISTRAR SALÓN
+    ========================= */
+    const formRegistrar = document.getElementById("formulario-registrar-salon");
+    if (formRegistrar) {
+        formRegistrar.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const data = {
-                nombre: document.getElementById('nombre_salon').value.trim(),
-                capacidad: document.getElementById('capacidad').value.trim(),
-                profesor_id: document.getElementById('numero_de_control').value.trim()
+                nombre: document.getElementById("nombre_salon").value,
+                capacidad: document.getElementById("capacidad").value,
+                numero_de_control: document.getElementById("numero_de_control").value
             };
 
+            const mensaje = document.getElementById("mensaje-registrar");
+            mensaje.textContent = "";
+
             try {
-                const res = await fetch(`${API}/registrar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                const res = await fetch("/api/salones/registrar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(data)
                 });
 
-                const r = await res.json();
-                msg.textContent = r.message;
-                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                const result = await res.json();
 
-                if (res.ok) fReg.reset();
+                mensaje.textContent = result.message;
+                mensaje.style.color = res.ok ? "green" : "red";
+                if (res.ok) formRegistrar.reset();
+
             } catch {
-                msg.textContent = 'Error de conexión';
-                msg.className = 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                mensaje.textContent = "Error de conexión";
+                mensaje.style.color = "red";
             }
         });
     }
 
-    /* ================= BUSCAR ================= */
-    const fBus = document.getElementById('formulario-buscar-salon');
-    if (fBus) {
-        const msg = document.getElementById('mensaje-busqueda-salon');
-        const datos = document.getElementById('datos-salon');
-
-        fBus.addEventListener('submit', async e => {
+    /* =========================
+       BUSCAR SALÓN
+    ========================= */
+    const formBuscar = document.getElementById("formulario-buscar-salon");
+    if (formBuscar) {
+        formBuscar.addEventListener("submit", async (e) => {
             e.preventDefault();
-            msg.style.display = 'none';
-            datos.style.display = 'none';
 
-            const id = document.getElementById('id').value.trim();
+            const id = document.getElementById("id_salon_buscar").value;
+            const mensaje = document.getElementById("mensaje-buscar");
+            const resultado = document.getElementById("resultado-salon");
+
+            mensaje.textContent = "";
+            resultado.style.display = "none";
 
             try {
-                const res = await fetch(`${API}/buscar/${id}`);
-                const r = await res.json();
+                const res = await fetch(`/api/salones/buscar/${id}`);
+                const data = await res.json();
 
-                msg.textContent = r.message;
-                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                if (!res.ok) {
+                    mensaje.textContent = data.message;
+                    mensaje.style.color = "red";
+                    return;
+                }
 
-                if (!res.ok) return;
+                document.getElementById("res-id").textContent = data.id;
+                document.getElementById("res-nombre").textContent = data.nombre;
+                document.getElementById("res-capacidad").textContent = data.capacidad;
+                document.getElementById("res-profesor").textContent = data.numero_de_control;
 
-                const s = r.salon;
-                datos.innerHTML = `
-                    <p><b>ID:</b> ${s.id}</p>
-                    <p><b>Nombre:</b> ${s.nombre}</p>
-                    <p><b>Capacidad:</b> ${s.capacidad}</p>
-                    <p><b>Profesor:</b> ${s.profesor_id}</p>
-                `;
-                datos.style.display = 'block';
+                resultado.style.display = "block";
+                mensaje.textContent = "Salón encontrado";
+                mensaje.style.color = "green";
+
             } catch {
-                msg.textContent = 'Error de conexión';
-                msg.className = 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                mensaje.textContent = "Error al buscar salón";
+                mensaje.style.color = "red";
             }
         });
     }
 
-    /* ================= ELIMINAR ================= */
-    const fDel = document.getElementById('formulario-eliminar-salon');
-    if (fDel) {
-        const msg = document.getElementById('mensaje-eliminar-salon');
-        const datos = document.getElementById('datos-salon');
-
-        fDel.addEventListener('submit', async e => {
+    /* =========================
+       ELIMINAR SALÓN
+    ========================= */
+    const formEliminar = document.getElementById("formulario-eliminar-salon");
+    if (formEliminar) {
+        formEliminar.addEventListener("submit", async (e) => {
             e.preventDefault();
-            msg.style.display = 'none';
-            datos.style.display = 'none';
 
-            const id = document.getElementById('id').value.trim();
+            const id = document.getElementById("id_salon_eliminar").value;
+            const mensaje = document.getElementById("mensaje-eliminar");
+
+            mensaje.textContent = "";
 
             try {
-                const res = await fetch(`${API}/eliminar/${id}`, { method: 'DELETE' });
-                const r = await res.json();
+                const res = await fetch(`/api/salones/eliminar/${id}`, {
+                    method: "DELETE"
+                });
 
-                msg.textContent = r.message;
-                msg.className = res.ok ? 'mensaje mensaje-exito' : 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                const data = await res.json();
+                mensaje.textContent = data.message;
+                mensaje.style.color = res.ok ? "green" : "red";
 
-                if (res.ok) fDel.reset();
             } catch {
-                msg.textContent = 'Error de conexión';
-                msg.className = 'mensaje mensaje-error';
-                msg.style.display = 'block';
+                mensaje.textContent = "Error al eliminar salón";
+                mensaje.style.color = "red";
             }
         });
     }

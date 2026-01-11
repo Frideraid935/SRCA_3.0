@@ -1,10 +1,9 @@
-// APIS/admin.api.js
 const express = require("express");
 const router = express.Router();
-const adminController = require("../controladores/controladores-admin/admin.controlador");
+const salones = require("../controladores/controladores-salones/salones.controlador");
 
-router.post("/registrar", adminController.registrarAdmin);
-router.get("/buscar", adminController.buscarAdmin);
-router.delete("/eliminar", adminController.eliminarAdmin);
+router.post("/registrar", salones.registrar);
+router.get("/buscar/:id", salones.buscar);
+router.delete("/eliminar/:id", salones.eliminar);
 
 module.exports = router;
