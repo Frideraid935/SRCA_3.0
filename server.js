@@ -1,9 +1,13 @@
 const express = require("express");
+const cors = require("cors"); // <-- AÑADE ESTO
 const path = require("path");
 const pool = require("./BD/BD");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ===== CONFIGURAR CORS (CRÍTICO) =====
+app.use(cors()); // <-- ESTA LÍNEA ES ESENCIAL
 
 // ===== MIDDLEWARE DE LOGGING =====
 app.use((req, res, next) => {
@@ -11,14 +15,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// ===== MIDDLEWARE PARA VER RESPUESTAS =====
+// ===== MIDDLEWARE PARA VER RESPUESTAS (MODIFICADO) =====
 app.use((req, res, next) => {
     const originalSend = res.send;
     const originalJson = res.json;
     
     res.json = function(data) {
         console.log(`Respuesta JSON para ${req.method} ${req.url}:`, JSON.stringify(data, null, 2));
-        originalJson.call(this, data);
+        return originalJson.call(this, data);
     };
     
     next();
@@ -55,8 +59,6 @@ app.use('/api/calificaciones', calificacionesAPI);
 const profesoresAPI = require('./APIS/profesores.api');
 app.use('/api/profesores', profesoresAPI);
 
-
-
 // ===== SALONES API =====
 console.log('Registrando API de salones...');
 try {
@@ -76,6 +78,15 @@ try {
     });
 }
 
+// ===== RUTA DE PRUEBA PARA CORS =====
+app.get('/api/test', (req, res) => {
+    res.json({
+        success: true,
+        message: 'API funcionando con CORS',
+        timestamp: new Date().toISOString()
+    });
+});
+
 /* ===============================
    RUTAS DE VISTAS
 ================================ */
@@ -85,6 +96,20 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "publico/Login/login.html"));
 });
 
+// Ruta para servir archivos HTML desde cualquier directorio
+app.get('*.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'publico', req.path));
+});
+
+// Manejo de errores 404
+app.use((req, res) => {
+    console.log(`Ruta no encontrada: ${req.method} ${req.url}`);
+    res.status(404).json({
+        success: false,
+        message: 'Ruta no encontrada'
+    });
+});
+
 /* ===============================
    SERVIDOR
 ================================ */
@@ -92,4 +117,6 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`Servidor activo en puerto ${PORT}`);
     console.log('Rutas disponibles:');
     console.log(`  http://localhost:${PORT}/api/salones/buscar/1`);
+    console.log(`  http://localhost:${PORT}/api/test (para probar CORS)`);
+    console.log(`  http://localhost:${PORT}/api/profesores/registrar`);
 });
