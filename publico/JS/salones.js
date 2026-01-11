@@ -1,23 +1,25 @@
 const API = '/api/salones';
 
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("salones.js cargado");
 
     /* =========================
-       REGISTRAR SALÓN
+       REGISTRAR
     ========================= */
     const formRegistrar = document.getElementById("formulario-registrar-salon");
     if (formRegistrar) {
+        console.log("Formulario registrar detectado");
+
         formRegistrar.addEventListener("submit", async (e) => {
             e.preventDefault();
+
+            const mensaje = document.getElementById("mensaje-registrar");
 
             const data = {
                 nombre: document.getElementById("nombre_salon").value,
                 capacidad: document.getElementById("capacidad").value,
                 numero_de_control: document.getElementById("numero_de_control").value
             };
-
-            const mensaje = document.getElementById("mensaje-registrar");
-            mensaje.textContent = "";
 
             try {
                 const res = await fetch("/api/salones/registrar", {
@@ -27,23 +29,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 const result = await res.json();
-
                 mensaje.textContent = result.message;
-                mensaje.style.color = res.ok ? "green" : "red";
+                mensaje.className = res.ok ? "mensaje-exito" : "mensaje-error";
+
                 if (res.ok) formRegistrar.reset();
 
-            } catch {
-                mensaje.textContent = "Error de conexión";
-                mensaje.style.color = "red";
+            } catch (error) {
+                mensaje.textContent = "Error al registrar salón";
+                mensaje.className = "mensaje-error";
             }
         });
     }
 
     /* =========================
-       BUSCAR SALÓN
+       BUSCAR
     ========================= */
     const formBuscar = document.getElementById("formulario-buscar-salon");
     if (formBuscar) {
+        console.log("Formulario buscar detectado");
+
         formBuscar.addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -60,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!res.ok) {
                     mensaje.textContent = data.message;
-                    mensaje.style.color = "red";
+                    mensaje.className = "mensaje-error";
                     return;
                 }
 
@@ -71,40 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 resultado.style.display = "block";
                 mensaje.textContent = "Salón encontrado";
-                mensaje.style.color = "green";
+                mensaje.className = "mensaje-exito";
 
             } catch {
                 mensaje.textContent = "Error al buscar salón";
-                mensaje.style.color = "red";
-            }
-        });
-    }
-
-    /* =========================
-       ELIMINAR SALÓN
-    ========================= */
-    const formEliminar = document.getElementById("formulario-eliminar-salon");
-    if (formEliminar) {
-        formEliminar.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById("id_salon_eliminar").value;
-            const mensaje = document.getElementById("mensaje-eliminar");
-
-            mensaje.textContent = "";
-
-            try {
-                const res = await fetch(`/api/salones/eliminar/${id}`, {
-                    method: "DELETE"
-                });
-
-                const data = await res.json();
-                mensaje.textContent = data.message;
-                mensaje.style.color = res.ok ? "green" : "red";
-
-            } catch {
-                mensaje.textContent = "Error al eliminar salón";
-                mensaje.style.color = "red";
+                mensaje.className = "mensaje-error";
             }
         });
     }
