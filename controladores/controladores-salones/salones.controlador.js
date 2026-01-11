@@ -1,86 +1,59 @@
-const db = require("../../BD/BD.js");
+const db = require('../../BD/BD.js');
 
+const salonesController = {
 
-/* ===============================
-   REGISTRAR SALÓN
-================================ */
-exports.registrar = async (req, res) => {
-  try {
-    const { nombre, capacidad, profesor_id } = req.body;
+    registrarSalon: (req, res) => {
+        const { id_salon, nombre_salon, capacidad, profesor_id } = req.body;
 
-    // Verificar profesor
-    const [profesor] = await pool.query(
-      'SELECT * FROM profesores WHERE numero_de_control = ?',
-      [profesor_id]
-    );
+        if (!id_salon || !nombre_salon || !capacidad || !profesor_id) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+        }
 
-    if (profesor.length === 0) {
-      return res.json({ ok: false, mensaje: 'El profesor no existe' });
+        const sql = `
+            INSERT INTO salones (id_salon, nombre_salon, capacidad, profesor_id)
+            VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(sql, [id_salon, nombre_salon, capacidad, profesor_id], (err) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al registrar salón' });
+            }
+            res.json({ message: 'Salón registrado correctamente' });
+        });
+    },
+
+    buscarSalon: (req, res) => {
+        const { id } = req.params;
+
+        const sql = 'SELECT * FROM salones WHERE id_salon = ?';
+        db.query(sql, [id], (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al buscar salón' });
+            }
+            if (rows.length === 0) {
+                return res.status(404).json({ message: 'Salón no encontrado' });
+            }
+            res.json(rows[0]);
+        });
+    },
+
+    eliminarSalon: (req, res) => {
+        const { id } = req.params;
+
+        const sql = 'DELETE FROM salones WHERE id_salon = ?';
+        db.query(sql, [id], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: 'Error al eliminar salón' });
+            }
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Salón no encontrado' });
+            }
+            res.json({ message: 'Salón eliminado correctamente' });
+        });
     }
-
-    await pool.query(
-      'INSERT INTO salones (nombre, capacidad, profesor_id) VALUES (?, ?, ?)',
-      [nombre, capacidad, profesor_id]
-    );
-
-    res.json({ ok: true, mensaje: 'Salón registrado correctamente' });
-
-  } catch (error) {
-    res.json({ ok: false, mensaje: 'Error al registrar el salón' });
-  }
 };
 
-/* ===============================
-   BUSCAR SALÓN
-================================ */
-exports.buscar = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [rows] = await pool.query(`
-      SELECT s.id, s.nombre, s.capacidad,
-             p.numero_de_control AS profesor_id,
-             p.nombre AS profesor_nombre
-      FROM salones s
-      JOIN profesores p ON s.profesor_id = p.numero_de_control
-      WHERE s.id = ?
-    `, [id]);
-
-    if (rows.length === 0) {
-      return res.json({ ok: false, mensaje: 'Salón no encontrado' });
-    }
-
-    res.json({
-      ok: true,
-      data: rows[0]
-    });
-
-  } catch (error) {
-    res.json({ ok: false, mensaje: 'Error al buscar salón' });
-  }
-};
-
-/* ===============================
-   ELIMINAR SALÓN
-================================ */
-exports.eliminar = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const [existe] = await pool.query(
-      'SELECT * FROM salones WHERE id = ?',
-      [id]
-    );
-
-    if (existe.length === 0) {
-      return res.json({ ok: false, mensaje: 'El salón no existe' });
-    }
-
-    await pool.query('DELETE FROM salones WHERE id = ?', [id]);
-
-    res.json({ ok: true, mensaje: 'Salón eliminado correctamente' });
-
-  } catch (error) {
-    res.json({ ok: false, mensaje: 'Error al eliminar salón' });
-  }
-};
+module.exports = salonesController;
