@@ -1,135 +1,111 @@
-const API_BASE = '/api/salones';
+const API_SALONES = '/api/salones';
+const API_PROFESORES = '/api/profesores/listar';
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================
-       REGISTRAR SALÓN
-    ========================= */
-    const formRegistrar = document.getElementById('formulario-salon');
-    if (formRegistrar) {
-        const mensaje = document.getElementById('mensaje');
-
-        formRegistrar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const data = {
-                id_salon: document.getElementById('id_salon').value.trim(),
-                nombre_salon: document.getElementById('nombre_salon').value.trim(),
-                capacidad: document.getElementById('capacidad').value.trim(),
-                numero_de_control: document.getElementById('numero_de_control').value.trim()
-            };
-
-            try {
-                const res = await fetch(`${API_BASE}/registrar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await res.json();
-                mensaje.textContent = result.message;
-                mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
-                mensaje.style.display = 'block';
-
-                if (res.ok) formRegistrar.reset();
-
-            } catch {
-                mensaje.textContent = 'Error al conectar con el servidor';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
-            }
+  /* =========================
+     CARGAR PROFESORES
+  ========================= */
+  const selectProfesor = document.getElementById('profesor_id');
+  if (selectProfesor) {
+    fetch(API_PROFESORES)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.numero_de_control;
+          option.textContent = `${p.numero_de_control} - ${p.nombre}`;
+          selectProfesor.appendChild(option);
         });
-    }
+      });
+  }
 
-    /* =========================
-       BUSCAR SALÓN
-    ========================= */
-    const formBuscar = document.getElementById('formulario-buscar-salon');
-    if (formBuscar) {
-        const mensaje = document.getElementById('mensaje-busqueda-salon');
-        const datos = document.getElementById('datos-salon');
+  /* =========================
+     REGISTRAR
+  ========================= */
+  const formRegistrar = document.getElementById('formulario-salon');
+  const mensaje = document.getElementById('mensaje');
 
-        formBuscar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('id').value.trim();
+  if (formRegistrar) {
+    formRegistrar.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-            try {
-                const res = await fetch(`${API_BASE}/buscar/${id}`);
-                const salon = await res.json();
+      const data = {
+        nombre: document.getElementById('nombre').value.trim(),
+        capacidad: document.getElementById('capacidad').value.trim(),
+        profesor_id: document.getElementById('profesor_id').value
+      };
 
-                if (!res.ok) {
-                    mensaje.textContent = salon.message;
-                    mensaje.className = 'mensaje-error';
-                    mensaje.style.display = 'block';
-                    datos.style.display = 'none';
-                    return;
-                }
+      const res = await fetch(`${API_SALONES}/registrar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
 
-                datos.innerHTML = `
-                    <p><strong>ID:</strong> ${salon.id_salon}</p>
-                    <p><strong>Salón:</strong> ${salon.nombre_salon}</p>
-                    <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
-                    <p><strong>Profesor (No. Control):</strong> ${salon.numero_de_control}</p>
-                `;
-                datos.style.display = 'block';
-                mensaje.style.display = 'none';
+      const result = await res.json();
+      mensaje.textContent = result.message;
+      mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
+      mensaje.style.display = 'block';
 
-            } catch {
-                mensaje.textContent = 'Error de conexión';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
-            }
-        });
-    }
+      if (res.ok) formRegistrar.reset();
+    });
+  }
 
-    /* =========================
-       ELIMINAR SALÓN
-    ========================= */
-    const formEliminar = document.getElementById('formulario-eliminar-salon');
-    if (formEliminar) {
-        const mensaje = document.getElementById('mensaje-eliminar-salon');
-        const datos = document.getElementById('datos-salon');
+  /* =========================
+     BUSCAR
+  ========================= */
+  const formBuscar = document.getElementById('formulario-buscar-salon');
+  const datos = document.getElementById('datos-salon');
+  const msgBuscar = document.getElementById('mensaje-busqueda-salon');
 
-        formEliminar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('id').value.trim();
+  if (formBuscar) {
+    formBuscar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('id').value;
 
-            try {
-                const resBuscar = await fetch(`${API_BASE}/buscar/${id}`);
-                const salon = await resBuscar.json();
+      const res = await fetch(`${API_SALONES}/buscar/${id}`);
+      const data = await res.json();
 
-                if (!resBuscar.ok) {
-                    mensaje.textContent = salon.message;
-                    mensaje.className = 'mensaje-error';
-                    mensaje.style.display = 'block';
-                    return;
-                }
+      if (!res.ok) {
+        msgBuscar.textContent = data.message;
+        msgBuscar.style.display = 'block';
+        datos.style.display = 'none';
+        return;
+      }
 
-                datos.innerHTML = `
-                    <p><strong>Salón:</strong> ${salon.nombre_salon}</p>
-                    <p><strong>Profesor:</strong> ${salon.numero_de_control}</p>
-                `;
-                datos.style.display = 'block';
+      datos.innerHTML = `
+        <p><strong>ID:</strong> ${data.id}</p>
+        <p><strong>Salón:</strong> ${data.nombre}</p>
+        <p><strong>Capacidad:</strong> ${data.capacidad}</p>
+        <p><strong>Profesor:</strong> ${data.profesor_nombre}</p>
+      `;
+      datos.style.display = 'block';
+      msgBuscar.style.display = 'none';
+    });
+  }
 
-                if (!confirm('¿Desea eliminar este salón?')) return;
+  /* =========================
+     ELIMINAR
+  ========================= */
+  const formEliminar = document.getElementById('formulario-eliminar-salon');
+  const msgEliminar = document.getElementById('mensaje-eliminar-salon');
 
-                const res = await fetch(`${API_BASE}/eliminar/${id}`, { method: 'DELETE' });
-                const result = await res.json();
+  if (formEliminar) {
+    formEliminar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('id').value;
 
-                mensaje.textContent = result.message;
-                mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
-                mensaje.style.display = 'block';
+      if (!confirm('¿Eliminar salón?')) return;
 
-                if (res.ok) {
-                    datos.style.display = 'none';
-                    formEliminar.reset();
-                }
+      const res = await fetch(`${API_SALONES}/eliminar/${id}`, { method: 'DELETE' });
+      const result = await res.json();
 
-            } catch {
-                mensaje.textContent = 'Error de conexión';
-                mensaje.className = 'mensaje-error';
-                mensaje.style.display = 'block';
-            }
-        });
-    }
+      msgEliminar.textContent = result.message;
+      msgEliminar.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
+      msgEliminar.style.display = 'block';
+
+      if (res.ok) formEliminar.reset();
+    });
+  }
+
 });
