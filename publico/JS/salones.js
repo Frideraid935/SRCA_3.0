@@ -4,6 +4,7 @@ const TIMEOUT = 30000;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Sistema de salones cargado');
 
+    /* ================= REGISTRAR ================= */
     const formRegistrar = document.getElementById('formulario-salon');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', e => {
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* ================= BUSCAR ================= */
     const formBuscar = document.getElementById('formulario-buscar-salon');
     if (formBuscar) {
         formBuscar.addEventListener('submit', e => {
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* ================= ELIMINAR ================= */
     const formEliminar = document.getElementById('formulario-eliminar-salon');
     if (formEliminar) {
         formEliminar.addEventListener('submit', e => {
@@ -61,68 +64,43 @@ function registrarSalon() {
 }
 
 /* ================= BUSCAR ================= */
+function buscarSalon() {
+    const id = document.getElementById('id_salon').value.trim();
+    const mensaje = document.getElementById('mensaje-busqueda-salon');
+    const datos = document.getElementById('datos-salon');
 
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    /* =========================
-       BUSCAR SALÓN
-    ========================= */
-    const formBuscar = document.getElementById('formulario-buscar-salon');
-    if (formBuscar) {
-        const mensaje = document.getElementById('mensaje-busqueda-salon');
-        const datos = document.getElementById('datos-salon');
-
-        formBuscar.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const id = document.getElementById('id_salon').value.trim();
-
-            if (!id) {
-                mensaje.textContent = 'Debes ingresar un ID de salón';
-                mensaje.className = 'mensaje mensaje-error';
-                mensaje.style.display = 'block';
-                datos.style.display = 'none';
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_BASE}/buscar/${id}`);
-                const result = await res.json();
-
-                if (!res.ok || !result.success) {
-                    mensaje.textContent = result.message || 'Error al buscar el salón';
-                    mensaje.className = 'mensaje mensaje-error';
-                    mensaje.style.display = 'block';
-                    datos.style.display = 'none';
-                    return;
-                }
-
-                // Mostrar la información del salón
-                datos.innerHTML = `
-                    <p><strong>ID:</strong> ${result.salon.id}</p>
-                    <p><strong>Nombre:</strong> ${result.salon.nombre}</p>
-                    <p><strong>Capacidad:</strong> ${result.salon.capacidad}</p>
-                    <p><strong>Profesor (No. Control):</strong> ${result.salon.profesor_id}</p>
-                `;
-                datos.style.display = 'block';
-
-                mensaje.textContent = 'Salón encontrado correctamente';
-                mensaje.className = 'mensaje mensaje-exito';
-                mensaje.style.display = 'block';
-
-            } catch (err) {
-                console.error(err);
-                mensaje.textContent = 'Error de conexión con el servidor';
-                mensaje.className = 'mensaje mensaje-error';
-                mensaje.style.display = 'block';
-                datos.style.display = 'none';
-            }
-        });
+    if (!id) {
+        mostrarMensaje(mensaje, 'Debes ingresar un ID de salón', 'error');
+        datos.style.display = 'none';
+        return;
     }
 
-});
+    fetch(`${API_BASE}/buscar/${id}`)
+    .then(res => res.json())
+    .then(result => {
+        if (!result.success) {
+            mostrarMensaje(mensaje, result.message || 'Salón no encontrado', 'error');
+            datos.style.display = 'none';
+            return;
+        }
 
+        // Mostrar la información del salón
+        datos.innerHTML = `
+            <p><strong>ID:</strong> ${result.salon.id}</p>
+            <p><strong>Nombre:</strong> ${result.salon.nombre}</p>
+            <p><strong>Capacidad:</strong> ${result.salon.capacidad}</p>
+            <p><strong>Profesor (No. Control):</strong> ${result.salon.profesor_id}</p>
+        `;
+        datos.style.display = 'block';
+
+        mostrarMensaje(mensaje, 'Salón encontrado correctamente', 'success');
+    })
+    .catch(err => {
+        console.error(err);
+        mostrarMensaje(mensaje, 'Error de conexión con el servidor', 'error');
+        datos.style.display = 'none';
+    });
+}
 
 /* ================= ELIMINAR ================= */
 function eliminarSalon() {
