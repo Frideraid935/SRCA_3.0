@@ -2,43 +2,98 @@ const db = require('../../BD/BD.js');
 
 const salonesController = {
 
+    // REGISTRAR
     registrar: (req, res) => {
-        const { nombre, capacidad, numero_de_control } = req.body;
+        const { nombre, capacidad, profesor_id } = req.body;
+
+        if (!nombre || !capacidad || !profesor_id) {
+            return res.json({
+                success: false,
+                message: 'Todos los campos son obligatorios'
+            });
+        }
 
         const sql = `
-            INSERT INTO salones (nombre, capacidad, numero_de_control)
+            INSERT INTO salones (nombre, capacidad, profesor_id)
             VALUES (?, ?, ?)
         `;
 
-        db.query(sql, [nombre, capacidad, numero_de_control], (err) => {
+        db.query(sql, [nombre, capacidad, profesor_id], (err, result) => {
             if (err) {
-                return res.status(500).json({ message: "Error al registrar salón" });
+                console.error(err);
+                return res.json({
+                    success: false,
+                    message: 'Error al registrar el salón'
+                });
             }
-            res.json({ message: "Salón registrado correctamente" });
+
+            res.json({
+                success: true,
+                message: 'Salón registrado correctamente',
+                id: result.insertId
+            });
         });
     },
 
+    // BUSCAR
     buscar: (req, res) => {
         const { id } = req.params;
 
-        const sql = "SELECT * FROM salones WHERE id = ?";
+        const sql = `
+            SELECT id, nombre, capacidad, profesor_id
+            FROM salones
+            WHERE id = ?
+        `;
+
         db.query(sql, [id], (err, rows) => {
-            if (err || rows.length === 0) {
-                return res.status(404).json({ message: "Salón no encontrado" });
+            if (err) {
+                console.error(err);
+                return res.json({
+                    success: false,
+                    message: 'Error al buscar el salón'
+                });
             }
-            res.json(rows[0]);
+
+            if (rows.length === 0) {
+                return res.json({
+                    success: false,
+                    message: 'Salón no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                salon: rows[0]
+            });
         });
     },
 
+    // ELIMINAR
     eliminar: (req, res) => {
         const { id } = req.params;
 
-        const sql = "DELETE FROM salones WHERE id = ?";
+        const sql = 'DELETE FROM salones WHERE id = ?';
+
         db.query(sql, [id], (err, result) => {
-            if (err || result.affectedRows === 0) {
-                return res.status(404).json({ message: "Salón no encontrado" });
+            if (err) {
+                console.error(err);
+                return res.json({
+                    success: false,
+                    message: 'Error al eliminar el salón'
+                });
             }
-            res.json({ message: "Salón eliminado correctamente" });
+
+            if (result.affectedRows === 0) {
+                return res.json({
+                    success: false,
+                    message: 'Salón no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Salón eliminado correctamente'
+            });
         });
     }
 };
