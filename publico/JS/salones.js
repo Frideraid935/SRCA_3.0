@@ -62,59 +62,48 @@ function registrarSalon() {
 
 /* ================= BUSCAR ================= */
 // ===============================
-// BUSCAR SALÓN
+// BUSCAR SALÓN POR NOMBRE
 // ===============================
-document.addEventListener('DOMContentLoaded', () => {
-    const formBuscar = document.getElementById('formulario-buscar-salon');
+const btnBuscar = document.getElementById("btn-buscar-salon");
 
-    if (!formBuscar) return;
+if (btnBuscar) {
+  btnBuscar.addEventListener("click", async () => {
+    const nombre = document.getElementById("buscar-nombre").value.trim();
+    const resultado = document.getElementById("resultado-buscar");
 
-    formBuscar.addEventListener('submit', function (e) {
-        e.preventDefault();
+    // Limpiar resultado previo
+    resultado.innerHTML = "";
 
-        const nombreInput = document.getElementById('nombre');
-        const mensaje = document.getElementById('mensaje-busqueda-salon');
-        const datos = document.getElementById('datos-salon');
+    if (!nombre) {
+      resultado.innerHTML = "<p style='color:red'>Ingresa el nombre del salón</p>";
+      return;
+    }
 
-        const nombre = nombreInput.value.trim();
+    try {
+      const response = await fetch(`/api/salones/buscar/${encodeURIComponent(nombre)}`);
+      const data = await response.json();
 
-        mensaje.style.display = 'none';
-        datos.style.display = 'none';
+      if (!data.success) {
+        resultado.innerHTML = `<p style="color:red">${data.message}</p>`;
+        return;
+      }
 
-        if (!nombre) {
-            mensaje.textContent = 'Ingrese el nombre del salón';
-            mensaje.className = 'mensaje mensaje-error';
-            mensaje.style.display = 'block';
-            return;
-        }
+      // MOSTRAR INFORMACIÓN
+      const salon = data.salon;
 
-        fetch('/api/salones/buscar/' + encodeURIComponent(nombre))
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    mensaje.textContent = data.message;
-                    mensaje.className = 'mensaje mensaje-error';
-                    mensaje.style.display = 'block';
-                    return;
-                }
+      resultado.innerHTML = `
+        <p><strong>ID:</strong> ${salon.id}</p>
+        <p><strong>Nombre:</strong> ${salon.nombre}</p>
+        <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
+        <p><strong>Profesor ID:</strong> ${salon.profesor_id}</p>
+      `;
+    } catch (error) {
+      console.error(error);
+      resultado.innerHTML = "<p style='color:red'>Error al conectar con el servidor</p>";
+    }
+  });
+}
 
-                const s = data.salon;
-
-                datos.innerHTML = `
-                    <p><strong>ID:</strong> ${s.id}</p>
-                    <p><strong>Nombre:</strong> ${s.nombre}</p>
-                    <p><strong>Capacidad:</strong> ${s.capacidad}</p>
-                    <p><strong>Profesor:</strong> ${s.profesor_id}</p>
-                `;
-                datos.style.display = 'block';
-            })
-            .catch(() => {
-                mensaje.textContent = 'Error de conexión con el servidor';
-                mensaje.className = 'mensaje mensaje-error';
-                mensaje.style.display = 'block';
-            });
-    });
-});
 
 /* ================= ELIMINAR ================= */
 function eliminarSalon() {
