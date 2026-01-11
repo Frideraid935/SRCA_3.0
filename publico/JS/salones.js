@@ -62,37 +62,37 @@ function registrarSalon() {
 
 /* ================= BUSCAR ================= */
 function buscarSalon() {
-    const id = document.getElementById('id').value.trim();
+    const nombre = document.getElementById('nombre').value.trim();
     const mensaje = document.getElementById('mensaje-busqueda-salon');
     const datos = document.getElementById('datos-salon');
 
-    if (!id) {
-        mostrarMensaje(mensaje, 'Ingrese el ID del salón', 'warning');
+    if (!nombre) {
+        mostrarMensaje(mensaje, 'Ingrese el nombre del salón', 'warning');
         return;
     }
 
-    fetch(API_BASE + '/buscar/' + id)
-    .then(r => r.json())
-    .then(data => {
-        if (!data.success) {
-            datos.style.display = 'none';
-            mostrarMensaje(mensaje, data.message, 'error');
-            return;
-        }
+    fetch(API_BASE + '/buscar/' + encodeURIComponent(nombre))
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                datos.style.display = 'none';
+                mostrarMensaje(mensaje, data.message, 'error');
+                return;
+            }
 
-        const s = data.salon;
-        datos.innerHTML = `
-            <p><strong>ID:</strong> ${s.id}</p>
-            <p><strong>Nombre:</strong> ${s.nombre}</p>
-            <p><strong>Capacidad:</strong> ${s.capacidad}</p>
-            <p><strong>Profesor:</strong> ${s.profesor_id}</p>
-        `;
-        datos.style.display = 'block';
-        mensaje.style.display = 'none';
-    })
-    .catch(() => {
-        mostrarMensaje(mensaje, 'Error de conexión', 'error');
-    });
+            const s = data.salon;
+            datos.innerHTML = `
+                <p><strong>ID:</strong> ${s.id}</p>
+                <p><strong>Nombre:</strong> ${s.nombre}</p>
+                <p><strong>Capacidad:</strong> ${s.capacidad}</p>
+                <p><strong>Profesor:</strong> ${s.profesor_id}</p>
+            `;
+            datos.style.display = 'block';
+            mensaje.style.display = 'none';
+        })
+        .catch(() => {
+            mostrarMensaje(mensaje, 'Error de conexión', 'error');
+        });
 }
 
 /* ================= ELIMINAR ================= */
