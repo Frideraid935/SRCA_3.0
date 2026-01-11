@@ -1,10 +1,9 @@
 const API_BASE = '/api/salones';
-const TIMEOUT = 30000;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Sistema de salones cargado');
 
-    /* ================= REGISTRAR ================= */
+    // ================= REGISTRAR =================
     const formRegistrar = document.getElementById('formulario-salon');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', e => {
@@ -13,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* ================= BUSCAR ================= */
+    // ================= BUSCAR =================
     const formBuscar = document.getElementById('formulario-buscar-salon');
     if (formBuscar) {
         formBuscar.addEventListener('submit', e => {
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* ================= ELIMINAR ================= */
+    // ================= ELIMINAR =================
     const formEliminar = document.getElementById('formulario-eliminar-salon');
     if (formEliminar) {
         formEliminar.addEventListener('submit', e => {
@@ -32,7 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ================= REGISTRAR ================= */
+// ================= FUNCIONES =================
+
+// ===== REGISTRAR =====
 function registrarSalon() {
     const nombre = document.getElementById('nombre_salon').value.trim();
     const capacidad = document.getElementById('capacidad').value.trim();
@@ -63,7 +64,7 @@ function registrarSalon() {
     });
 }
 
-/* ================= BUSCAR ================= */
+// ===== BUSCAR =====
 function buscarSalon() {
     const id = document.getElementById('id_salon').value.trim();
     const mensaje = document.getElementById('mensaje-busqueda-salon');
@@ -92,7 +93,6 @@ function buscarSalon() {
             <p><strong>Profesor (No. Control):</strong> ${result.salon.profesor_id}</p>
         `;
         datos.style.display = 'block';
-
         mostrarMensaje(mensaje, 'Salón encontrado correctamente', 'success');
     })
     .catch(err => {
@@ -102,7 +102,7 @@ function buscarSalon() {
     });
 }
 
-/* ================= ELIMINAR ================= */
+// ===== ELIMINAR =====
 function eliminarSalon() {
     const id = document.getElementById('id').value.trim();
     const mensaje = document.getElementById('mensaje-eliminar-salon');
@@ -131,13 +131,10 @@ function eliminarSalon() {
     });
 }
 
-/* ================= MENSAJES ================= */
+// ===== MENSAJES =====
 function mostrarMensaje(el, texto, tipo) {
     el.innerHTML = texto;
     el.className = 'mensaje mensaje-' + tipo;
     el.style.display = 'block';
-
-    setTimeout(() => {
-        el.style.display = 'none';
-    }, 5000);
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
