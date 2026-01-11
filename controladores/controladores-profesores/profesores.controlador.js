@@ -1,4 +1,4 @@
-const db = require('../BD/BD');
+const pool = require("../../BD/BD");
 
 const profesoresController = {
     // Registrar profesor
