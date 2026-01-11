@@ -36,38 +36,38 @@ const salonesController = {
     },
 
     
-    // BUSCAR 
-buscar: (req, res) => {
-    const { id } = req.params;
+  buscar: (req, res) => {
+        const { id } = req.params;
 
-    const sql = `
-        SELECT id, nombre, capacidad, profesor_id
-        FROM salones
-        WHERE id = ?
-    `;
+        const sql = `
+            SELECT id, nombre, capacidad, profesor_id
+            FROM salones
+            WHERE id = ?
+        `;
 
-    db.query(sql, [id], (err, rows) => {
-        if (err) {
-            console.error(err);
-            return res.json({
-                success: false,
-                message: 'Error al buscar el salón'
+        db.query(sql, [id], (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.json({
+                    success: false,
+                    message: 'Error al buscar el salón'
+                });
+            }
+
+            if (rows.length === 0) {
+                return res.json({
+                    success: false,
+                    message: 'Salón no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                salon: rows[0]
             });
-        }
-
-        if (rows.length === 0) {
-            return res.json({
-                success: false,
-                message: 'Salón no encontrado'
-            });
-        }
-
-        res.json({
-            success: true,
-            salon: rows[0]
         });
-    });
-},
+    },
+
 
 
 

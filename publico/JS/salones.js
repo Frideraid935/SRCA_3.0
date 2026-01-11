@@ -61,59 +61,68 @@ function registrarSalon() {
 }
 
 /* ================= BUSCAR ================= */
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ===== BUSCAR SALÓN POR ID =====
-    const btnBuscar = document.getElementById('btn-buscar-salon');
-    btnBuscar?.addEventListener('click', async () => {
-        const id = document.getElementById('salon_id').value.trim();
+    /* =========================
+       BUSCAR SALÓN
+    ========================= */
+    const formBuscar = document.getElementById('formulario-buscar-salon');
+    if (formBuscar) {
         const mensaje = document.getElementById('mensaje-busqueda-salon');
         const datos = document.getElementById('datos-salon');
 
-        // Limpiar mensajes y resultados previos
-        mensaje.style.display = 'none';
-        datos.style.display = 'none';
-        datos.innerHTML = '';
+        formBuscar.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        if (!id) {
-            mensaje.textContent = 'Debe escribir el ID del salón';
-            mensaje.className = 'mensaje mensaje-error';
-            mensaje.style.display = 'block';
-            return;
-        }
+            const id = document.getElementById('id_salon').value.trim();
 
-        try {
-            const res = await fetch(`${API_BASE}/buscar/${encodeURIComponent(id)}`);
-            const result = await res.json();
-
-            if (!res.ok || !result.success) {
-                mensaje.textContent = result.message || 'Error al buscar el salón';
+            if (!id) {
+                mensaje.textContent = 'Debes ingresar un ID de salón';
                 mensaje.className = 'mensaje mensaje-error';
                 mensaje.style.display = 'block';
+                datos.style.display = 'none';
                 return;
             }
 
-            const salon = result.salon;
+            try {
+                const res = await fetch(`${API_BASE}/buscar/${id}`);
+                const result = await res.json();
 
-            datos.innerHTML = `
-                <p><strong>ID:</strong> ${salon.id}</p>
-                <p><strong>Nombre:</strong> ${salon.nombre}</p>
-                <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
-                <p><strong>Profesor (No. Control):</strong> ${salon.profesor_id}</p>
-            `;
-            datos.style.display = 'block';
-            mensaje.style.display = 'none';
+                if (!res.ok || !result.success) {
+                    mensaje.textContent = result.message || 'Error al buscar el salón';
+                    mensaje.className = 'mensaje mensaje-error';
+                    mensaje.style.display = 'block';
+                    datos.style.display = 'none';
+                    return;
+                }
 
-        } catch (err) {
-            mensaje.textContent = 'Error al conectar con el servidor';
-            mensaje.className = 'mensaje mensaje-error';
-            mensaje.style.display = 'block';
-            console.error(err);
-        }
-    });
+                // Mostrar la información del salón
+                datos.innerHTML = `
+                    <p><strong>ID:</strong> ${result.salon.id}</p>
+                    <p><strong>Nombre:</strong> ${result.salon.nombre}</p>
+                    <p><strong>Capacidad:</strong> ${result.salon.capacidad}</p>
+                    <p><strong>Profesor (No. Control):</strong> ${result.salon.profesor_id}</p>
+                `;
+                datos.style.display = 'block';
 
-    
+                mensaje.textContent = 'Salón encontrado correctamente';
+                mensaje.className = 'mensaje mensaje-exito';
+                mensaje.style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                mensaje.textContent = 'Error de conexión con el servidor';
+                mensaje.className = 'mensaje mensaje-error';
+                mensaje.style.display = 'block';
+                datos.style.display = 'none';
+            }
+        });
+    }
+
 });
+
 
 /* ================= ELIMINAR ================= */
 function eliminarSalon() {
