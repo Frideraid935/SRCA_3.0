@@ -4,29 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eliminar Profesor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body>
-    <div class="contenedor-formulario active">
+    <div class="contenedor-formulario">
         <h2>Eliminar Profesor</h2>
-        
-        <form id="formulario-buscar-eliminar">
-            <div class="grupo-campos">
-                <div class="campo">
-                    <label for="eliminar-numero">Número de Control:</label>
-                    <input type="text" id="eliminar-numero" name="numero_de_control" placeholder="Ingrese número de control">
-                </div>
+        <div class="grupo-campos">
+            <div class="campo">
+                <label for="eliminar-numero">Número de Control:</label>
+                <input type="text" id="eliminar-numero" placeholder="Ingrese número de control">
             </div>
-            <div class="botones">
-                <button type="submit" class="btn btn-primary">Buscar Profesor</button>
-            </div>
-        </form>
+        </div>
+        <div class="botones">
+            <button class="btn btn-primary" onclick="buscarProfesorEliminar()">Buscar</button>
+        </div>
         
         <div id="datos-profesor" style="margin-top: 20px; display: none;">
-            <h3>Datos del Profesor a Eliminar</h3>
+            <h3>Profesor a Eliminar</h3>
             <div id="info-profesor"></div>
-            <button type="button" class="btn btn-danger" id="btn-eliminar-confirmar" style="display: none; margin-top: 20px;">
+            <button class="btn btn-danger" id="btn-eliminar-confirmar" 
+                    onclick="eliminarProfesorConfirmado()" 
+                    style="display: none; margin-top: 20px;">
                 Confirmar Eliminación
             </button>
         </div>

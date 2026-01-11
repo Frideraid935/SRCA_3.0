@@ -4,23 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscar Profesor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body>
-    <div class="contenedor-formulario active">
+    <div class="contenedor-formulario">
         <h2>Buscar Profesor</h2>
-        <form id="formulario-buscar">
-            <div class="grupo-campos">
-                <div class="campo">
-                    <label for="busqueda-numero">Número de Control:</label>
-                    <input type="text" id="busqueda-numero" name="numero_de_control" placeholder="Ingrese número de control">
-                </div>
+        <div class="grupo-campos">
+            <div class="campo">
+                <label for="busqueda-numero">Número de Control:</label>
+                <input type="text" id="busqueda-numero" placeholder="Ingrese número de control">
             </div>
-            <div class="botones">
-                <button type="submit" class="btn btn-primary">Buscar</button>
-            </div>
-        </form>
+        </div>
+        <div class="botones">
+            <button class="btn btn-primary" onclick="buscarProfesor()">Buscar</button>
+        </div>
         
         <div id="resultados-busqueda" style="margin-top: 20px; display: none;">
             <h3>Datos del Profesor</h3>

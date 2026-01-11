@@ -3,19 +3,16 @@ const express = require('express');
 const router = express.Router();
 const profesoresController = require('../controladores/controladores-profesores/profesores.controlador');
 
-// Registrar profesor
-router.post('/registrar', profesoresController.registrarProfesor);
+// Ruta para registrar profesor
+router.post('/registrar', profesoresController.registrar);
 
-// Listar todos los profesores
-router.get('/listar', profesoresController.listarProfesores);
+// Ruta para buscar profesor
+router.get('/buscar/:id', profesoresController.buscar);
 
-// Buscar profesor por número de control
-router.get('/buscar/:numero', profesoresController.buscarProfesorPorNumero);
+// Ruta para actualizar profesor
+router.put('/actualizar', profesoresController.actualizar);
 
-// Actualizar profesor
-router.put('/actualizar', profesoresController.actualizarProfesor);
-
-// Eliminar profesor
-router.delete('/eliminar', profesoresController.eliminarProfesor);
+// Ruta para eliminar profesor
+router.delete('/eliminar', profesoresController.eliminar);
 
 module.exports = router;
