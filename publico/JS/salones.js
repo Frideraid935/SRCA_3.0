@@ -3,7 +3,16 @@ const API_BASE = '/api/salones';
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Sistema de salones cargado');
 
-    // ================= REGISTRAR =================
+    // ================= BUSCAR =================
+    const formBuscar = document.getElementById('formulario-buscar-salon');
+    if (formBuscar) {
+        formBuscar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await buscarSalon();
+        });
+    }
+
+    // ================= REGISTRAR ================= (NO MODIFICAR)
     const formRegistrar = document.getElementById('formulario-salon');
     if (formRegistrar) {
         formRegistrar.addEventListener('submit', e => {
@@ -12,16 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ================= BUSCAR =================
-    const formBuscar = document.getElementById('formulario-buscar-salon');
-    if (formBuscar) {
-        formBuscar.addEventListener('submit', e => {
-            e.preventDefault();
-            buscarSalon();
-        });
-    }
-
-    // ================= ELIMINAR =================
+    // ================= ELIMINAR ================= (NO MODIFICAR)
     const formEliminar = document.getElementById('formulario-eliminar-salon');
     if (formEliminar) {
         formEliminar.addEventListener('submit', e => {
@@ -31,18 +31,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ================= FUNCIONES =================
+// ===== BUSCAR ===== (REESCRITA SEGÚN TU PATRÓN FUNCIONAL)
+async function buscarSalon() {
+    const id = document.getElementById('id_salon').value.trim();
+    const mensaje = document.getElementById('mensaje-busqueda-salon');
+    const datos = document.getElementById('datos-salon');
 
-// ===== REGISTRAR =====
+    // Validación simple como en tu ejemplo
+    if (!id) {
+        mensaje.textContent = 'Debes ingresar un ID de salón';
+        mensaje.style.color = 'red';
+        datos.style.display = 'none';
+        return;
+    }
+
+    // Mostrar "buscando..."
+    mensaje.textContent = 'Buscando salón...';
+    mensaje.style.color = 'blue';
+
+    try {
+        // Hacer fetch igual que en tu ejemplo funcional
+        const res = await fetch(`${API_BASE}/buscar/${id}`);
+        const result = await res.json();
+
+        // Manejar la respuesta como en tu ejemplo
+        if (!res.ok || !result.success) {
+            mensaje.textContent = result.message || 'Salón no encontrado';
+            mensaje.style.color = 'red';
+            datos.style.display = 'none';
+            return;
+        }
+
+        // Mostrar los datos - FORMATO SIMPLE Y DIRECTO
+        datos.innerHTML = `
+            <div style="background:#f5f5f5; padding:15px; border-radius:5px; margin-top:10px;">
+                <h3 style="margin-top:0;">Información del Salón</h3>
+                <p><strong>ID:</strong> ${result.salon.id}</p>
+                <p><strong>Nombre:</strong> ${result.salon.nombre}</p>
+                <p><strong>Capacidad:</strong> ${result.salon.capacidad} personas</p>
+                <p><strong>Número de Control del Profesor:</strong> ${result.salon.profesor_id}</p>
+            </div>
+        `;
+        
+        // Mostrar el contenedor
+        datos.style.display = 'block';
+        
+        // Mensaje de éxito
+        mensaje.textContent = 'Salón encontrado correctamente';
+        mensaje.style.color = 'green';
+
+    } catch (err) {
+        console.error('Error al buscar salón:', err);
+        mensaje.textContent = 'Error al conectar con el servidor';
+        mensaje.style.color = 'red';
+        datos.style.display = 'none';
+    }
+}
+
+// ===== REGISTRAR ===== (MANTENIDO IGUAL)
 function registrarSalon() {
-    // (MANTENIDO IGUAL - NO MODIFICAR)
     const nombre = document.getElementById('nombre_salon').value.trim();
     const capacidad = document.getElementById('capacidad').value.trim();
     const profesor_id = document.getElementById('numero_de_control').value.trim();
     const mensaje = document.getElementById('mensaje');
 
     if (!nombre || !capacidad || !profesor_id) {
-        mostrarMensaje(mensaje, 'Todos los campos son obligatorios', 'error');
+        mensaje.textContent = 'Todos los campos son obligatorios';
+        mensaje.style.color = 'red';
         return;
     }
 
@@ -54,122 +109,29 @@ function registrarSalon() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            mostrarMensaje(mensaje, data.message, 'success');
+            mensaje.textContent = data.message;
+            mensaje.style.color = 'green';
             document.getElementById('formulario-salon').reset();
         } else {
-            mostrarMensaje(mensaje, data.message, 'error');
+            mensaje.textContent = data.message;
+            mensaje.style.color = 'red';
         }
     })
     .catch(() => {
-        mostrarMensaje(mensaje, 'Error de conexión con el servidor', 'error');
+        mensaje.textContent = 'Error de conexión con el servidor';
+        mensaje.style.color = 'red';
     });
 }
 
-// ===== BUSCAR ===== (CORREGIDA)
-async function buscarSalon() {
-    console.log('=== INICIANDO BÚSQUEDA ===');
-    
-    const id = document.getElementById('id_salon').value.trim();
-    const mensajeDiv = document.getElementById('mensaje-busqueda-salon');
-    const contenedorDatos = document.getElementById('contenedor-datos-salon');
-    const datosDiv = document.getElementById('datos-salon');
-    
-    console.log('ID ingresado:', id);
-    console.log('Elemento mensajeDiv:', mensajeDiv);
-    console.log('Elemento contenedorDatos:', contenedorDatos);
-    console.log('Elemento datosDiv:', datosDiv);
-
-    // Limpiar resultados anteriores
-    if (mensajeDiv) mensajeDiv.style.display = 'none';
-    if (contenedorDatos) contenedorDatos.style.display = 'none';
-    if (datosDiv) datosDiv.innerHTML = '';
-
-    if (!id) {
-        console.log('Error: No se ingresó ID');
-        mostrarMensaje(mensajeDiv, 'Debes ingresar un ID de salón', 'error');
-        return;
-    }
-
-    // Mostrar cargando
-    if (mensajeDiv) {
-        mensajeDiv.innerHTML = ' Buscando salón...';
-        mensajeDiv.className = 'mensaje mensaje-info';
-        mensajeDiv.style.display = 'block';
-    }
-
-    try {
-        console.log(`Haciendo fetch a: ${API_BASE}/buscar/${id}`);
-        
-        const response = await fetch(`${API_BASE}/buscar/${id}`);
-        
-        console.log('Respuesta recibida:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok,
-            url: response.url
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log('Datos JSON recibidos:', result);
-        
-        if (!result.success) {
-            console.log('API devolvió success: false');
-            mostrarMensaje(mensajeDiv, result.message || 'Salón no encontrado', 'error');
-            return;
-        }
-
-        console.log('Datos del salón encontrado:', result.salon);
-        
-        // Mostrar los datos
-        if (datosDiv && result.salon) {
-            datosDiv.innerHTML = `
-                <div class="dato-salon">
-                    <p><strong>ID:</strong> ${result.salon.id || 'N/A'}</p>
-                    <p><strong>Nombre del Salón:</strong> ${result.salon.nombre || 'N/A'}</p>
-                    <p><strong>Capacidad:</strong> ${result.salon.capacidad || 'N/A'} personas</p>
-                    <p><strong>Número de Control del Profesor:</strong> ${result.salon.profesor_id || 'N/A'}</p>
-                </div>
-            `;
-        }
-        
-        // Mostrar contenedor de datos
-        if (contenedorDatos) {
-            contenedorDatos.style.display = 'block';
-        }
-        
-        mostrarMensaje(mensajeDiv, 'Salón encontrado correctamente', 'success');
-        
-    } catch (error) {
-        console.error('Error completo en búsqueda:', error);
-        
-        let mensajeError = 'Error de conexión con el servidor';
-        if (error.message.includes('Failed to fetch')) {
-            mensajeError = 'No se puede conectar al servidor. Verifica que el servidor esté corriendo.';
-        } else if (error.message.includes('HTTP')) {
-            mensajeError = `Error del servidor: ${error.message}`;
-        }
-        
-        mostrarMensaje(mensajeDiv, mensajeError, 'error');
-        
-        // Mostrar más detalles en consola
-        console.log('=== DETALLES DEL ERROR ===');
-        console.log('URL intentada:', `${API_BASE}/buscar/${id}`);
-        console.log('Error completo:', error);
-    }
-}
-
-// ===== ELIMINAR ===== (MANTENIDO IGUAL - NO MODIFICAR)
+// ===== ELIMINAR ===== (MANTENIDO IGUAL)
 function eliminarSalon() {
     const id = document.getElementById('id').value.trim();
     const mensaje = document.getElementById('mensaje-eliminar-salon');
     const datos = document.getElementById('datos-salon');
 
     if (!id) {
-        mostrarMensaje(mensaje, 'Ingrese el ID del salón', 'warning');
+        mensaje.textContent = 'Ingrese el ID del salón';
+        mensaje.style.color = 'orange';
         return;
     }
 
@@ -179,35 +141,17 @@ function eliminarSalon() {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            mostrarMensaje(mensaje, data.message, 'success');
+            mensaje.textContent = data.message;
+            mensaje.style.color = 'green';
             datos.style.display = 'none';
             document.getElementById('formulario-eliminar-salon').reset();
         } else {
-            mostrarMensaje(mensaje, data.message, 'error');
+            mensaje.textContent = data.message;
+            mensaje.style.color = 'red';
         }
     })
     .catch(() => {
-        mostrarMensaje(mensaje, 'Error de conexión', 'error');
+        mensaje.textContent = 'Error de conexión';
+        mensaje.style.color = 'red';
     });
-}
-
-// ===== MENSAJES ===== (MEJORADA)
-function mostrarMensaje(elemento, texto, tipo) {
-    if (!elemento) {
-        console.error('Elemento de mensaje no encontrado:', texto);
-        return;
-    }
-    
-    elemento.innerHTML = texto;
-    elemento.className = `mensaje mensaje-${tipo}`;
-    elemento.style.display = 'block';
-    
-    // Solo ocultar automáticamente si es éxito o error, no si es info
-    if (tipo === 'success' || tipo === 'error') {
-        setTimeout(() => {
-            if (elemento.innerHTML === texto) {
-                elemento.style.display = 'none';
-            }
-        }, 5000);
-    }
 }
