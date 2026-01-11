@@ -2,39 +2,55 @@ const db = require('../../BD/BD.js');
 
 const salonesController = {
 
-    // REGISTRAR
-    registrarSalon: async (req, res) => {
+    /* =========================
+       REGISTRAR
+    ========================= */
+    registrar: async (req, res) => {
         try {
-            const { id_salon, nombre_salon, capacidad, profesor_id } = req.body;
+            const { nombre_salon, capacidad, profesor_id } = req.body;
 
-            if (!id_salon || !nombre_salon || !capacidad || !profesor_id) {
-                return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+            if (!nombre_salon || !capacidad || !profesor_id) {
+                return res.status(400).json({ message: 'Datos incompletos' });
             }
 
-            const sql = `
-                INSERT INTO salones (id_salon, nombre_salon, capacidad, profesor_id)
-                VALUES (?, ?, ?, ?)
-            `;
+            // Verificar profesor existente
+            const [profesor] = await db.execute(
+                'SELECT numero_de_control FROM profesores WHERE numero_de_control = ?',
+                [profesor_id]
+            );
 
-            await db.execute(sql, [id_salon, nombre_salon, capacidad, profesor_id]);
+            if (profesor.length === 0) {
+                return res.status(404).json({ message: 'Profesor no encontrado' });
+            }
+
+            await db.execute(
+                'INSERT INTO salones (nombre, capacidad, profesor_id) VALUES (?, ?, ?)',
+                [nombre_salon, capacidad, profesor_id]
+            );
 
             res.json({ message: 'Salón registrado correctamente' });
 
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error al registrar salón' });
+            console.error('ERROR REGISTRAR SALÓN:', error.message);
+            res.status(500).json({ message: error.message });
         }
     },
 
-    // BUSCAR
-    buscarSalon: async (req, res) => {
+    /* =========================
+       BUSCAR
+    ========================= */
+    buscar: async (req, res) => {
         try {
             const { id } = req.params;
 
-            const [rows] = await db.execute(
-                'SELECT * FROM salones WHERE id_salon = ?',
-                [id]
-            );
+            const [rows] = await db.execute(`
+                SELECT s.id, s.nombre, s.capacidad,
+                       p.numero_de_control AS profesor_id,
+                       p.nombre AS profesor_nombre
+                FROM salones s
+                JOIN profesores p ON s.profesor_id = p.numero_de_control
+                WHERE s.id = ?
+            `, [id]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'Salón no encontrado' });
@@ -43,30 +59,37 @@ const salonesController = {
             res.json(rows[0]);
 
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error al buscar salón' });
+            console.error('ERROR BUSCAR SALÓN:', error.message);
+            res.status(500).json({ message: error.message });
         }
     },
 
-    // ELIMINAR
-    eliminarSalon: async (req, res) => {
+    /* =========================
+       ELIMINAR
+    ========================= */
+    eliminar: async (req, res) => {
         try {
             const { id } = req.params;
 
-            const [result] = await db.execute(
-                'DELETE FROM salones WHERE id_salon = ?',
+            const [existe] = await db.execute(
+                'SELECT id FROM salones WHERE id = ?',
                 [id]
             );
 
-            if (result.affectedRows === 0) {
+            if (existe.length === 0) {
                 return res.status(404).json({ message: 'Salón no encontrado' });
             }
+
+            await db.execute(
+                'DELETE FROM salones WHERE id = ?',
+                [id]
+            );
 
             res.json({ message: 'Salón eliminado correctamente' });
 
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error al eliminar salón' });
+            console.error('ERROR ELIMINAR SALÓN:', error.message);
+            res.status(500).json({ message: error.message });
         }
     }
 };

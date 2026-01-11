@@ -1,15 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const salones = require('../controladores/controladores-salones/salones.controlador');
 
-const salonesController = require('../controladores/controladores-salones/salones.controlador');
-
-// REGISTRAR
-router.post('/registrar', salonesController.registrarSalon);
-
-// BUSCAR
-router.get('/buscar/:id', salonesController.buscarSalon);
-
-// ELIMINAR
-router.delete('/eliminar/:id', salonesController.eliminarSalon);
+router.post('/registrar', salones.registrar);
+router.get('/buscar/:id', salones.buscar);
+router.delete('/eliminar/:id', salones.eliminar);
 
 module.exports = router;
