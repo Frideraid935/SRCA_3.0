@@ -1,6 +1,4 @@
-const API_SALONES = '/api/salones';
-const API_PROFESORES = '/api/profesores/listar';
-
+const API_BASE = '/api/salones';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -17,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = {
                 nombre: document.getElementById('nombre_salon').value.trim(),
                 capacidad: document.getElementById('capacidad').value.trim(),
-                profesor_id: document.getElementById('numero_de_control').value.trim()
+                profesor_id: document.getElementById('profesor_id').value.trim()
             };
 
             try {
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const result = await res.json();
-
                 mensaje.textContent = result.message;
                 mensaje.className = res.ok ? 'mensaje-exito' : 'mensaje-error';
                 mensaje.style.display = 'block';
@@ -53,10 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formBuscar.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const id = document.getElementById('id').value.trim();
-            mensaje.style.display = 'none';
-            datos.style.display = 'none';
+            const id = document.getElementById('id_salon').value.trim();
 
             try {
                 const res = await fetch(`${API_BASE}/buscar/${id}`);
@@ -66,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     mensaje.textContent = salon.message;
                     mensaje.className = 'mensaje-error';
                     mensaje.style.display = 'block';
+                    datos.style.display = 'none';
                     return;
                 }
 
@@ -73,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>ID:</strong> ${salon.id}</p>
                     <p><strong>Salón:</strong> ${salon.nombre}</p>
                     <p><strong>Capacidad:</strong> ${salon.capacidad}</p>
-                    <p><strong>Profesor (No. Control):</strong> ${salon.profesor_id}</p>
+                    <p><strong>Profesor:</strong> ${salon.profesor_id}</p>
                 `;
-
                 datos.style.display = 'block';
+                mensaje.style.display = 'none';
 
             } catch {
-                mensaje.textContent = 'Error al buscar salón';
+                mensaje.textContent = 'Error de conexión';
                 mensaje.className = 'mensaje-error';
                 mensaje.style.display = 'block';
             }
@@ -96,10 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         formEliminar.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const id = document.getElementById('id').value.trim();
-            mensaje.style.display = 'none';
-            datos.style.display = 'none';
+            const id = document.getElementById('id_salon').value.trim();
 
             try {
                 const resBuscar = await fetch(`${API_BASE}/buscar/${id}`);
@@ -113,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 datos.innerHTML = `
-                    <p><strong>ID:</strong> ${salon.id}</p>
                     <p><strong>Salón:</strong> ${salon.nombre}</p>
                     <p><strong>Profesor:</strong> ${salon.profesor_id}</p>
                 `;
@@ -121,10 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!confirm('¿Desea eliminar este salón?')) return;
 
-                const res = await fetch(`${API_BASE}/eliminar/${id}`, {
-                    method: 'DELETE'
-                });
-
+                const res = await fetch(`${API_BASE}/eliminar/${id}`, { method: 'DELETE' });
                 const result = await res.json();
 
                 mensaje.textContent = result.message;
@@ -137,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } catch {
-                mensaje.textContent = 'Error al eliminar salón';
+                mensaje.textContent = 'Error de conexión';
                 mensaje.className = 'mensaje-error';
                 mensaje.style.display = 'block';
             }
