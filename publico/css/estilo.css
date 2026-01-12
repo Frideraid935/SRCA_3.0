@@ -12,7 +12,6 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #34495e;
     line-height: 1.6;
-    display: flex;
     min-height: 100vh;
     background-image: url('../imagenes/fondo3.jpeg');
     background-size: cover;
@@ -22,9 +21,17 @@ body {
 }
 
 /* --------------------------------------- */
-/* MENÚS LATERALES (TODOS) */
+/* LAYOUT PRINCIPAL - ESCRITORIO */
 /* --------------------------------------- */
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
 
+/* --------------------------------------- */
+/* MENÚ LATERAL - ESCRITORIO */
+/* --------------------------------------- */
 .menu-lateral {
     width: 250px;
     background-color: #34495e;
@@ -33,7 +40,11 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 100;
-    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
 }
 
 .menu-lateral .logo,
@@ -75,50 +86,51 @@ body {
 }
 
 /* --------------------------------------- */
-/* CONTENIDO PRINCIPAL CON IFRAMES */
+/* CONTENIDO PRINCIPAL CON IFRAMES - ESCRITORIO */
 /* --------------------------------------- */
-
 .contenido-principal {
     flex: 1;
-    padding: 25px;
-    background-color: rgba(255, 255, 255, 0.9);
-    margin: 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    min-height: calc(100vh - 40px);
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
-/* Contenedor de iframe (para menús admin, profesores, etc.) */
+/* Contenedor centrado para iframe */
+.contenedor-centrado {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .contenedor-iframe {
     width: 100%;
-    height: 100%;
+    max-width: 1100px;
+    height: calc(100vh - 100px);
     min-height: 600px;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 #contenido-iframe,
 .contenido-principal iframe {
     width: 100%;
     height: 100%;
-    min-height: 600px;
     border: none;
     display: block;
     background: white;
-    border-radius: 8px;
-    flex: 1;
+    border-radius: 12px;
 }
 
 /* --------------------------------------- */
 /* CONTENEDOR DE FORMULARIO (PARA FORMULARIOS DIRECTOS) */
 /* --------------------------------------- */
-
 .contenedor-formulario {
     background-color: rgba(255, 255, 255, 0.95);
     padding: 35px;
@@ -141,7 +153,6 @@ h2 {
 /* --------------------------------------- */
 /* SECCIONES DEL FORMULARIO */
 /* --------------------------------------- */
-
 .seccion-titulo {
     color: #3498db;
     margin: 25px 0 18px;
@@ -154,7 +165,6 @@ h2 {
 /* --------------------------------------- */
 /* GRUPOS DE CAMPOS */
 /* --------------------------------------- */
-
 .grupo-campos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -197,7 +207,6 @@ h2 {
 /* --------------------------------------- */
 /* BOTONES */
 /* --------------------------------------- */
-
 .botones {
     display: flex;
     justify-content: center;
@@ -257,7 +266,6 @@ h2 {
 /* --------------------------------------- */
 /* MENSAJES */
 /* --------------------------------------- */
-
 .mensaje {
     margin-top: 25px;
     padding: 18px;
@@ -282,245 +290,32 @@ h2 {
 }
 
 /* --------------------------------------- */
-/* RESPONSIVE PARA MÓVILES - MENÚS CON IFRAMES */
+/* TOGGLE MENU MÓVIL (oculto en desktop) */
 /* --------------------------------------- */
-
-/* Tablets (768px - 1024px) */
-@media (max-width: 1024px) {
-    body {
-        flex-direction: column;
-        background-attachment: scroll;
-    }
-    
-    .menu-lateral {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding: 15px;
-        justify-content: center;
-        position: relative;
-        height: auto;
-        min-height: auto;
-    }
-    
-    .menu-lateral .logo,
-    .menu-lateral h2 {
-        width: 100%;
-        margin-bottom: 15px;
-        padding: 0;
-        border-bottom: none;
-        font-size: 1.3rem;
-    }
-    
-    .menu-item {
-        padding: 14px 20px;
-        margin: 5px;
-        flex: 1;
-        min-width: 180px;
-        justify-content: center;
-        font-size: 0.95rem;
-    }
-    
-    .contenido-principal {
-        margin: 15px;
-        padding: 20px;
-        min-height: calc(100vh - 150px);
-        border-radius: 10px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 500px;
-    }
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
 }
 
-/* Móviles grandes (600px - 767px) */
-@media (max-width: 767px) {
-    body {
-        padding: 0;
-        background-attachment: scroll;
-    }
-    
-    .menu-lateral {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px;
-    }
-    
-    .menu-item {
-        margin: 4px 0;
-        padding: 16px 20px;
-        width: 100%;
-        justify-content: flex-start;
-        font-size: 1.05rem;
-    }
-    
-    .menu-item i {
-        width: 26px;
-        font-size: 1.2rem;
-    }
-    
-    .contenido-principal {
-        margin: 10px;
-        padding: 16px;
-        min-height: calc(100vh - 140px);
-        border-radius: 8px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 450px;
-    }
-    
-    .contenedor-formulario {
-        padding: 25px;
-    }
-}
-
-/* Móviles (480px - 599px) */
-@media (max-width: 599px) {
-    .menu-lateral {
-        padding: 10px;
-    }
-    
-    .menu-lateral .logo,
-    .menu-lateral h2 {
-        font-size: 1.2rem;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .menu-item {
-        padding: 14px 18px;
-        font-size: 1rem;
-    }
-    
-    .menu-item i {
-        width: 24px;
-        font-size: 1.1rem;
-    }
-    
-    .contenido-principal {
-        padding: 14px;
-        margin: 8px;
-        min-height: calc(100vh - 120px);
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 400px;
-    }
-    
-    .contenedor-formulario {
-        padding: 22px;
-    }
-    
-    h2 {
-        font-size: 1.4em;
-    }
-    
-    .botones {
-        flex-direction: column;
-    }
-    
-    .btn {
-        width: 100%;
-        min-width: auto;
-    }
-}
-
-/* Móviles pequeños (menos de 480px) */
-@media (max-width: 479px) {
-    .menu-lateral {
-        padding: 8px;
-    }
-    
-    .menu-lateral .logo,
-    .menu-lateral h2 {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
-    }
-    
-    .menu-item {
-        padding: 12px 16px;
-        font-size: 0.95rem;
-        margin: 3px 0;
-    }
-    
-    .menu-item i {
-        width: 22px;
-        font-size: 1rem;
-    }
-    
-    .contenido-principal {
-        padding: 12px;
-        margin: 6px;
-        min-height: calc(100vh - 100px);
-        border-radius: 6px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 350px;
-    }
-    
-    .contenedor-formulario {
-        padding: 18px;
-    }
-    
-    h2 {
-        font-size: 1.3em;
-    }
-}
-
-/* Orientación landscape en móviles */
-@media (max-height: 500px) and (orientation: landscape) {
-    .menu-lateral {
-        flex-direction: row;
-        height: 70px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 5px;
-    }
-    
-    .menu-lateral .logo,
-    .menu-lateral h2 {
-        width: auto;
-        padding: 5px 15px;
-        margin-bottom: 0;
-        border-bottom: none;
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
-        white-space: nowrap;
-    }
-    
-    .menu-item {
-        min-width: 150px;
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        margin: 0 4px;
-    }
-    
-    .menu-item i {
-        width: 20px;
-        font-size: 0.95rem;
-    }
-    
-    .contenido-principal {
-        min-height: calc(100vh - 90px);
-        padding: 12px;
-        margin: 5px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 300px;
-    }
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
 
 /* Estilos para la búsqueda de salones */
@@ -579,6 +374,170 @@ h2 {
     box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
 }
 
+/* ========== RESPONSIVE MÓVIL ========== */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+    body {
+        background-attachment: scroll;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    .overlay.active {
+        display: block;
+    }
+    
+    .menu-lateral {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .menu-lateral.active {
+        left: 0;
+    }
+    
+    .contenido-principal {
+        margin-left: 0;
+        padding: 20px;
+        min-height: 100vh;
+        width: 100%;
+    }
+    
+    .contenedor-centrado {
+        padding: 20px;
+    }
+    
+    .contenedor-iframe {
+        height: calc(100vh - 120px);
+        min-height: 500px;
+        max-width: 900px;
+    }
+    
+    .contenedor-formulario {
+        padding: 25px;
+        max-width: 700px;
+    }
+    
+    .menu-item {
+        padding: 14px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* Móviles grandes (600px - 767px) */
+@media (max-width: 767px) {
+    .contenido-principal {
+        padding: 15px;
+    }
+    
+    .contenedor-centrado {
+        padding: 15px;
+    }
+    
+    .contenedor-iframe {
+        height: calc(100vh - 100px);
+        min-height: 450px;
+        border-radius: 10px;
+    }
+    
+    .contenedor-formulario {
+        padding: 22px;
+        max-width: 95%;
+    }
+    
+    .menu-item {
+        padding: 14px 20px;
+        font-size: 1rem;
+    }
+    
+    .botones {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* Móviles (480px - 599px) */
+@media (max-width: 599px) {
+    .contenedor-iframe {
+        height: calc(100vh - 90px);
+        min-height: 400px;
+        border-radius: 8px;
+    }
+    
+    #contenido-iframe,
+    .contenido-principal iframe {
+        border-radius: 8px;
+    }
+    
+    .contenedor-formulario {
+        padding: 20px;
+    }
+    
+    h2 {
+        font-size: 1.5em;
+    }
+    
+    .grupo-campos {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Móviles pequeños (menos de 480px) */
+@media (max-width: 479px) {
+    .contenedor-iframe {
+        height: calc(100vh - 80px);
+        min-height: 350px;
+    }
+    
+    .contenido-principal {
+        padding: 12px;
+    }
+    
+    .contenedor-centrado {
+        padding: 12px;
+    }
+    
+    .contenedor-formulario {
+        padding: 18px;
+    }
+    
+    .menu-item {
+        padding: 12px 16px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Orientación landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    .contenedor-iframe {
+        height: calc(100vh - 60px);
+        min-height: 300px;
+    }
+    
+    .menu-lateral {
+        width: 220px;
+    }
+    
+    .menu-item {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
+
 /* Ajustes para pantallas muy grandes */
 @media (min-width: 1600px) {
     .menu-lateral {
@@ -586,15 +545,15 @@ h2 {
     }
     
     .contenido-principal {
-        margin: 25px;
-        padding: 30px;
-        min-height: calc(100vh - 50px);
-        border-radius: 15px;
+        margin-left: 280px;
     }
     
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
+    .contenedor-centrado {
+        max-width: 1400px;
+    }
+    
+    .contenedor-iframe {
+        max-width: 1300px;
         min-height: 700px;
     }
     

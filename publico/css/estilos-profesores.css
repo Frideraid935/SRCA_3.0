@@ -1,4 +1,6 @@
-/* Estilos generales */
+/* ==============================
+   ESTILOS GENERALES - PROFESORES
+============================== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -6,8 +8,7 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
     color: #34495e;
     background-image: url('../imagenes/fondo3.jpeg');
@@ -17,16 +18,30 @@ body {
     background-attachment: fixed;
 }
 
-/* Menú lateral */
+/* ==============================
+   LAYOUT PRINCIPAL
+============================== */
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* ==============================
+   MENÚ LATERAL - DESKTOP
+============================== */
 .menu-lateral {
     width: 250px;
     background-color: #2c3e50;
-    padding: 20px 0;
     color: white;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
     z-index: 100;
-    min-height: 100vh;
 }
 
 .menu-lateral .logo,
@@ -63,12 +78,13 @@ body {
     font-weight: 500;
 }
 
-/* Contenido principal */
+/* ==============================
+   CONTENIDO PRINCIPAL - DESKTOP
+============================== */
 .contenido-principal {
     flex-grow: 1;
-    padding: 30px;
     margin-left: 250px;
-    width: calc(100% - 250px);
+    padding: 30px;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -76,7 +92,43 @@ body {
     background-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Contenedor de formulario (para formularios directos) */
+/* ==============================
+   CONTENEDOR CENTRADO
+============================== */
+.contenedor-centrado {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ==============================
+   CONTENEDORES DE IFRAME
+============================== */
+.contenedor-iframe {
+    width: 100%;
+    max-width: 1100px;
+    height: calc(100vh - 100px);
+    min-height: 600px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+#contenido-iframe,
+.contenido-principal iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: white;
+    border-radius: 10px;
+}
+
+/* ==============================
+   CONTENEDOR DE FORMULARIO
+============================== */
 .contenedor-formulario {
     display: none;
     background-color: rgba(255, 255, 255, 0.95);
@@ -91,29 +143,9 @@ body {
     display: block;
 }
 
-/* Para iframes en menús de profesores */
-.contenedor-iframe {
-    width: 100%;
-    height: 100%;
-    min-height: 600px;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-#contenido-iframe,
-.contenido-principal iframe {
-    width: 100%;
-    height: 100%;
-    min-height: 600px;
-    border: none;
-    display: block;
-    background: white;
-    border-radius: 8px;
-    flex: 1;
-}
-
+/* ==============================
+   HEADER DEL FORMULARIO
+============================== */
 .form-header {
     display: flex;
     justify-content: space-between;
@@ -141,7 +173,9 @@ body {
     box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
 }
 
-/* Campos del formulario */
+/* ==============================
+   CAMPOS DEL FORMULARIO
+============================== */
 .grupo-campos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -156,7 +190,7 @@ body {
 .campo label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
+    font-weight: 500;
     color: #555;
 }
 
@@ -170,13 +204,16 @@ body {
     transition: all 0.3s;
 }
 
-.campo input:focus {
+.campo input:focus,
+.campo select:focus {
     border-color: #3498db;
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* Botones */
+/* ==============================
+   BOTONES
+============================== */
 .botones {
     display: flex;
     justify-content: center;
@@ -227,7 +264,9 @@ body {
     background-color: #c82333;
 }
 
-/* Mensajes */
+/* ==============================
+   MENSAJES
+============================== */
 .mensaje {
     margin-top: 20px;
     padding: 15px;
@@ -248,83 +287,124 @@ body {
     border-left: 5px solid #e74c3c;
 }
 
-/* ========== RESPONSIVE PARA MÓVILES ========== */
+/* ==============================
+   MENU TOGGLE MOBILE
+============================== */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* ==============================
+   RESPONSIVE MÓVIL
+============================== */
 
 /* Tablets (768px - 1024px) */
 @media (max-width: 1024px) {
     body {
-        flex-direction: column;
         background-attachment: scroll;
     }
     
+    .menu-toggle {
+        display: block;
+    }
+    
+    .overlay.active {
+        display: block;
+    }
+    
     .menu-lateral {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding: 15px;
-        justify-content: center;
-        position: relative;
-        height: auto;
-        min-height: auto;
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
     
-    .menu-lateral h2 {
-        width: 100%;
-        margin-bottom: 15px;
-        padding: 0;
-        border-bottom: none;
-        font-size: 1.3rem;
-    }
-    
-    .menu-item {
-        padding: 14px 20px;
-        margin: 5px;
-        flex: 1;
-        min-width: 180px;
-        justify-content: center;
-        font-size: 0.95rem;
+    .menu-lateral.active {
+        left: 0;
     }
     
     .contenido-principal {
         margin-left: 0;
+        padding: 20px;
         width: 100%;
-        padding: 25px;
-        min-height: calc(100vh - 150px);
-        margin: 15px;
-        border-radius: 10px;
+        min-height: 100vh;
+    }
+    
+    .contenedor-centrado {
+        padding: 20px;
+    }
+    
+    .contenedor-iframe {
+        height: calc(100vh - 120px);
+        min-height: 500px;
+        max-width: 900px;
     }
     
     .contenedor-formulario {
         padding: 25px;
-        max-width: 750px;
+        max-width: 700px;
     }
     
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 500px;
+    .form-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-btn {
+        width: 100%;
     }
 }
 
 /* Móviles grandes (600px - 767px) */
 @media (max-width: 767px) {
-    body {
-        padding: 0;
-        background-attachment: scroll;
+    .contenido-principal {
+        padding: 15px;
     }
     
-    .menu-lateral {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 12px;
+    .contenedor-centrado {
+        padding: 15px;
+    }
+    
+    .contenedor-iframe {
+        height: calc(100vh - 100px);
+        min-height: 450px;
+    }
+    
+    .contenedor-formulario {
+        padding: 22px;
+        max-width: 95%;
     }
     
     .menu-item {
         margin: 4px 0;
         padding: 16px 20px;
         width: 100%;
-        justify-content: flex-start;
-        font-size: 1.05rem;
+        font-size: 1rem;
     }
     
     .menu-item i {
@@ -332,38 +412,28 @@ body {
         font-size: 1.2rem;
     }
     
-    .contenido-principal {
-        padding: 20px;
-        margin: 10px;
-        min-height: calc(100vh - 140px);
-        border-radius: 8px;
-    }
-    
-    .contenedor-formulario {
-        padding: 22px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 450px;
-    }
-    
-    .form-header {
+    .botones {
         flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+        align-items: center;
     }
     
-    .search-btn {
+    .btn {
         width: 100%;
-        padding: 14px;
-        font-size: 16px;
+        max-width: 300px;
     }
 }
 
 /* Móviles (480px - 599px) */
 @media (max-width: 599px) {
+    .contenedor-iframe {
+        height: calc(100vh - 90px);
+        min-height: 400px;
+    }
+    
+    .contenedor-formulario {
+        padding: 20px;
+    }
+    
     .menu-lateral {
         padding: 10px;
     }
@@ -372,7 +442,6 @@ body {
         font-size: 1.2rem;
         margin-bottom: 12px;
         padding-bottom: 10px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .menu-item {
@@ -385,47 +454,34 @@ body {
         font-size: 1.1rem;
     }
     
-    .contenido-principal {
-        padding: 16px;
-        margin: 8px;
-        min-height: calc(100vh - 120px);
-    }
-    
-    .contenedor-formulario {
-        padding: 20px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 400px;
-    }
-    
     .grupo-campos {
         grid-template-columns: 1fr;
     }
     
-    .botones {
-        flex-direction: column;
-        gap: 12px;
-    }
-    
     .btn {
-        width: 100%;
-        min-width: auto;
         padding: 14px 20px;
+        font-size: 15px;
+        min-width: auto;
     }
 }
 
 /* Móviles pequeños (menos de 480px) */
 @media (max-width: 479px) {
-    .menu-lateral {
-        padding: 8px;
+    .contenedor-iframe {
+        height: calc(100vh - 80px);
+        min-height: 350px;
     }
     
-    .menu-lateral h2 {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
+    .contenido-principal {
+        padding: 12px;
+    }
+    
+    .contenedor-centrado {
+        padding: 12px;
+    }
+    
+    .contenedor-formulario {
+        padding: 18px;
     }
     
     .menu-item {
@@ -436,23 +492,6 @@ body {
     .menu-item i {
         width: 22px;
         font-size: 1rem;
-    }
-    
-    .contenido-principal {
-        padding: 14px;
-        margin: 6px;
-        min-height: calc(100vh - 100px);
-        border-radius: 6px;
-    }
-    
-    .contenedor-formulario {
-        padding: 18px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 350px;
     }
     
     .campo label {
@@ -469,17 +508,18 @@ body {
         padding: 14px 18px;
         font-size: 15px;
     }
-    
-    .mensaje {
-        padding: 12px;
-        font-size: 14px;
-    }
 }
 
 /* Orientación landscape en móviles */
 @media (max-height: 500px) and (orientation: landscape) {
+    .contenedor-iframe {
+        height: calc(100vh - 60px);
+        min-height: 300px;
+    }
+    
     .menu-lateral {
         flex-direction: row;
+        width: auto;
         height: 70px;
         overflow-x: auto;
         overflow-y: hidden;
@@ -508,15 +548,8 @@ body {
     }
     
     .contenido-principal {
-        min-height: calc(100vh - 90px);
-        padding: 12px;
-        margin: 5px;
-    }
-    
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
-        min-height: 300px;
+        min-height: calc(100vh - 70px);
+        padding: 10px;
     }
     
     .contenedor-formulario {
@@ -541,9 +574,8 @@ body {
         padding: 40px;
     }
     
-    .contenedor-iframe,
-    #contenido-iframe,
-    .contenido-principal iframe {
+    .contenedor-iframe {
+        max-width: 1200px;
         min-height: 700px;
     }
     
