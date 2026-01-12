@@ -217,3 +217,231 @@ body {
     color: #e74c3c;
     border-left: 5px solid #e74c3c;
 }
+
+/* ========== RESPONSIVE PARA MÓVILES ========== */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+    .menu-lateral {
+        width: 220px;
+    }
+    
+    .contenido-principal {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+        padding: 25px;
+    }
+    
+    .contenedor-formulario {
+        padding: 25px;
+        max-width: 700px;
+    }
+    
+    .grupo-campos {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
+/* Tablets pequeñas y móviles grandes (600px - 767px) */
+@media (max-width: 767px) {
+    body {
+        flex-direction: column;
+    }
+    
+    .menu-lateral {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 10px;
+    }
+
+    .logo {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .logo h2 {
+        font-size: 1.1rem;
+    }
+
+    .menu-item {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .contenido-principal {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .contenedor-formulario {
+        padding: 20px;
+    }
+    
+    .form-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+}
+
+/* Móviles (480px - 599px) */
+@media (max-width: 599px) {
+    .menu-lateral {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .menu-item {
+        width: 100%;
+        margin: 2px 0;
+        padding: 12px 15px;
+        justify-content: flex-start;
+    }
+    
+    .contenido-principal {
+        padding: 15px;
+    }
+    
+    .contenedor-formulario {
+        padding: 15px;
+    }
+    
+    .grupo-campos {
+        grid-template-columns: 1fr;
+    }
+    
+    .botones {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .search-btn {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+/* Móviles pequeños (menos de 480px) */
+@media (max-width: 479px) {
+    .menu-lateral {
+        padding: 8px;
+    }
+    
+    .logo {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .menu-item {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .contenido-principal {
+        padding: 10px;
+    }
+    
+    .contenedor-formulario {
+        padding: 12px;
+    }
+    
+    .campo label {
+        font-size: 14px;
+    }
+    
+    .campo input,
+    .campo select {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    .mensaje {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+/* Orientación landscape en móviles */
+@media (max-height: 500px) and (orientation: landscape) {
+    .menu-lateral {
+        flex-direction: row;
+        height: 60px;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    
+    .logo {
+        width: auto;
+        padding: 5px 15px;
+        margin-bottom: 0;
+        border-bottom: none;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .logo h2 {
+        font-size: 1em;
+        white-space: nowrap;
+    }
+    
+    .menu-item {
+        min-width: 110px;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        margin: 0 5px;
+    }
+    
+    .contenido-principal {
+        min-height: calc(100vh - 60px);
+        padding: 10px;
+    }
+    
+    .contenedor-formulario {
+        max-width: 95%;
+    }
+}
+
+/* Ajustes para pantallas muy grandes */
+@media (min-width: 1600px) {
+    .menu-lateral {
+        width: 280px;
+    }
+    
+    .contenido-principal {
+        margin-left: 280px;
+        width: calc(100% - 280px);
+    }
+    
+    .contenedor-formulario {
+        max-width: 1000px;
+        padding: 40px;
+    }
+    
+    .grupo-campos {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+    }
+    
+    .btn {
+        padding: 15px 30px;
+        font-size: 17px;
+        min-width: 180px;
+    }
+}
