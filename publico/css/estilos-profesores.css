@@ -1,6 +1,4 @@
-/* ==============================
-   ESTILOS GENERALES - PROFESORES
-============================== */
+/* Estilos generales */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -8,51 +6,34 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
-    color: #34495e;
-    background-image: url('../imagenes/fondo3.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-
-/* ==============================
-   LAYOUT PRINCIPAL
-============================== */
-.layout-container {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
     display: flex;
     min-height: 100vh;
-    position: relative;
+    color: #34495e;
 }
 
-/* ==============================
-   MENÚ LATERAL - DESKTOP
-============================== */
+/* Menú lateral */
 .menu-lateral {
     width: 250px;
     background-color: #2c3e50;
+    padding: 20px 0;
     color: white;
     display: flex;
     flex-direction: column;
     position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    overflow-y: auto;
+    height: 100vh;
     z-index: 100;
 }
 
-.menu-lateral .logo,
-.menu-lateral h2 {
+.logo {
     text-align: center;
     padding: 20px;
     margin-bottom: 30px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.menu-lateral h2 {
+.logo h2 {
     color: white;
     font-size: 1.3rem;
 }
@@ -78,57 +59,23 @@ body {
     font-weight: 500;
 }
 
-/* ==============================
-   CONTENIDO PRINCIPAL - DESKTOP
-============================== */
+/* Contenido principal */
 .contenido-principal {
     flex-grow: 1;
-    margin-left: 250px;
     padding: 30px;
+    margin-left: 250px;
+    width: calc(100% - 250px);
     min-height: 100vh;
+    background-color: #ffffff;
+    background-image: url('../imagenes/fondo3.jpeg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0.85);
 }
 
-/* ==============================
-   CONTENEDOR CENTRADO
-============================== */
-.contenedor-centrado {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* ==============================
-   CONTENEDORES DE IFRAME
-============================== */
-.contenedor-iframe {
-    width: 100%;
-    max-width: 1100px;
-    height: calc(100vh - 100px);
-    min-height: 600px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-#contenido-iframe,
-.contenido-principal iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-    background: white;
-    border-radius: 10px;
-}
-
-/* ==============================
-   CONTENEDOR DE FORMULARIO
-============================== */
 .contenedor-formulario {
     display: none;
     background-color: rgba(255, 255, 255, 0.95);
@@ -143,39 +90,28 @@ body {
     display: block;
 }
 
-/* ==============================
-   HEADER DEL FORMULARIO
-============================== */
 .form-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
 }
 
 .search-btn {
     background-color: #3498db;
     color: white;
-    padding: 12px 20px;
+    padding: 10px 15px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s;
-    font-size: 15px;
-    font-weight: 500;
 }
 
 .search-btn:hover {
     background-color: #2980b9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
 }
 
-/* ==============================
-   CAMPOS DEL FORMULARIO
-============================== */
+/* Campos del formulario */
 .grupo-campos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -190,7 +126,7 @@ body {
 .campo label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 500;
+    font-weight: bold;
     color: #555;
 }
 
@@ -204,16 +140,13 @@ body {
     transition: all 0.3s;
 }
 
-.campo input:focus,
-.campo select:focus {
+.campo input:focus {
     border-color: #3498db;
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* ==============================
-   BOTONES
-============================== */
+/* Botones */
 .botones {
     display: flex;
     justify-content: center;
@@ -264,9 +197,7 @@ body {
     background-color: #c82333;
 }
 
-/* ==============================
-   MENSAJES
-============================== */
+/* Mensajes */
 .mensaje {
     margin-top: 20px;
     padding: 15px;
@@ -285,308 +216,4 @@ body {
     background-color: #fadbd8;
     color: #e74c3c;
     border-left: 5px solid #e74c3c;
-}
-
-/* ==============================
-   MENU TOGGLE MOBILE
-============================== */
-.menu-toggle {
-    display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 1000;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 15px;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
-
-/* ==============================
-   RESPONSIVE MÓVIL
-============================== */
-
-/* Tablets (768px - 1024px) */
-@media (max-width: 1024px) {
-    body {
-        background-attachment: scroll;
-    }
-    
-    .menu-toggle {
-        display: block;
-    }
-    
-    .overlay.active {
-        display: block;
-    }
-    
-    .menu-lateral {
-        position: fixed;
-        left: -250px;
-        top: 0;
-        bottom: 0;
-        transition: left 0.3s ease;
-        z-index: 1000;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .menu-lateral.active {
-        left: 0;
-    }
-    
-    .contenido-principal {
-        margin-left: 0;
-        padding: 20px;
-        width: 100%;
-        min-height: 100vh;
-    }
-    
-    .contenedor-centrado {
-        padding: 20px;
-    }
-    
-    .contenedor-iframe {
-        height: calc(100vh - 120px);
-        min-height: 500px;
-        max-width: 900px;
-    }
-    
-    .contenedor-formulario {
-        padding: 25px;
-        max-width: 700px;
-    }
-    
-    .form-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-btn {
-        width: 100%;
-    }
-}
-
-/* Móviles grandes (600px - 767px) */
-@media (max-width: 767px) {
-    .contenido-principal {
-        padding: 15px;
-    }
-    
-    .contenedor-centrado {
-        padding: 15px;
-    }
-    
-    .contenedor-iframe {
-        height: calc(100vh - 100px);
-        min-height: 450px;
-    }
-    
-    .contenedor-formulario {
-        padding: 22px;
-        max-width: 95%;
-    }
-    
-    .menu-item {
-        margin: 4px 0;
-        padding: 16px 20px;
-        width: 100%;
-        font-size: 1rem;
-    }
-    
-    .menu-item i {
-        width: 26px;
-        font-size: 1.2rem;
-    }
-    
-    .botones {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .btn {
-        width: 100%;
-        max-width: 300px;
-    }
-}
-
-/* Móviles (480px - 599px) */
-@media (max-width: 599px) {
-    .contenedor-iframe {
-        height: calc(100vh - 90px);
-        min-height: 400px;
-    }
-    
-    .contenedor-formulario {
-        padding: 20px;
-    }
-    
-    .menu-lateral {
-        padding: 10px;
-    }
-    
-    .menu-lateral h2 {
-        font-size: 1.2rem;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-    }
-    
-    .menu-item {
-        padding: 14px 18px;
-        font-size: 1rem;
-    }
-    
-    .menu-item i {
-        width: 24px;
-        font-size: 1.1rem;
-    }
-    
-    .grupo-campos {
-        grid-template-columns: 1fr;
-    }
-    
-    .btn {
-        padding: 14px 20px;
-        font-size: 15px;
-        min-width: auto;
-    }
-}
-
-/* Móviles pequeños (menos de 480px) */
-@media (max-width: 479px) {
-    .contenedor-iframe {
-        height: calc(100vh - 80px);
-        min-height: 350px;
-    }
-    
-    .contenido-principal {
-        padding: 12px;
-    }
-    
-    .contenedor-centrado {
-        padding: 12px;
-    }
-    
-    .contenedor-formulario {
-        padding: 18px;
-    }
-    
-    .menu-item {
-        padding: 12px 16px;
-        font-size: 0.95rem;
-    }
-    
-    .menu-item i {
-        width: 22px;
-        font-size: 1rem;
-    }
-    
-    .campo label {
-        font-size: 14px;
-    }
-    
-    .campo input,
-    .campo select {
-        padding: 14px 16px;
-        font-size: 15px;
-    }
-    
-    .btn {
-        padding: 14px 18px;
-        font-size: 15px;
-    }
-}
-
-/* Orientación landscape en móviles */
-@media (max-height: 500px) and (orientation: landscape) {
-    .contenedor-iframe {
-        height: calc(100vh - 60px);
-        min-height: 300px;
-    }
-    
-    .menu-lateral {
-        flex-direction: row;
-        width: auto;
-        height: 70px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 5px;
-    }
-    
-    .menu-lateral h2 {
-        width: auto;
-        padding: 5px 15px;
-        margin-bottom: 0;
-        border-bottom: none;
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
-        white-space: nowrap;
-    }
-    
-    .menu-item {
-        min-width: 150px;
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        margin: 0 4px;
-    }
-    
-    .menu-item i {
-        width: 20px;
-        font-size: 0.95rem;
-    }
-    
-    .contenido-principal {
-        min-height: calc(100vh - 70px);
-        padding: 10px;
-    }
-    
-    .contenedor-formulario {
-        max-width: 95%;
-        padding: 15px;
-    }
-}
-
-/* Ajustes para pantallas muy grandes */
-@media (min-width: 1600px) {
-    .menu-lateral {
-        width: 280px;
-    }
-    
-    .contenido-principal {
-        margin-left: 280px;
-        width: calc(100% - 280px);
-    }
-    
-    .contenedor-formulario {
-        max-width: 1000px;
-        padding: 40px;
-    }
-    
-    .contenedor-iframe {
-        max-width: 1200px;
-        min-height: 700px;
-    }
-    
-    .grupo-campos {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 25px;
-    }
-    
-    .btn {
-        padding: 15px 30px;
-        font-size: 17px;
-        min-width: 180px;
-    }
 }

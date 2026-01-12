@@ -1,146 +1,81 @@
-/* ==============================
-   ESTILOS GENERALES - ALUMNOS
-============================== */
+/* Estilos generales */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
-    color: #34495e;
-    background-image: url('../imagenes/fondo3.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-
-/* ==============================
-   LAYOUT PRINCIPAL
-============================== */
-.layout-container {
+   /* background-color: #f4f6f9;*/
     display: flex;
     min-height: 100vh;
-    position: relative;
+    color: #34495e;
 }
 
-/* ==============================
-   MENÚ LATERAL - DESKTOP
-============================== */
+/* Menú lateral */
 .menu-lateral {
     width: 250px;
     background-color: #34495e;
+    padding: 20px 0;
     color: white;
     display: flex;
     flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    overflow-y: auto;
-    z-index: 100;
 }
 
 .logo {
     text-align: center;
     padding: 20px;
+    margin-bottom: 30px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.logo h2 {
-    color: white;
-    font-size: 1.2rem;
-    margin: 0;
-}
-
 .menu-item {
-    padding: 14px 20px;
+    padding: 15px 25px;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
     align-items: center;
-    margin: 4px 10px;
+    gap: 10px;
     border-radius: 6px;
-    font-size: 0.95rem;
-}
-
-.menu-item i {
-    margin-right: 10px;
-    width: 20px;
-    text-align: center;
-    font-size: 1rem;
 }
 
 .menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .menu-item.active {
     background-color: #3498db;
     font-weight: 500;
+    color: white;
 }
 
-/* ==============================
-   CONTENIDO PRINCIPAL - DESKTOP
-============================== */
+.menu-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Contenido principal */
 .contenido-principal {
-    flex: 1;
-    margin-left: 250px;
+    flex-grow: 1;
     padding: 30px;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255, 255, 255, 0.95);
-}
-
-/* ==============================
-   CONTENEDOR CENTRADO
-============================== */
-.contenedor-centrado {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* ==============================
-   CONTENEDORES DE IFRAME
-============================== */
-.contenedor-iframe {
-    width: 100%;
-    max-width: 1100px;
-    height: calc(100vh - 100px);
-    min-height: 600px;
+    overflow-y: auto;
+    background-image: url('../imagenes/fondo3.jpeg');
+   background: linear-gradient(to right, #f4f6f9, #dde6f0);
+    background-repeat: no-repeat;
+    background-position: center center;
     border-radius: 10px;
-    overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-#iframe-contenido,
-#contenido-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-    background: white;
-    border-radius: 10px;
-}
-
-/* ==============================
-   CONTENEDORES DE FORMULARIO
-============================== */
+/* Contenedores de formulario */
 .contenedor-formulario {
-    background-color: rgba(255, 255, 255, 0.98);
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
     padding: 30px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 800px;
+    margin: 0 auto;
     display: none;
 }
 
@@ -148,9 +83,7 @@ body {
     display: block;
 }
 
-/* ==============================
-   TÍTULOS DE SECCIÓN
-============================== */
+/* Títulos de sección */
 .seccion-titulo {
     color: #3498db;
     margin: 20px 0 15px;
@@ -158,9 +91,7 @@ body {
     font-weight: 600;
 }
 
-/* ==============================
-   CAMPOS DEL FORMULARIO
-============================== */
+/* Campos del formulario */
 .grupo-campos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -177,7 +108,6 @@ body {
     margin-bottom: 8px;
     font-weight: 500;
     color: #34495e;
-    font-size: 0.95rem;
 }
 
 .campo input,
@@ -199,25 +129,24 @@ body {
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* ==============================
-   BOTONES
-============================== */
+/* Botones */
 .botones {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 25px;
+    margin-top: 30px;
 }
 
 .btn {
-    padding: 14px 20px;
+    padding: 12px 25px;
     border: none;
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
     min-width: 150px;
     transition: all 0.3s;
-    font-weight: 500;
+    background-color: #3498db;
+    color: white;
 }
 
 .btn:hover {
@@ -252,16 +181,13 @@ body {
     background-color: #c0392b;
 }
 
-/* ==============================
-   MENSAJES
-============================== */
+/* Mensajes */
 .mensaje {
     margin-top: 20px;
     padding: 15px;
     text-align: center;
     border-radius: 6px;
     display: none;
-    font-size: 0.95rem;
 }
 
 .mensaje-exito {
@@ -276,268 +202,42 @@ body {
     border-left: 5px solid #e74c3c;
 }
 
-/* ==============================
-   MENU TOGGLE MOBILE
-============================== */
-.menu-toggle {
-    display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 1000;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 15px;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
-
-/* ==============================
-   RESPONSIVE MÓVIL
-============================== */
-
-/* Tablets (768px - 1024px) */
-@media (max-width: 1024px) {
+/* Responsive */
+@media (max-width: 900px) {
     body {
-        background-attachment: scroll;
+        flex-direction: column;
     }
-    
-    .menu-toggle {
-        display: block;
-    }
-    
-    .overlay.active {
-        display: block;
-    }
-    
     .menu-lateral {
-        position: fixed;
-        left: -250px;
-        top: 0;
-        bottom: 0;
-        transition: left 0.3s ease;
-        z-index: 1000;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .menu-lateral.active {
-        left: 0;
-    }
-    
-    .contenido-principal {
-        margin-left: 0;
-        padding: 20px;
         width: 100%;
-        min-height: 100vh;
-    }
-    
-    .contenedor-centrado {
-        padding: 20px;
-    }
-    
-    .contenedor-iframe {
-        height: calc(100vh - 120px);
-        min-height: 500px;
-        max-width: 900px;
-    }
-    
-    .contenedor-formulario {
-        padding: 25px;
-        max-width: 700px;
-    }
-    
-    .botones {
+        flex-direction: row;
         flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+    }
+    .logo {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+    .menu-item {
+        padding: 10px 15px;
+    }
+    .contenido-principal {
+        padding: 20px;
     }
 }
 
-/* Móviles grandes (600px - 767px) */
-@media (max-width: 767px) {
-    .contenido-principal {
-        padding: 15px;
-    }
-    
-    .contenedor-centrado {
-        padding: 15px;
-    }
-    
-    .contenedor-iframe {
-        height: calc(100vh - 100px);
-        min-height: 450px;
-    }
-    
-    .contenedor-formulario {
-        padding: 22px;
-        max-width: 95%;
-    }
-    
+@media (max-width: 600px) {
     .grupo-campos {
         grid-template-columns: 1fr;
     }
-    
-    .botones {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .btn {
-        width: 100%;
-        max-width: 300px;
-    }
-}
-
-/* Móviles (480px - 599px) */
-@media (max-width: 599px) {
-    .contenedor-iframe {
-        height: calc(100vh - 90px);
-        min-height: 400px;
-    }
-    
     .contenedor-formulario {
         padding: 20px;
     }
-    
-    .menu-item {
-        padding: 13px 16px;
-        font-size: 0.95rem;
+    .botones {
+        flex-direction: column;
     }
-    
-    .menu-item i {
-        width: 22px;
-        font-size: 1rem;
-    }
-    
-    .campo label {
-        font-size: 0.9rem;
-    }
-    
     .btn {
-        padding: 14px 20px;
-        font-size: 15px;
-        min-width: auto;
-    }
-}
-
-/* Móviles pequeños (menos de 480px) */
-@media (max-width: 479px) {
-    .contenedor-iframe {
-        height: calc(100vh - 80px);
-        min-height: 350px;
-    }
-    
-    .contenido-principal {
-        padding: 12px;
-    }
-    
-    .contenedor-centrado {
-        padding: 12px;
-    }
-    
-    .contenedor-formulario {
-        padding: 18px;
-    }
-    
-    .menu-item {
-        padding: 12px 14px;
-        font-size: 0.9rem;
-    }
-    
-    .menu-item i {
-        width: 20px;
-        font-size: 0.95rem;
-    }
-    
-    .btn {
-        padding: 13px 18px;
-        font-size: 14px;
-    }
-}
-
-/* Orientación landscape en móviles */
-@media (max-height: 500px) and (orientation: landscape) {
-    .contenedor-iframe {
-        height: calc(100vh - 60px);
-        min-height: 300px;
-    }
-    
-    .menu-lateral {
-        flex-direction: row;
-        width: auto;
-        height: 60px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 8px;
-    }
-    
-    .logo {
-        width: auto;
-        padding: 5px 15px;
-        margin-bottom: 0;
-        border-bottom: none;
-        border-right: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .logo h2 {
-        font-size: 1em;
-        white-space: nowrap;
-        margin: 0;
-    }
-    
-    .menu-item {
-        min-width: 140px;
-        padding: 10px 12px;
-        font-size: 0.85rem;
-        margin: 0 5px;
-    }
-    
-    .contenido-principal {
-        min-height: calc(100vh - 70px);
-        padding: 10px;
-    }
-}
-
-/* Ajustes para pantallas muy grandes */
-@media (min-width: 1600px) {
-    .menu-lateral {
-        width: 280px;
-    }
-    
-    .contenido-principal {
-        margin-left: 280px;
-        width: calc(100% - 280px);
-    }
-    
-    .contenedor-formulario {
-        max-width: 900px;
-        padding: 30px;
-    }
-    
-    .grupo-campos {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 25px;
-    }
-    
-    .btn {
-        padding: 16px 28px;
-        font-size: 17px;
-        min-width: 180px;
-    }
-    
-    .contenedor-iframe {
-        max-width: 1200px;
-        min-height: 700px;
+        width: 100%;
     }
 }
