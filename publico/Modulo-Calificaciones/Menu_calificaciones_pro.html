@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Calificaciones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="../css/estilo-calificaciones.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <div class="menu-lateral">
+        <div class="logo">
+            <h2>Gestor de Calificaciones</h2>
+        </div>
+
+        <div class="menu-item active" data-url="Registrar_calificaciones.html">
+            <i class="fas fa-plus"></i> Ingresar Calificación
+        </div>
+
+        <div class="menu-item" data-url="Actualizar_calificaciones.html">
+            <i class="fas fa-edit"></i> Actualizar Calificación
+        </div>
+
+        <div class="menu-item" id="btn-inicio">
+            <i class="fas fa-home"></i> Menú Principal
+        </div>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="contenido-principal" id="contenido-principal">
+        <div class="contenedor-formulario active">
+            <iframe
+                id="contenido-iframe"
+                src="Registrar_calificaciones.html">
+            </iframe>
+        </div>
+    </div>
+
+    <script src="../JS/menu_calificaciones.js"></script>
+    
+    <script>
+        // Sobrescribir el comportamiento del botón de inicio
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnInicio = document.getElementById('btn-inicio');
+            if (btnInicio) {
+                btnInicio.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Redirigir al menú del profesor
+                    window.location.href = '../menu_inicio/menu_inicio_profe.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
