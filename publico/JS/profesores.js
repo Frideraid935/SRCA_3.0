@@ -1,12 +1,15 @@
-// JS/profesores.js
-const API_BASE = '/api/profesores';
+// publico/JS/profesores.js
 
-// Función para mostrar mensajes (ya existía)
+const API_BASE = window.location.origin + '/api/profesores';
+
+console.log('API Base configurada:', API_BASE);
+
+// Función para mostrar mensajes
 function mostrarMensaje(elementId, mensaje, tipo = 'success') {
     const elemento = document.getElementById(elementId);
     if (elemento) {
         elemento.textContent = mensaje;
-        elemento.className = `mensaje mensaje-${tipo}`;
+        elemento.className = 'mensaje mensaje-' + tipo;
         elemento.style.display = 'block';
         
         setTimeout(() => {
@@ -15,11 +18,38 @@ function mostrarMensaje(elementId, mensaje, tipo = 'success') {
     }
 }
 
+// Función para manejar errores de fetch
+async function handleFetch(url, options = {}) {
+    try {
+        console.log('Enviando petición a:', url);
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...options.headers
+            }
+        });
+        
+        console.log('Respuesta recibida:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error en fetch:', error);
+        throw error;
+    }
+}
+
 // ========== REGISTRAR PROFESOR ==========
 window.guardarProfesor = async function() {
     const numeroControl = document.getElementById('numero_de_control_ingresar').value.trim();
     const nombre = document.getElementById('nombre_ingresar').value.trim();
     const especialidad = document.getElementById('especialidad_ingresar').value.trim();
+    const mensajeDiv = document.getElementById('mensaje-ingresar');
     
     if (!numeroControl || !nombre || !especialidad) {
         mostrarMensaje('mensaje-ingresar', 'Todos los campos son obligatorios', 'error');
@@ -32,17 +62,14 @@ window.guardarProfesor = async function() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/registrar`, {
+        const result = await handleFetch(API_BASE + '/registrar', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 numero_de_control: numeroControl,
                 nombre: nombre,
                 especialidad: especialidad
             })
         });
-        
-        const result = await response.json();
         
         if (result.success) {
             mostrarMensaje('mensaje-ingresar', result.message, 'success');
@@ -51,30 +78,24 @@ window.guardarProfesor = async function() {
             mostrarMensaje('mensaje-ingresar', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-ingresar', 'Error de conexión', 'error');
+        console.error('Error al registrar profesor:', error);
+        mostrarMensaje('mensaje-ingresar', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
-// ========== BUSCAR PROFESOR INDIVIDUAL ==========
+// ========== BUSCAR PROFESOR ==========
 window.buscarProfesor = async function() {
     const numeroControl = document.getElementById('busqueda-numero').value.trim();
     const resultadosDiv = document.getElementById('resultados-busqueda');
     const datosDiv = document.getElementById('datos-profesor');
-    const listaDiv = document.getElementById('lista-profesores');
-    
-    // Ocultar lista si está visible
-    listaDiv.style.display = 'none';
     
     if (!numeroControl) {
         mostrarMensaje('mensaje-busqueda', 'Ingrese un número de control', 'error');
-        resultadosDiv.style.display = 'none';
         return;
     }
     
     try {
-        const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
-        const result = await response.json();
+        const result = await handleFetch(API_BASE + '/buscar/' + encodeURIComponent(numeroControl));
         
         if (result.success) {
             const profesor = result.profesor;
@@ -102,8 +123,8 @@ window.buscarProfesor = async function() {
             mostrarMensaje('mensaje-busqueda', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-busqueda', 'Error de conexión', 'error');
+        console.error('Error al buscar profesor:', error);
+        mostrarMensaje('mensaje-busqueda', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
@@ -114,12 +135,10 @@ window.listarTodosProfesores = async function() {
     const contadorDiv = document.getElementById('contador-profesores');
     const tablaContenedor = document.getElementById('tabla-profesores-contenedor');
     
-    // Ocultar búsqueda individual si está visible
     resultadosDiv.style.display = 'none';
     
     try {
-        const response = await fetch(`${API_BASE}/listar`);
-        const result = await response.json();
+        const result = await handleFetch(API_BASE + '/listar');
         
         if (result.success && result.profesores.length > 0) {
             let tablaHTML = `
@@ -155,8 +174,8 @@ window.listarTodosProfesores = async function() {
             mostrarMensaje('mensaje-busqueda', 'No hay profesores registrados', 'info');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-busqueda', 'Error de conexión', 'error');
+        console.error('Error al listar profesores:', error);
+        mostrarMensaje('mensaje-busqueda', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
@@ -171,8 +190,7 @@ window.buscarProfesorActualizar = async function() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
-        const result = await response.json();
+        const result = await handleFetch(API_BASE + '/buscar/' + encodeURIComponent(numeroControl));
         
         if (result.success) {
             const profesor = result.profesor;
@@ -181,14 +199,14 @@ window.buscarProfesorActualizar = async function() {
             document.getElementById('especialidad_actualizar').value = profesor.especialidad;
             
             formulario.style.display = 'block';
-            mostrarMensaje('mensaje-actualizar', 'Profesor encontrado', 'success');
+            mostrarMensaje('mensaje-actualizar', 'Profesor encontrado. Puede modificar los datos.', 'success');
         } else {
             formulario.style.display = 'none';
             mostrarMensaje('mensaje-actualizar', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-actualizar', 'Error de conexión', 'error');
+        console.error('Error al buscar profesor para actualizar:', error);
+        mostrarMensaje('mensaje-actualizar', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
@@ -204,17 +222,14 @@ window.actualizarProfesor = async function() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/actualizar`, {
+        const result = await handleFetch(API_BASE + '/actualizar', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 numero_de_control: numeroOriginal,
                 nombre: nombre,
                 especialidad: especialidad
             })
         });
-        
-        const result = await response.json();
         
         if (result.success) {
             mostrarMensaje('mensaje-actualizar', result.message, 'success');
@@ -223,13 +238,14 @@ window.actualizarProfesor = async function() {
                 document.getElementById('actualizar-numero').value = '';
                 document.getElementById('formulario-actualizar').style.display = 'none';
                 document.getElementById('formulario-actualizar').reset();
+                document.getElementById('numero_original').value = '';
             }, 2000);
         } else {
             mostrarMensaje('mensaje-actualizar', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-actualizar', 'Error de conexión', 'error');
+        console.error('Error al actualizar profesor:', error);
+        mostrarMensaje('mensaje-actualizar', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
@@ -246,8 +262,7 @@ window.buscarProfesorEliminar = async function() {
     }
     
     try {
-        const response = await fetch(`${API_BASE}/buscar/${numeroControl}`);
-        const result = await response.json();
+        const result = await handleFetch(API_BASE + '/buscar/' + encodeURIComponent(numeroControl));
         
         if (result.success) {
             const profesor = result.profesor;
@@ -271,15 +286,15 @@ window.buscarProfesorEliminar = async function() {
             confirmarBtn.style.display = 'block';
             confirmarBtn.dataset.numero = profesor.numero_de_control;
             
-            mostrarMensaje('mensaje-eliminar', 'Profesor encontrado', 'success');
+            mostrarMensaje('mensaje-eliminar', 'Profesor encontrado. Confirme para eliminar.', 'success');
         } else {
             datosDiv.style.display = 'none';
             confirmarBtn.style.display = 'none';
             mostrarMensaje('mensaje-eliminar', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-eliminar', 'Error de conexión', 'error');
+        console.error('Error al buscar profesor para eliminar:', error);
+        mostrarMensaje('mensaje-eliminar', 'Error de conexión: ' + error.message, 'error');
     }
 };
 
@@ -291,31 +306,31 @@ window.eliminarProfesorConfirmado = async function() {
         return;
     }
     
-    if (!confirm('¿Está seguro de eliminar este profesor?')) {
+    if (!confirm('¿Está seguro de eliminar este profesor?\n\nEsta acción no se puede deshacer.')) {
         return;
     }
     
     try {
-        const response = await fetch(`${API_BASE}/eliminar`, {
+        const result = await handleFetch(API_BASE + '/eliminar', {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ numero_de_control: numeroControl })
         });
-        
-        const result = await response.json();
         
         if (result.success) {
             mostrarMensaje('mensaje-eliminar', result.message, 'success');
             
-            document.getElementById('eliminar-numero').value = '';
-            document.getElementById('datos-profesor').style.display = 'none';
-            document.getElementById('btn-eliminar-confirmar').style.display = 'none';
-            document.getElementById('info-profesor').innerHTML = '';
+            setTimeout(() => {
+                document.getElementById('eliminar-numero').value = '';
+                document.getElementById('datos-profesor').style.display = 'none';
+                document.getElementById('btn-eliminar-confirmar').style.display = 'none';
+                document.getElementById('info-profesor').innerHTML = '';
+                delete document.getElementById('btn-eliminar-confirmar').dataset.numero;
+            }, 1500);
         } else {
             mostrarMensaje('mensaje-eliminar', result.message, 'error');
         }
     } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('mensaje-eliminar', 'Error de conexión', 'error');
+        console.error('Error al eliminar profesor:', error);
+        mostrarMensaje('mensaje-eliminar', 'Error de conexión: ' + error.message, 'error');
     }
 };

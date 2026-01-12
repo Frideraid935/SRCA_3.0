@@ -4,7 +4,7 @@ const path = require("path");
 const pool = require("./BD/BD");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Configurar CORS
 app.use(cors());

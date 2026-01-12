@@ -1,5 +1,5 @@
 // profesores.controlador.js
-const pool = require("../../BD/BD");
+const pool = require("../../BD/BD.js");
 
 const profesoresController = {
     // Registrar profesor
