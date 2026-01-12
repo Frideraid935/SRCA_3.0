@@ -46,6 +46,15 @@ app.use("/api/admin", adminApi);
 const calificacionesAPI = require('./APIS/calificaciones.api');
 app.use('/api/calificaciones', calificacionesAPI);
 
+// En tu server.js, agrega después de las otras rutas:
+try {
+    const calificacionesAPI = require('./APIS/calificaciones2.api');
+    app.use('/api/calificaciones2', calificacionesAPI);
+    console.log('API de calificaciones cargada exitosamente');
+} catch (error) {
+    console.error('Error cargando calificaciones.api:', error.message);
+}
+
 // Profesores
 try {
     const profesoresAPI = require('./APIS/profesores.api');

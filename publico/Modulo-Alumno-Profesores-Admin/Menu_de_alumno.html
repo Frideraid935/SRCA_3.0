@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Alumnos</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/estilo-alumnos.css">
+    
+    <style>
+        /* ESTILOS SOLO PARA EL CONTENEDOR PRINCIPAL Y IFRAME */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .contenido-principal {
+            flex: 1;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #iframe-contenido {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div class="menu-lateral">
+        <div class="logo">
+            <h2>Gestor de Alumnos</h2>
+        </div>
+
+        <div class="menu-item" data-form="Buscar_alumno_admin">
+            <i class="fas fa-search"></i> Buscar Alumno
+        </div>
+        <div class="menu-item" data-form="Actualizar_alumno_admin">
+            <i class="fas fa-edit"></i> Actualizar Datos
+        </div>
+        <div class="menu-item" id="btn-inicio">
+            <i class="fas fa-home"></i> Menú Principal
+        </div>
+    </div>
+
+    <!-- Contenido principal - IFRAME -->
+    <div class="contenido-principal">
+        <iframe 
+            id="iframe-contenido" 
+            src="Buscar_alumno_admin.html"
+            frameborder="0">
+        </iframe>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const iframe = document.getElementById('iframe-contenido');
+            
+            // Ajustar el iframe al 100% del contenedor
+            function ajustarIframe() {
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.display = 'block';
+            }
+            
+            // Ajustar inicialmente
+            ajustarIframe();
+            
+            // Ajustar cuando cambie el tamaño de la ventana
+            window.addEventListener('resize', ajustarIframe);
+            
+            // Marcar "Buscar Alumno" como activo
+            const buscarItem = document.querySelector('[data-form="Buscar_alumno_admin"]');
+            if (buscarItem) {
+                buscarItem.classList.add('active');
+            }
+            
+            // Manejar clics en menú
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (this.id === 'btn-inicio') {
+                        window.location.href = '../menu_inicio/menu_inicio_alumno.html';
+                        return;
+                    }
+                    
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const formName = this.getAttribute('data-form');
+                    const iframeSrc = `${formName}.html`;
+                    
+                    console.log('Cargando:', iframeSrc);
+                    iframe.src = iframeSrc;
+                    
+                    // Reajustar el iframe después de cargar
+                    setTimeout(ajustarIframe, 100);
+                });
+            });
+            
+            // Reajustar cuando el iframe se carga
+            iframe.addEventListener('load', function() {
+                ajustarIframe();
+                console.log('Iframe cargado:', iframe.src);
+                
+                // Forzar el tamaño del contenido interno si es necesario
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc.body) {
+                        iframeDoc.body.style.minHeight = '100vh';
+                        iframeDoc.body.style.width = '100%';
+                    }
+                } catch (e) {
+                    // Error de CORS, ignorar
+                }
+            });
+            
+            // Manejar errores
+            iframe.addEventListener('error', function(e) {
+                console.error('Error cargando iframe:', iframe.src);
+                ajustarIframe();
+            });
+        });
+    </script>
+</body>
+</html>

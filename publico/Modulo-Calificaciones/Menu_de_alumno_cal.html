@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Calificaciones</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/estilo-alumnos.css">
+</head>
+<body>
+    <!-- Menú lateral -->
+    <div class="menu-lateral">
+        <div class="logo">
+            <h2>Gestor de Calificaciones</h2>
+        </div>
+        
+        <div class="menu-item active" data-form="consultar">
+            <i class="fas fa-search"></i> Consultar Calificación
+        </div>
+        
+        <div class="menu-item" id="btn-inicio">
+            <i class="fas fa-home"></i> Menú Principal
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="contenido-principal">
+        <!-- Formulario de Consulta -->
+        <div id="form-consultar" class="contenedor-formulario active">
+            <h2>Consulta de Calificaciones</h2>
+            
+            <div class="campo">
+                <label for="numero_de_control">Número de Control del Estudiante:</label>
+                <input type="text" id="numero_de_control" name="numero_de_control" placeholder="Ingrese el número de control" required>
+            </div>
+            
+            <button class="btn btn-primary" onclick="buscarCalificaciones()">
+                <i class="fas fa-search"></i> Buscar Calificaciones
+            </button>
+
+            <!-- Información del alumno -->
+            <div id="info-alumno" style="margin-top: 20px; display: none;">
+                <h3>Información del Alumno</h3>
+                <div id="datos-alumno"></div>
+            </div>
+
+            <!-- Tabla de calificaciones -->
+            <div id="tabla-calificaciones" style="margin-top: 20px; display: none;">
+                <h3>Calificaciones</h3>
+                <div id="contenido-tabla"></div>
+            </div>
+
+            <!-- Mensaje sin resultados -->
+            <div id="sin-resultados" style="margin-top: 20px; display: none; text-align: center; color: #666;">
+                No se encontraron calificaciones para este alumno
+            </div>
+            
+            <div id="mensaje" class="mensaje"></div>
+        </div>
+    </div>
+
+    <script src="../JS/calificaciones2.js"></script>
+    <script>
+        // Botón de inicio - redirige al menú principal del alumno
+        document.getElementById("btn-inicio").addEventListener("click", function() {
+            window.location.href = "../menu_inicio/menu_inicio_alumno.html";
+        });
+
+        // Permitir buscar con Enter
+        document.getElementById("numero_de_control").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                buscarCalificaciones();
+            }
+        });
+    </script>
+</body>
+</html>
