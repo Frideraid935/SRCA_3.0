@@ -6,39 +6,131 @@
     <link rel="stylesheet" href="../css/estilo.css">
 </head>
 <body>
-
-<div class="contenedor-formulario">
-    <h2>Buscar Salón</h2>
-
-    <form id="formulario-buscar-salon" class="grupo-campos">
-        <div class="campo">
-            <label for="id_salon_buscar">ID del Salón</label>
-            <input type="number" id="id_salon_buscar" name="id_salon" required min="1" placeholder="Ej: 1">
+    <div class="contenedor-formulario">
+        <h2>Buscar Salón</h2>
+        
+        <form id="formulario-buscar-salon">
+            <div class="grupo-campos">
+                <div class="campo">
+                    <label for="id_salon_buscar">ID del Salón:</label>
+                    <input type="number" id="id_salon_buscar" name="id_salon" required min="1" 
+                           placeholder="Ej: 1">
+                </div>
+            </div>
+            
+            <div class="botones">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+                <button type="button" class="btn btn-secondary" onclick="limpiarBusqueda()">Limpiar</button>
+                <button type="button" class="btn btn-info" onclick="listarTodosSalones()">Listar Todos</button>
+            </div>
+        </form>
+        
+        <div id="mensaje-busqueda" class="mensaje"></div>
+        
+        <!-- Resultados de búsqueda individual -->
+        <div id="resultado-salon" style="margin-top: 20px; display: none;">
+            <h3>Información del Salón</h3>
+            <div id="datos-salon">
+                <!-- Los datos se cargarán aquí -->
+            </div>
         </div>
-        <div class="botones">
-            <button type="submit" class="btn">Buscar</button>
-            <button type="button" class="btn btn-secundario" onclick="limpiarBusqueda()">Limpiar</button>
-        </div>
-    </form>
-
-    <div id="mensaje-busqueda" class="mensaje" style="display: none;"></div>
-    
-    <div id="resultado-salon" class="resultado-contenedor" style="display: none;">
-        <h3>Información del Salón</h3>
-        <div id="datos-salon">
-            <!-- Los datos se cargarán aquí -->
+        
+        <!-- Lista de todos los salones -->
+        <div id="lista-salones" style="margin-top: 20px; display: none;">
+            <h3>Lista de Salones</h3>
+            <div id="contador-salones"></div>
+            <div id="tabla-salones-contenedor"></div>
         </div>
     </div>
-</div>
 
-<script src="../JS/buscar-salon.js"></script>
-<script>
-    function limpiarBusqueda() {
-        document.getElementById('id_salon_buscar').value = '';
-        document.getElementById('resultado-salon').style.display = 'none';
-        document.getElementById('mensaje-busqueda').style.display = 'none';
-        document.getElementById('datos-salon').innerHTML = '';
-    }
-</script>
+    <script src="../JS/buscar-salon.js"></script>
+    <script>
+        // Función para listar todos los salones
+        async function listarTodosSalones() {
+            const listaDiv = document.getElementById('lista-salones');
+            const resultadoDiv = document.getElementById('resultado-salon');
+            const contadorDiv = document.getElementById('contador-salones');
+            const tablaContenedor = document.getElementById('tabla-salones-contenedor');
+            
+            resultadoDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/salones/listar');
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.salones.length > 0) {
+                    let tablaHTML = `
+                        <table class="tabla-profesor" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Capacidad</th>
+                                    <th>Profesor</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    
+                    result.salones.forEach(salon => {
+                        tablaHTML += `
+                            <tr>
+                                <td>${salon.id}</td>
+                                <td>${salon.nombre}</td>
+                                <td>${salon.capacidad}</td>
+                                <td>${salon.profesor_nombre || salon.profesor_id || 'No asignado'}</td>
+                            </tr>`;
+                    });
+                    
+                    tablaHTML += `</tbody></table>`;
+                    
+                    tablaContenedor.innerHTML = tablaHTML;
+                    contadorDiv.innerHTML = `<p>Total de salones: ${result.total}</p>`;
+                    listaDiv.style.display = 'block';
+                    
+                    // Usar la función mostrarMensaje del archivo buscar-salon.js
+                    const mensajeDiv = document.getElementById('mensaje-busqueda');
+                    if (mensajeDiv) {
+                        mensajeDiv.textContent = `Se encontraron ${result.total} salones`;
+                        mensajeDiv.className = 'mensaje mensaje-success';
+                        mensajeDiv.style.display = 'block';
+                    }
+                    
+                } else {
+                    tablaContenedor.innerHTML = '';
+                    contadorDiv.innerHTML = '<p>No hay salones registrados</p>';
+                    listaDiv.style.display = 'block';
+                    
+                    const mensajeDiv = document.getElementById('mensaje-busqueda');
+                    if (mensajeDiv) {
+                        mensajeDiv.textContent = 'No hay salones registrados';
+                        mensajeDiv.className = 'mensaje mensaje-info';
+                        mensajeDiv.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const mensajeDiv = document.getElementById('mensaje-busqueda');
+                if (mensajeDiv) {
+                    mensajeDiv.textContent = 'Error de conexión: ' + error.message;
+                    mensajeDiv.className = 'mensaje mensaje-error';
+                    mensajeDiv.style.display = 'block';
+                }
+            }
+        }
+        
+        // Función para limpiar (mantener igual)
+        function limpiarBusqueda() {
+            document.getElementById('id_salon_buscar').value = '';
+            document.getElementById('resultado-salon').style.display = 'none';
+            document.getElementById('lista-salones').style.display = 'none';
+            document.getElementById('mensaje-busqueda').style.display = 'none';
+            document.getElementById('datos-salon').innerHTML = '';
+        }
+    </script>
 </body>
 </html>
