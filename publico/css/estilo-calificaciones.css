@@ -13,6 +13,11 @@ body {
     min-height: 100vh;
     color: #34495e;
     background-color: #f4f6f9;
+    background-image: url('../imagenes/fondo3.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 /* ==============================
@@ -77,9 +82,7 @@ body {
     align-items: center;
     padding: 40px;
     box-sizing: border-box;
-    background-image: url('../imagenes/fondo3.jpeg');
-    background-size: cover;
-    background-position: center;
+    background-color: rgba(255, 255, 255, 0.85);
 }
 
 /* ==============================
@@ -88,10 +91,12 @@ body {
 #contenido-iframe {
     width: 100%;
     max-width: 900px;
-    height: 520px;
+    height: 600px;
     border: none;
     background: transparent;
     display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* ==============================
@@ -214,18 +219,22 @@ body {
 
 /* Tablets (768px - 1024px) */
 @media (max-width: 1024px) {
+    body {
+        background-attachment: scroll;
+    }
+    
     .menu-lateral {
-        width: 200px;
+        width: 220px;
     }
 
     .contenido-principal {
-        margin-left: 200px;
-        width: calc(100% - 200px);
+        margin-left: 220px;
+        width: calc(100% - 220px);
         padding: 30px;
     }
     
     #contenido-iframe {
-        height: 500px;
+        height: 550px;
         max-width: 800px;
     }
 }
@@ -234,6 +243,7 @@ body {
 @media (max-width: 767px) {
     body {
         flex-direction: column;
+        background-attachment: scroll;
     }
     
     .menu-lateral {
@@ -242,25 +252,25 @@ body {
         height: auto;
         flex-direction: row;
         flex-wrap: wrap;
-        padding: 10px;
+        padding: 12px;
         justify-content: center;
     }
 
     .logo {
         width: 100%;
         padding: 10px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     .logo h2 {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .menu-item {
-        margin: 5px;
-        padding: 10px 15px;
-        font-size: 0.9rem;
-        min-width: 140px;
+        margin: 6px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        min-width: 160px;
         justify-content: center;
     }
 
@@ -268,15 +278,19 @@ body {
         margin-left: 0;
         width: 100%;
         padding: 20px;
-        min-height: calc(100vh - 120px);
+        min-height: calc(100vh - 140px);
     }
     
     .contenedor-formulario {
-        padding: 20px;
+        padding: 25px;
     }
     
+    /* IFRAME EN MÓVILES */
     #contenido-iframe {
-        height: 450px;
+        height: 500px;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
     }
 }
 
@@ -285,21 +299,29 @@ body {
     .menu-lateral {
         flex-direction: column;
         align-items: stretch;
+        padding: 10px;
     }
     
     .menu-item {
         width: 100%;
-        margin: 2px 0;
-        padding: 12px 15px;
+        margin: 4px 0;
+        padding: 14px 16px;
         justify-content: flex-start;
+        font-size: 1rem;
+    }
+    
+    .menu-item i {
+        width: 24px;
+        font-size: 18px;
     }
     
     .contenido-principal {
-        padding: 15px;
+        padding: 16px;
+        min-height: calc(100vh - 150px);
     }
     
     .contenedor-formulario {
-        padding: 15px;
+        padding: 20px;
     }
     
     .grupo-campos {
@@ -313,10 +335,12 @@ body {
     .btn {
         width: 100%;
         min-width: auto;
+        padding: 14px 20px;
     }
     
+    /* IFRAME EN MÓVILES */
     #contenido-iframe {
-        height: 400px;
+        height: 450px;
     }
 }
 
@@ -331,32 +355,43 @@ body {
         margin-bottom: 8px;
     }
     
+    .logo h2 {
+        font-size: 1.1rem;
+    }
+    
     .menu-item {
-        padding: 10px 12px;
-        font-size: 0.85rem;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    
+    .menu-item i {
+        width: 22px;
+        font-size: 16px;
     }
     
     .contenido-principal {
-        padding: 10px;
+        padding: 12px;
+        min-height: calc(100vh - 130px);
     }
     
     .contenedor-formulario {
-        padding: 12px;
+        padding: 16px;
     }
     
     .campo input,
     .campo select {
-        padding: 10px 12px;
-        font-size: 15px;
+        padding: 14px 16px;
+        font-size: 16px;
     }
     
     .btn {
-        padding: 10px 15px;
-        font-size: 14px;
+        padding: 14px 18px;
+        font-size: 15px;
     }
     
+    /* IFRAME EN MÓVILES PEQUEÑOS */
     #contenido-iframe {
-        height: 350px;
+        height: 400px;
     }
 }
 
@@ -364,9 +399,10 @@ body {
 @media (max-height: 500px) and (orientation: landscape) {
     .menu-lateral {
         flex-direction: row;
-        height: 60px;
+        height: 70px;
         overflow-x: auto;
         overflow-y: hidden;
+        padding: 5px;
     }
     
     .logo {
@@ -378,24 +414,26 @@ body {
     }
     
     .logo h2 {
-        font-size: 1em;
+        font-size: 1.1em;
         white-space: nowrap;
     }
     
     .menu-item {
-        min-width: 110px;
-        padding: 8px 10px;
-        font-size: 0.8rem;
-        margin: 0 5px;
+        min-width: 140px;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+        margin: 0 4px;
     }
     
     .contenido-principal {
-        min-height: calc(100vh - 60px);
+        min-height: calc(100vh - 80px);
         padding: 10px;
     }
     
+    /* IFRAME EN LANDSCAPE */
     #contenido-iframe {
-        height: 300px;
+        height: 350px;
+        min-height: 300px;
     }
 }
 
@@ -407,7 +445,7 @@ body {
     
     #contenido-iframe {
         max-width: 1000px;
-        height: 600px;
+        height: 650px;
     }
     
     .grupo-campos {

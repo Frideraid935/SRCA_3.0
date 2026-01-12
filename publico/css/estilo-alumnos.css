@@ -10,6 +10,11 @@ body {
     display: flex;
     min-height: 100vh;
     color: #34495e;
+    background-image: url('../imagenes/fondo3.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 /* Menú lateral */
@@ -20,6 +25,7 @@ body {
     color: white;
     display: flex;
     flex-direction: column;
+    z-index: 100;
 }
 
 .logo {
@@ -59,16 +65,16 @@ body {
     flex-grow: 1;
     padding: 30px;
     overflow-y: auto;
-    background-image: url('../imagenes/fondo3.jpeg');
-    background-repeat: no-repeat;
-    background-position: center center;
+    background-color: rgba(255, 255, 255, 0.85);
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    min-height: calc(100vh - 40px);
 }
 
 /* Contenedores de formulario */
 .contenedor-formulario {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -208,6 +214,7 @@ body {
     body {
         flex-direction: column;
         min-height: auto;
+        background-attachment: scroll;
     }
     
     .menu-lateral {
@@ -217,6 +224,7 @@ body {
         padding: 10px;
         position: relative;
         height: auto;
+        justify-content: center;
     }
     
     .logo {
@@ -226,22 +234,24 @@ body {
     }
     
     .menu-item {
-        padding: 10px 15px;
+        padding: 12px 18px;
         margin: 5px;
         flex: 1;
-        min-width: 150px;
+        min-width: 160px;
         justify-content: center;
+        font-size: 14px;
     }
     
     .contenido-principal {
-        margin-left: 0;
+        margin: 10px;
         padding: 20px;
-        width: 100%;
-        min-height: calc(100vh - 120px);
+        width: calc(100% - 20px);
+        min-height: calc(100vh - 140px);
+        border-radius: 8px;
     }
     
     .contenedor-formulario {
-        padding: 20px;
+        padding: 25px;
     }
     
     .grupo-campos {
@@ -251,83 +261,116 @@ body {
 
 /* Móviles (480px - 767px) */
 @media (max-width: 767px) {
+    body {
+        padding: 0;
+    }
+    
     .menu-lateral {
         flex-direction: column;
         align-items: stretch;
+        padding: 8px;
     }
     
     .menu-item {
-        margin: 2px 0;
-        padding: 12px 15px;
+        margin: 3px 0;
+        padding: 14px 15px;
         width: 100%;
         justify-content: flex-start;
+        font-size: 15px;
+    }
+    
+    .menu-item i {
+        width: 24px;
+        font-size: 18px;
     }
     
     .contenido-principal {
+        margin: 8px;
         padding: 15px;
-        border-radius: 0;
+        min-height: calc(100vh - 130px);
+        border-radius: 6px;
     }
     
     .contenedor-formulario {
-        padding: 15px;
-        border-radius: 8px;
+        padding: 20px;
     }
     
     .botones {
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
     }
     
     .btn {
         width: 100%;
         min-width: auto;
         padding: 14px 20px;
+        font-size: 15px;
     }
     
     .campo input,
     .campo select,
     .campo textarea {
-        padding: 10px 12px;
-        font-size: 15px;
+        padding: 14px 16px;
+        font-size: 16px;
     }
     
     h2 {
-        font-size: 1.4em;
-        margin-bottom: 15px;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+    }
+    
+    /* IFRAMES EN MÓVILES */
+    .contenido-principal iframe {
+        width: 100%;
+        height: 75vh;
+        min-height: 500px;
+        border: none;
+        display: block;
+        background: white;
+        border-radius: 8px;
     }
 }
 
 /* Móviles pequeños (menos de 480px) */
 @media (max-width: 479px) {
     .contenido-principal {
-        padding: 10px;
+        padding: 12px;
+        margin: 6px;
+        min-height: calc(100vh - 120px);
     }
     
     .contenedor-formulario {
-        padding: 12px;
+        padding: 16px;
     }
     
     .menu-item {
-        padding: 10px 12px;
+        padding: 12px 14px;
         font-size: 14px;
     }
     
     .menu-item i {
-        width: 18px;
+        width: 22px;
+        font-size: 16px;
     }
     
     .campo label {
-        font-size: 14px;
+        font-size: 15px;
     }
     
     .btn {
-        padding: 12px 15px;
-        font-size: 14px;
+        padding: 14px 18px;
+        font-size: 15px;
     }
     
     .mensaje {
-        padding: 10px;
+        padding: 12px;
         font-size: 14px;
+    }
+    
+    /* IFRAMES EN MÓVILES PEQUEÑOS */
+    .contenido-principal iframe {
+        height: 70vh;
+        min-height: 450px;
     }
 }
 
@@ -338,6 +381,7 @@ body {
         height: 70px;
         overflow-x: auto;
         overflow-y: hidden;
+        padding: 5px;
     }
     
     .logo {
@@ -349,19 +393,27 @@ body {
     }
     
     .logo h2 {
-        font-size: 1em;
+        font-size: 1.1em;
         white-space: nowrap;
     }
     
     .menu-item {
-        min-width: 120px;
-        padding: 8px 12px;
+        min-width: 130px;
+        padding: 10px 12px;
         font-size: 13px;
+        margin: 0 3px;
     }
     
     .contenido-principal {
-        min-height: calc(100vh - 70px);
-        padding: 15px;
+        min-height: calc(100vh - 80px);
+        padding: 10px;
+        margin: 5px;
+    }
+    
+    /* IFRAMES EN LANDSCAPE */
+    .contenido-principal iframe {
+        height: 65vh;
+        min-height: 300px;
     }
 }
 
@@ -371,6 +423,7 @@ body {
     height: 100%;
     border: none;
     display: block;
+    background: white;
 }
 
 /* Ajustes para pantallas muy grandes */
@@ -382,5 +435,9 @@ body {
     .grupo-campos {
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         gap: 25px;
+    }
+    
+    .contenido-principal iframe {
+        min-height: 700px;
     }
 }
